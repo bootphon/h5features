@@ -5,8 +5,46 @@ Created on Thu Jul 11 11:06:06 2013
 @author: Thomas Schatz
 """
 
+
+
+#FIXME test write, adapt read to new version (keeping legacy) and push
+#FIXME implement sparse functionalities 
+#FIXME create github with MIT license, test profile and document everything
+#FIXME introduce support for empty internal files ?
+# for profiling and doc could re-use stuff on LSCP wiki
+
+import h5py, os
+import numpy as np
+import scipy.sparse as sp
+
+
+def read_index(filename, group=None):
+    with h5py.File(filename, 'r') as f:
+        if group is None:
+            groups = [g for g in f]
+            assert len(groups) <= 1, ("There are several groups in file %s, you should specify which one should be read" % filename)
+            assert len(groups) > 0, ("There are no group in file %s, impossible to read" % filename)                
+            group = groups[0]
+        g = f[group]
+        legacy = False
+        try: 
+            version = g.attrs['version']
+        except KeyError:
+            legacy = True
+        if legacy:
+            index = legacy_read_index(filename, group)
+        else:
+            assert version=="1.0", "unsupported version %s" % version
+            files = list(g['files'][...])
+            index = {'files': files, 'file_index': g['file_index'][...], 'times': g['times'][...], 'format': g.attrs['format']} # file_index contains the index of the end of each file        
+            if index['format'] == 'sparse':
+                index['dim'] = g.attrs['dim']
+                index['frames'] = g['frames'][...]
+        return index
+    
+   
 """
-function read_features
+function read
 
 inputs:
 
@@ -19,68 +57,53 @@ inputs:
 - (optional) index (for faster access)
 
 outputs:
-- features (a 2D array with the 'feature' dimension along the columns and the 'time' dimension along the lines)
+- times (a dictionary of 1D arrays)
+- features (a dictionary of 2D arrays with the 'feature' dimension along the columns and the 'time' dimension along the lines)
 
-Note that all the files that are present on disk between file1 and file2 will be loaded and returned by read_features. It's the responsibility 
+
+Note that all the files that are present on disk between file1 and file2 will be loaded and returned. It's the responsibility 
 of the user to make sure that it will fit into RAM memory.  
 
 Also note that the functions are not concurrent nor thread-safe (because the HDF5 library is not concurrent and not always thread-safe), 
 moreover, they aren't even atomic for independent process (because there are several independent calls to the file system), so that
-thread-safety and atomicity of operation should be enforced externally.
+thread-safety and atomicity of operations should be enforced externally when necessary.
 """
 
-#FIXME write the write_index function: adapt also the read to correct the following shortcomings of the matlab version (and if possible also correct the matlab version):
-#   - internal filenames could be encoded directly as string using a variable length dtype
-#   - do the index-related datasets really neeed to be chunked ?
-#   - the type of the various datasets do not seem currently adapted to the data (float for times for example), which is probably wasteful in terms of memory
-#   - check if the choice of time along lines and feature along columns is optimal
-# maintain compatibility by using a flag indicating the version ?
-
-import h5py
-import numpy as np
-
-def read_features_index(filename, group):
-    with h5py.File(filename, 'r') as f:
-        g = f[group]
-        files = ''.join([unichr(int(c)) for c in g['files'][...]]).replace('/-', '/').split('/\\') # parse unicode to strings
-        index = {'files': files, 'file_index': np.int64(g['file_index'][...]), 'times': g['times'][...], 'format': g.attrs['format']} # file_index contains the index of the end of each file
-        #FIXME ideally the type conversions above should be removable        
-        if index['format'] == 'sparse':
-            index['dim'] = g.attrs['dim'] #FIXME type ?
-            index['lines'] = g['lines'][...] #FIXME type ?
-    return index
-    
-#FIXME add default for group for both functions: check if only one group and take it otherwise fail 
-def read_features(filename, group, from_internal_file=None, to_internal_file=None, from_time=None, to_time=None, index=None):    
-    # parse arguments and find read coordinates   
-    if index is None: index = read_features_index(filename, group)
+def read(filename, group=None, from_internal_file=None, to_internal_file=None, from_time=None, to_time=None, index=None):    
+    # Step 1: parse arguments and find read coordinates from metadata           
+    if index is None: index = read_index(filename, group)
+    if group is None: group = index['group']
     if to_internal_file is None:
         if from_internal_file is None:
             to_internal_file = index['files'][-1]
         else:
             to_internal_file=from_internal_file
     if from_internal_file is None:
-        from_internal_file = index['files'][0]
+        from_internal_file = index['files'][0]        
     try: f1 = index['files'].index(from_internal_file) # the second 'index' in this expression refers to the 'index' method of class list
     except ValueError: raise Exception('No entry for file %s in %s\\%s' % (from_internal_file, filename, group))
     try: f2 = index['files'].index(to_internal_file)
     except ValueError: raise Exception('No entry for file %s in %s\\%s' % (to_internal_file, filename, group))
+    assert f2 >= f1, ("Internal file %s is located after internal file %s in the h5features file %s" % (from_internal_file, to_internal_file, filename))    
     f1_start = 0 if f1==0 else index['file_index'][f1-1] + 1 # index associated with the beginning of from_internal_file
     f1_end = index['file_index'][f1]    
     f2_start = 0 if f2==0 else index['file_index'][f2-1] + 1
     f2_end = index['file_index'][f2] # index associated with the end of to_internal_file  
-    # could check that f2 is after f1 in the file
     if from_time is None: i1 = f1_start
     else:
         times = index['times'][f1_start:f1_end+1] # the end is included...                     
-        i1 = f1_start + np.where(times>=from_time)[0][0]# smallest time larger or equal to from_time
-        # here could catch exception if from_time is larger than the biggest time in from_external_time 
+        try:
+            i1 = f1_start + np.where(times>=from_time)[0][0]# smallest time larger or equal to from_time
+        except IndexError:
+            raise Exception('from_time %f is larger than the biggest time in from_internal_file %s' % (from_time, from_internal_file)) 
     if to_time is None: i2 = f2_end        
     else:
         times = index['times'][f2_start:f2_end+1] # the end is included...
-        i2 = f2_start + np.where(times<=to_time)[0][-1]# largest time smaller or equal to to_time
-        # here could catch exception if to_time is smaller than the smallest time in to_external_time 
-    # access file
+        try:
+            i2 = f2_start + np.where(times<=to_time)[0][-1]# largest time smaller or equal to to_time
+        except IndexError:
+            raise Exception('to_time %f is smaller than the smallest time in to_internal_file %s' % (to_time, to_internal_file)) 
+    # Step 2: access actual data
     with h5py.File(filename, 'r') as f:
         g = f[group]
         if index['format'] == 'dense':
@@ -88,14 +111,178 @@ def read_features(filename, group, from_internal_file=None, to_internal_file=Non
             times = g['times'][i1:i2+1]
         else: #FIXME implement this
             raise IOError('reading sparse features not yet implemented')
+            # will be different for version 1.0 and legacy code ...
     if f2>f1:
         file_ends = index['file_index'][f1:f2]-f1_start
-        features = np.split(features, file_ends+1, axis=1)
+        features = np.split(features, file_ends+1, axis=0) #FIXME change axis from 1 to 0, but need to check that this doesn't break compatibility with matlab generated files
         times = np.split(times, file_ends+1)
     else:
-        features = [features] #FIXME maybe here keep not a list if to_internal_file was None and from_internal_file was not None (i.e. the user expects only the content of one specific file ?)
+        features = [features]
         times = [times]
     files = index['files'][f1:f2+1]
     features = dict(zip(files, features))
     times = dict(zip(files, times))
-    return features, times
+    return times, features
+
+    
+""" 
+function write
+    to be documented
+    features should have time along the lines and features along the columns (accomodating row-major storage in hdf5 files)
+"""
+#FIXME could check that the times are increasing for each file
+# chunk_size (in Mo): tuning parameter corresponding to the size of a chunk in the h5file, ignored if the file already exists
+# sparsity: tuning parameter corresponding to the expected proportion of non-zeros elements on average in a single frame
+def write(filename, group, files, times, features, features_format='dense', chunk_size=0.1, sparsity=0.1):        
+    version = "1.0" # version number for the file format
+    # Step 1: check arguments
+    assert features_format in ['dense', 'sparse']
+    assert chunk_size >= 0.008, 'chunk_size below 8Ko are not allowed as they would result in poor performances'
+    nb_frames = [x.shape[0] for x in features] 
+    assert all([n > 0 for n in nb_frames]), "all files must be non-empty"
+    dims = [x.shape[1] for x in features]
+    dim = dims[0]
+    assert dim>0, "features dimension must be strictly positive"
+    assert all([d==dim for d in dims]), "all files must have the same feature dimension" 
+    types = [x.dtype for x in features]
+    features_type = types[0]
+    assert all([t==features_type for t in types]), "all files must have the same feature type"
+    assert len(set(files)) == len(files), "all files must have different names"
+    datasets = ['files', 'times', 'features', 'file_index']
+    if features_format == 'sparse':
+        datasets.append('frames')
+        datasets.append('coordinates')
+    # Step 2: preparing target file
+    append = False
+    if os.path.isfile(filename):
+        with h5py.File(filename) as fh:
+            if group in fh:
+                append = True
+    with h5py.File(filename) as fh:        
+        if append: # check existing h5 file
+            g = fh[group] # raise KeyError if group not in file
+            assert g.attrs['version'] == version, "File was written with incompatible version of h5features"
+            assert g.attrs['format'] == features_format
+            for dataset in datasets:
+                assert dataset in g, ("group %s of file %s is not a valid h5features file: missing dataset %s" % (group, filename, dataset))
+            assert g['features'].dtype == features_type
+            if features_format == 'sparse':
+                f_dim = g.attrs['dim']
+            else:
+                f_dim = g['features'].shape[1]
+            assert f_dim == dim, "mismatch between provided features dimension and already stored feature dimension"
+        else: # create h5 file   
+            #FIXME if something fails here, the file will be polluted, should we catch and del new datasets?                 
+            g = fh.create_group(group)
+            g.attrs['version'] = version
+            if features_format == 'sparse':
+                nb_lines_by_chunk = max(10, nb_lines(features_type.itemsize, 1, chunk_size*1000))          
+                g.create_dataset('coordinates', (0, 2), dtype=np.float64, chunks=(nb_lines_by_chunk, 2), maxshape=(None, 2))                                               
+                g.create_dataset('features', (0,), dtype=features_type, chunks=(nb_lines_by_chunk,), maxshape=(None,))          
+                nb_frames_by_chunk = max(10, nb_lines(features_type.itemsize, int(round(sparsity*dim)), chunk_size*1000)) # guessed from value of sparsity, used to determine time chunking                
+                nb_lines_by_chunk = max(10, nb_lines(np.dtype(np.int64).itemsize, 1, chunk_size*1000))                 
+                g.create_dataset('frames', (0,), dtype=np.int64, chuns=(nb_lines_by_chunk,), maxshape=(None,))
+                g.attrs['dim'] = dim 
+            else:
+                nb_frames_by_chunk = max(10, nb_lines(features_type.itemsize, dim, chunk_size*1000))        
+                g.create_dataset('features', (0, dim), dtype=features_type, chunks=(nb_frames_by_chunk, dim), maxshape=(None, dim))               
+            g.create_dataset('times', (0,), dtype=np.float64, chunks=(nb_frames_by_chunk,), maxshape=(None,))               
+            str_dtype = h5py.special_dtype(vlen=unicode)
+            nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size*1000)) # typical filename is 20 characters i.e. around 20 bytes
+            g.create_dataset('files', (0,), dtype=str_dtype, chunks=(nb_lines_by_chunk,), maxshape=(None,)) 
+            nb_lines_by_chunk = max(10, nb_lines(np.dtype(np.int64).itemsize, 1, chunk_size*1000))            
+            g.create_dataset('file_index', (0,), dtype=np.int64, chunks=(nb_lines_by_chunk,), maxshape=(None,))
+            g.attrs['format'] = features_format
+        # Step 3: preparing data for writing
+        nb_existing_files = g['files'].shape[0]
+        continue_last_file = False
+        if nb_existing_files > 0:
+            existing_files = g['files'][...]
+            inter = list(set(existing_files).intersection(files))
+            if inter:
+                assert inter == [files[0]] and files[0] == existing_files[-1], "Data can be added only at the end of the last written file" 
+                continue_last_file = True
+                files = files[1:]
+        file_index = [x.shape[0] for x in features]
+        file_index = np.cumsum(file_index)
+        if nb_existing_files > 0:
+            last_file_index = g['file_index'][-1]
+        else:
+            last_file_index = -1 # indexing from 0
+        file_index = last_file_index + file_index
+        if features_format == 'sparse':
+            raise IOError('writing sparse features not yet implemented')
+            # put them in right format if they aren't already
+            #FIXME implement this
+            #are_sparse = [x.isspmatrix_coo() for x in features]
+            #if not(all(are_sparse)):
+            #    for x in features:
+            #        if not(x.isspmatrix_coo()):
+            #            x = sp.coo_matrix(x)
+            ## need to get the coo by line ...             
+        else:
+            features = [x.todense() if sp.issparse(x) else x for x in features]
+            features = np.concatenate(features, axis=0) 
+        times = np.concatenate(times)
+        # Step 4: writing data
+        if features_format == 'sparse':
+            raise IOError('writing sparse features not yet implemented')
+            #nb, = g['features'].shape
+            #g['feature'].resize((nb+features.shape[0],))
+            #g['features'][nb:] = features
+            #g['coordinates'].resize((nb+features.shape[0],2))
+            #g['coordinates'][nb:,:] = coordinates
+            #nb, = g['frames'].shape
+            #g['frames'].resize((nb+frames.shape[0],))
+            #g['frames'][nb:] = frames
+        else:
+            nb, d = g['features'].shape
+            g['features'].resize((nb+features.shape[0], d))
+            g['features'][nb:,:] = features
+        nb, = g['times'].shape
+        g['times'].resize((nb+times.shape[0],))
+        g['times'][nb:] = times
+        if files:
+            nb, = g['files'].shape
+            g['files'].resize((nb+len(files),))
+            g['files'][nb:] = files
+        nb, = g['file_index'].shape
+        if continue_last_file:
+            nb = nb-1
+        g['file_index'].resize((nb+file_index.shape[0],))
+        g['file_index'][nb:] = file_index
+        
+        
+"""
+simplified version of write when there is only one file
+"""
+def simple_write(filename, group, times, features):
+    write(filename, group, ['features'], [times], [features]) # use a default name for the file
+
+"""
+Auxiliary function
+"""               
+# item_size given in bytes, size_in_mem given in kilobytes
+def nb_lines(item_size, n_columns, size_in_mem):
+    return int(round(size_in_mem*1000./(item_size*n_columns))) 
+    
+
+""" 
+legacy code for supporting reading feature written from matlab bindings       
+"""
+def legacy_read_index(filename, group=None):
+    with h5py.File(filename, 'r') as f:
+        if group is None:
+            groups = [g for g in f]
+            assert len(groups) <= 1, ("There are several groups in file %s, you should specify which one should be read" % filename)
+            assert len(groups) > 0, ("There are no group in file %s, impossible to read" % filename)                
+            group = groups[0]
+        g = f[group]
+        files = ''.join([unichr(int(c)) for c in g['files'][...]]).replace('/-', '/').split('/\\') # parse unicode to strings
+        index = {'files': files, 'file_index': np.int64(g['file_index'][...]), 'times': g['times'][...], 'format': g.attrs['format']} # file_index contains the index of the end of each file
+        #FIXME ideally the type conversions above should be removable        
+        if index['format'] == 'sparse':
+            index['dim'] = g.attrs['dim'] #FIXME type ?
+            index['frames'] = g['lines'][...] #FIXME type ?
+    return index
+          
