@@ -7,7 +7,7 @@ Created on Thu Jul 11 11:06:06 2013
 
 
 
-#FIXME test write, adapt read to new version (keeping legacy) and push
+#FIXME test that read is still compatible with legacy version (should it take a transpose at some point ?)
 #FIXME implement sparse functionalities 
 #FIXME create github with MIT license, test profile and document everything
 #FIXME introduce support for empty internal files ?
