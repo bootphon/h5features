@@ -40,6 +40,8 @@ def read_index(filename, group=None):
             if index['format'] == 'sparse':
                 index['dim'] = g.attrs['dim']
                 index['frames'] = g['frames'][...]
+        index['group'] = group
+        index['legacy'] = legacy
         return index
     
    
@@ -107,7 +109,10 @@ def read(filename, group=None, from_internal_file=None, to_internal_file=None, f
     with h5py.File(filename, 'r') as f:
         g = f[group]
         if index['format'] == 'dense':
-            features = g['features'][:,i1:i2+1] # i2 included
+            if index['legacy']:
+                features = g['features'][:,i1:i2+1].T # i2 included
+            else:
+                features = g['features'][i1:i2+1,:] # i2 included
             times = g['times'][i1:i2+1]
         else: #FIXME implement this
             raise IOError('reading sparse features not yet implemented')
@@ -279,10 +284,9 @@ def legacy_read_index(filename, group=None):
             group = groups[0]
         g = f[group]
         files = ''.join([unichr(int(c)) for c in g['files'][...]]).replace('/-', '/').split('/\\') # parse unicode to strings
-        index = {'files': files, 'file_index': np.int64(g['file_index'][...]), 'times': g['times'][...], 'format': g.attrs['format']} # file_index contains the index of the end of each file
-        #FIXME ideally the type conversions above should be removable        
+        index = {'files': files, 'file_index': np.int64(g['file_index'][...]), 'times': g['times'][...], 'format': g.attrs['format']} # file_index contains the index of the end of each file       
         if index['format'] == 'sparse':
             index['dim'] = g.attrs['dim'] #FIXME type ?
             index['frames'] = g['lines'][...] #FIXME type ?
     return index
-          
+
