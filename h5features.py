@@ -183,8 +183,7 @@ def read(filename, group=None, from_internal_file=None, to_internal_file=None,
 # FIXME could check that the times are increasing for each file
 def write(filename, group, files, times, features, features_format='dense',
           chunk_size=0.1, sparsity=0.1):
-    """
-    function write
+    """function write
 
     Write in a h5features file.
 

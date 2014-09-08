@@ -5,8 +5,8 @@ The npz files must respect the following conventions:
 They must contains 2 arrays:
 
 - a 1D-array named 'times'
-- a 2D-array named 'features', the 'feature' dimension along the columns and
-the 'time' dimension along the lines
+- a 2D-array named 'features', the 'feature' dimension along the columns and\
+ the 'time' dimension along the lines
 
 """
 # -*- coding: utf-8 -*-
