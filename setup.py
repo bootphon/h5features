@@ -1,8 +1,8 @@
 from distutils.core import setup
 
 setup(
-    name='h5features',
-    version='0.1.0',
+    name='h5features2',
+    version='2.0',
     author='Thomas Schatz',
     packages=[],
     # url='http://pypi.python.org/pypi/h5features/',

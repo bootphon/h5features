@@ -1,25 +1,26 @@
-"""Test of the h5features package
+"""Test of the h5features2 module
 
-Created on Wed Apr 30 09:59:57 2014
-
-@author: Thomas Schatz
+@author: Mathieu Bernard
 """
 
 import os
 import numpy as np
 import h5py
 
-import h5features as h5f
-
+import h5features2 as h5f
 
 class TestH5FeaturesWrite:
+    """Test write methods."""
     def setup(self):
         self.filename = 'test.h5'
         self.features_0 = np.random.randn(300, 20)
         self.times_0 = np.linspace(0, 2, 300)
 
     def teardown(self):
-        os.remove(self.filename)
+        try:
+            os.remove(self.filename)
+        except:
+            pass
 
     def test_simple_write(self):
         h5f.simple_write(self.filename, 'features_0',
@@ -31,18 +32,24 @@ class TestH5FeaturesWrite:
             assert g.keys() == [u'features', u'file_index', u'files', u'times']
             assert g['features'].shape == (300,20)
 
-#     def test_write(self):
-#         n_files = 30
-#         features = []
-#         times = []
-#         files = []
-#         for i in xrange(n_files):
-#             n_frames = np.random.randint(400)+1
-#             features.append(np.random.randn(n_frames, 20))
-#             times.append(np.linspace(0, 2, n_frames))
-#             files.append('File %d' % (i+1))
+    def test_write(self):
+        n_files = 30
+        features = []
+        times = []
+        files = []
+        for i in xrange(n_files):
+            n_frames = np.random.randint(400)+1
+            features.append(np.random.randn(n_frames, 20))
+            times.append(np.linspace(0, 2, n_frames))
+            files.append('File %d' % (i+1))
 
-#         h5f.write('test.h5', 'features', files, times, features)
+        h5f.write('test.h5', 'features', files, times, features)
+
+        with h5py.File(self.filename, 'r') as f:
+            assert 'features' in f.keys()
+            g = f.get('features')
+            assert g.keys() == [u'features', u'file_index', u'files', u'times']
+            #assert g['features'].shape == (300,20)
 
 
 # if __name__ == '__main__':

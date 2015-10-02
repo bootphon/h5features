@@ -5,14 +5,6 @@ http://abxpy.readthedocs.org/en/latest/FilesFormat.html#features-file
 
 """
 
-"""
-Created on Thu Jul 11 11:06:06 2013
-
-@author: Thomas Schatz
-
-"""
-
-
 import h5py
 import os
 import numpy as np

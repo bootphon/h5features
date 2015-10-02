@@ -14,10 +14,11 @@ Created on Fri May  2 09:33:20 2014
 
 @author: Thomas Schatz
 """
-import h5features
 import os
 import numpy as np
 
+# TODO: dirty dev shortcut
+import h5features2 as h5features
 
 def npz_to_h5features(path, files, h5_filename, h5_groupname, batch_size=500):
     """Append a list of npz files to a h5features file.
@@ -45,20 +46,23 @@ def npz_to_h5features(path, files, h5_filename, h5_groupname, batch_size=500):
     i = 0
     for f in files:
         if i == batch_size:
-            h5features.write(h5_filename, h5_groupname, internal_files, times,
-                             features)
+            h5features.write(
+                h5_filename, h5_groupname, internal_files, times, features)
+
             features = []
             times = []
             internal_files = []
             i = 0
+
         i = i+1
         data = np.load(os.path.join(path, f))
         features.append(data['features'])
         times.append(data['time'])
         internal_files.append(os.path.splitext(f)[0])
+
     if features:
-        h5features.write(h5_filename, h5_groupname, internal_files, times,
-                         features)
+        h5features.write(
+            h5_filename, h5_groupname, internal_files, times, features)
 
 
 def convert(npz_folder, h5_filename='./features.features'):
