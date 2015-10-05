@@ -209,13 +209,13 @@ def write(filename, group, files, times, features,
 
     """
 
-    # Step 1: setup parameters an dbasic checks
+    # Step 1: check parameters
 
-    # version number for the file format
-    # TODO Get it from setup.py
+    # version number for the file format TODO Get it from setup.py
     version = '1.0'
 
-    # Check if file is writtable and if data will be appended, raise if error.
+    # Check if the file is writtable and if data can be appended to
+    # it, raise if error.
     need_append = _check_write_filename(filename, group)
 
     # Check for arguments consistency, raise if error.
@@ -228,27 +228,29 @@ def write(filename, group, files, times, features,
     if features_format == 'sparse':
         datasets += ['frames', 'coordinates']
 
-    fh = h5py.File(filename)
+    h5file = h5py.File(filename)
 
     if need_append:
-        # raise IOError if the data is not appendable
-        _check_write_appendable(fh, group, datasets,
+        # raise if the data is not appendable
+        _check_write_appendable(h5file, group, datasets,
                                 features_format, features_dim,
                                 features_type, version)
-        g = fh.get(group)
+        g = h5file.get(group)
 
     else:  # create h5 file
         # FIXME if something fails here, the file will be polluted, should
         # we catch and del new datasets?
-        g = fh.create_group(group)
+        g = h5file.create_group(group)
         g.attrs['version'] = version
 
         if features_format == 'sparse':
             nb_lines_by_chunk = max(
                 10, nb_lines(features_type.itemsize, 1, chunk_size * 1000))
-            g.create_dataset(
-                'coordinates', (0, 2), dtype=np.float64,
-                chunks=(nb_lines_by_chunk, 2), maxshape=(None, 2))
+
+            g.create_dataset('coordinates', (0, 2), dtype=np.float64,
+                             chunks=(nb_lines_by_chunk, 2),
+                             maxshape=(None, 2))
+
             g.create_dataset(
                 'features', (0,), dtype=features_type, chunks=(
                     nb_lines_by_chunk,), maxshape=(None,))
@@ -360,7 +362,7 @@ def write(filename, group, files, times, features,
     g['file_index'].resize((nb + file_index.shape[0],))
     g['file_index'][nb:] = file_index
 
-    fh.close()
+    h5file.close()
 
 def simple_write(filename, group, times, features):
     """simplified version of write when there is only one file
