@@ -5,3 +5,4 @@ dist/*
 h5features2.egg-info*
 /v1.h5
 /v2.h5
+*.h5
