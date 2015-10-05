@@ -206,45 +206,23 @@ def write(filename, group, files, times, features,
         non-zeros elements on average in a single frame.
 
     """
-    # FIXME: check that the times are increasing for each file
 
     # version number for the file format
-    version = "1.0"
+    # TODO Get it from setup.py
+    version = '1.0'
 
-    # Step 1: check arguments
-    assert features_format in ['dense', 'sparse']
-    assert chunk_size >= 0.008, ('chunk_size below 8Ko are not allowed as they'
-                                 ' would result in poor performances')
-
-    nb_frames = [x.shape[0] for x in features]
-    assert all([n > 0 for n in nb_frames]), "all files must be non-empty"
-
-    dims = [x.shape[1] for x in features]
-    dim = dims[0]
-    assert dim > 0, "features dimension must be strictly positive"
-    assert all([d == dim for d in dims]), ("all files must have the same "
-                                           "feature dimension")
-
-    types = [x.dtype for x in features]
-    features_type = types[0]
-    assert all([t == features_type for t in types]), ("all files must have the"
-                                                      " same feature type")
-
-    assert len(set(files)) == len(files), "all files must have different names"
+    # Check for arguments correctness, raise if error.
+    dim, features_type, = _check_write_arguments(filename, group,
+        features_format, chunk_size, features, files)
 
     datasets = ['files', 'times', 'features', 'file_index']
     if features_format == 'sparse':
         datasets += ['frames', 'coordinates']
 
     # Step 2: preparing target file
-    append = False
-    if os.path.isfile(filename):
-        with h5py.File(filename) as fh:
-            if group in fh:
-                append = True
 
     with h5py.File(filename) as fh:
-        if append:  # check existing h5 file
+        if _append_to_existing_file(filename, group):
             g = fh[group]  # raise KeyError if group not in file
 
             assert g.attrs['version'] == version, (
@@ -267,7 +245,7 @@ def write(filename, group, files, times, features,
                 "stored feature dimension")
 
         else:  # create h5 file
-            # FIXME: if something fails here, the file will be polluted, should
+            # FIXME if something fails here, the file will be polluted, should
             # we catch and del new datasets?
             g = fh.create_group(group)
             g.attrs['version'] = version
@@ -388,6 +366,77 @@ def simple_write(filename, group, times, features):
     """
     # use a default name for the file
     write(filename, group, ['features'], [times], [features])
+
+
+def _check_write_arguments(filename, group, features_format,
+                           chunk_size, features, files):
+    """Consistency checks of write() arguments.
+
+    This method is called by write() and check for errors in the input
+    arguments.
+
+    Raise:
+
+        IOError if badly formatted arguments.
+
+    Return:
+
+        dim: int. Dimension of the feature vectors.
+        features_type: Type of the feature scalars.
+
+    """
+    try:
+
+
+    if not features_format in  ['dense', 'sparse']:
+        raise IOError(
+            "{} is a bad features_format, please choose 'dense' or 'sparse'"
+            .format(features_format))
+
+    if not chunk_size >= 0.008:
+        raise IOError('chunk_size below 8Ko are not allowed as they'
+                      ' would result in poor performances')
+
+    nb_frames = [x.shape[0] for x in features]
+    if not all([n > 0 for n in nb_frames]):
+        raise IOError('all files must be non-empty')
+
+    # retrieve features dimension
+    dims = [x.shape[1] for x in features]
+    features_dim = dims[0]
+
+    if not features_dim > 0:
+        raise IOError("features dimension must be strictly positive")
+
+    if not all([d == features_dim for d in dims]):
+        raise IOError("all files must have the same feature dimension")
+
+    # retrieve features type
+    types = [x.dtype for x in features]
+    features_type = types[0]
+
+    if not all([t == features_type for t in types]):
+        raise IOError("all files must have the same feature type")
+
+    if not len(set(files)) == len(files):
+        raise IOError("all files must have different names")
+
+    # TODO check that the times are increasing for each file
+
+    return features_dim, features_type
+
+def _append_to_existing_file(filename, group):
+    """Return True if write() need to append data in a file.
+
+    This method returns True if 'filename' is an existing HDF5 file
+    and 'group' is an existing group in that file.
+
+    """
+    if os.path.isfile(filename):
+        with h5py.File(filename) as fh:
+            if group in fh:
+                return True
+    return False
 
 
 def nb_lines(item_size, n_columns, size_in_mem):

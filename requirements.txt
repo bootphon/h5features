@@ -1,5 +1,0 @@
-python
-h5py
-numpy
-scipy
-numpydoc
