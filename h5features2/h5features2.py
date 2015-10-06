@@ -209,90 +209,41 @@ def write(filename, group, files, times, features,
 
     """
 
-    # Step 1: check parameters
+    # Step 1:
+    # preparing parameters, check for and raise if error.
 
-    # version number for the file format TODO Get it from setup.py
+    # file format version number TODO Get it from setup.py
     version = '1.0'
 
-    # # Check if file is writtable and if data will be appended, raise if error.
-    # need_append = _check_write_filename(filename, group)
-
-    # Check for arguments consistency, raise if error.
-    features_dim, features_type = _check_write_arguments(
+    features_dim, features_type = _write_check_arguments(
         filename, group, features_format, chunk_size, features, files)
 
-    # Step 2: preparing target file
-
+    # The datasets that will be writted on the HDF5 file
     datasets = ['files', 'times', 'features', 'file_index']
     if features_format == 'sparse':
         datasets += ['frames', 'coordinates']
 
+    # Step 2:
+    # preparing target file.  Choose if data will be appended
+    # to an existing group or stored in a new one
+
     h5file = h5py.File(filename)
 
-    if need_append:
-        # raise if the data is not appendable
-        _check_write_appendable(h5file, group, datasets,
-                                features_format, features_dim,
-                                features_type, version)
+    if _write_need_to_append(
+            h5file, group, datasets,
+            features_format, features_dim, features_type,
+            version):
         g = h5file.get(group)
 
-    else:  # create h5 file
-        # FIXME if something fails here, the file will be polluted, should
-        # we catch and del new datasets?
-        g = h5file.create_group(group)
-        g.attrs['version'] = version
+    else:
+        g = _write_init_datasets(
+            h5file, group, datasets,
+            features_format, features_dim, features_type,
+            chunk_size, version)
 
-        if features_format == 'sparse':
-            nb_lines_by_chunk = max(
-                10, nb_lines(features_type.itemsize, 1, chunk_size * 1000))
+    # Step 3:
+    # preparing data for writing
 
-            g.create_dataset('coordinates', (0, 2), dtype=np.float64,
-                             chunks=(nb_lines_by_chunk, 2),
-                             maxshape=(None, 2))
-
-            g.create_dataset(
-                'features', (0,), dtype=features_type, chunks=(
-                    nb_lines_by_chunk,), maxshape=(None,))
-            # guessed from value of sparsity, used to determine time
-            # chunking
-            nb_frames_by_chunk = max(10, nb_lines(
-                features_type.itemsize, int(round(sparsity * features_dim)),
-                chunk_size * 1000))
-            nb_lines_by_chunk = max(
-                10, nb_lines(np.dtype(np.int64).itemsize, 1,
-                             chunk_size * 1000))
-            g.create_dataset(
-                'frames', (0,), dtype=np.int64, chuns=(nb_lines_by_chunk,),
-                maxshape=(None,))
-            g.attrs['dim'] = features_dim
-
-        else:
-            nb_frames_by_chunk = max(
-                10, nb_lines(features_type.itemsize, features_dim,
-                             chunk_size * 1000))
-            g.create_dataset( 'features', (0, features_dim),
-                              dtype=features_type, chunks=(
-                                  nb_frames_by_chunk, features_dim),
-                              maxshape=(None, features_dim))
-
-        g.create_dataset('times', (0,), dtype=np.float64, chunks=(
-            nb_frames_by_chunk,), maxshape=(None,))
-        str_dtype = h5py.special_dtype(vlen=unicode)
-
-        # typical filename is 20 characters i.e. around 20 bytes
-        nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
-        g.create_dataset(
-            'files', (0,), dtype=str_dtype, chunks=(nb_lines_by_chunk,),
-            maxshape=(None,))
-
-        nb_lines_by_chunk = max(
-            10, nb_lines(np.dtype(np.int64).itemsize, 1,
-                         chunk_size * 1000))
-        g.create_dataset('file_index', (0,), dtype=np.int64, chunks=(
-            nb_lines_by_chunk,), maxshape=(None,))
-        g.attrs['format'] = features_format
-
-        # Step 3: preparing data for writing
     nb_existing_files = g['files'].shape[0]
     continue_last_file = False
     if nb_existing_files > 0:
@@ -369,26 +320,28 @@ def simple_write(filename, group, times, features):
     # use a default name for the file
     write(filename, group, ['features'], [times], [features])
 
-
-def _check_write_filename(filename, group):
-    """Check that filename is a valid file fro writting.
+def _write_check_arguments(
+        filename, group, features_format, chunk_size, features, files):
+    """Consistency checks of write() arguments.
 
     This method is called by write(). It checks that filename can be
-    openned for writting. If the file already exists, checks if it is
-    a valid HDF5 file where the group can be apended.
+    openned for writting. Also checks for consistency errors in the input
+    arguments, as documented in write.__doc__.
 
     Raise:
 
-    IOError if the file os not valid for writting HDF5 data.
+        IOError if the file os not valid for writting HDF5 data.
+        IOError if badly formatted arguments.
 
     Return:
 
-    True if the data must be appended in the given group of the HDF5
-    file, False else.
+        dim: int -- Dimension of the feature vectors.
+        features_type -- Type of the feature scalars.
 
     """
-    # Raise if the file don't exists and is not writable
-    # TODO simplify, no need to create/delete the file
+
+    # Raise if the file don't exists and is not writable.
+    # TODO simplify, no need to create/delete the file.
     if not os.path.isfile(filename):
         try:
             f = open(filename, 'w')
@@ -401,29 +354,6 @@ def _check_write_filename(filename, group):
     if os.path.isfile(filename) and not h5py.is_hdf5(filename):
         raise IOError('{} is not an HDF5 file.'.format(filename))
 
-    if h5py.is_hdf5(filename):
-        with h5py.File(filename) as fh:
-            if group in fh:
-                return True
-    return False
-
-
-def _check_write_arguments(features_format, chunk_size, features, files):
-    """Consistency checks of write() arguments.
-
-    This method is called by write() and check for errors in the input
-    arguments, as documented in write.__doc__.
-
-    Raise:
-
-        IOError if badly formatted arguments.
-
-    Return:
-
-        dim: int -- Dimension of the feature vectors.
-        features_type -- Type of the feature scalars.
-
-    """
     if not features_format in  ['dense', 'sparse']:
         raise IOError(
             "{} is a bad features_format, please choose 'dense' or 'sparse'"
@@ -462,19 +392,32 @@ def _check_write_arguments(features_format, chunk_size, features, files):
     return features_dim, features_type
 
 
-def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
-                            h5type, version):
-    """Raise IOError if the data is not appendable in the file."""
-    filename = h5file.filename
+def _write_need_to_append(h5file, group, datasets, h5format, h5dim,
+                          h5type, version):
+    """Return True if the data can be appended in the given group of the file.
+
+    This internal method is called by write().
+
+    Raise:
+
+    Raise IOError if the data is not appendable in the file because of
+    some format error.
+
+    Return:
+
+    True if the data can be appended in the given group of the HDF5
+    file, False else.
+
+    """
 
     if not group in h5file:
-        raise IOError('The group {} is not in the file {}.'
-                      .format(filename, group))
+        return False
 
     g = h5file.get(group)
 
     if not g.attrs['version'] == version:
-        raise IOError('Files was written with incompatible version of h5features')
+        raise IOError('Files was written with incompatible'
+                      'version of h5features')
 
     if not g.attrs['format'] == h5format:
         raise IOError('Files must have the same features format.')
@@ -483,16 +426,120 @@ def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
         if not dataset in g:
             raise IOError('group {} of file {} is not a valid h5features file:'
                           ' missing dataset {}'
-                          .format(group, filename, dataset))
+                          .format(group, h5file.filename, dataset))
 
     if not g['features'].dtype == h5type:
         raise IOError('Files must have the same data type')
 
     f_dim = g.attrs['dim'] if h5format == 'sparse' else g['features'].shape[1]
-
     if not f_dim == h5dim:
         raise IOError('mismatch between provided features dimension and already'
                       ' stored feature dimension.')
+
+    return True
+
+# FIXME if something fails here, the file will be polluted, should
+# we catch and del new datasets?
+def _write_init_datasets(h5file, group, datasets,
+                         features_format, features_dim, features_type,
+                         chunk_size, version):
+    """Initializes HDF5 file datasets according to parameters."""
+
+    g = h5file.create_group(group)
+    g.attrs['version'] = version
+    g.attrs['format'] = features_format
+
+    # init specific datasets for 'dense' and 'sparse' cases.
+    if features_format == 'sparse':
+        nb_frames_by_chunk = _write_init_sparse_datasets(
+            g, features_type, features_dim, sparsity, chunk_size)
+
+    else:
+        nb_frames_by_chunk = _write_init_dense_datasets(
+            g, features_type, features_dim, chunk_size)
+
+    g.create_dataset('times',
+                     (0,),
+                     dtype=np.float64,
+                     chunks=(nb_frames_by_chunk,),
+                     maxshape=(None,))
+
+    # typical filename is 20 characters i.e. around 20 bytes
+    nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
+    str_dtype = h5py.special_dtype(vlen=unicode)
+
+    g.create_dataset('files',
+                     (0,),
+                     dtype=str_dtype,
+                     chunks=(nb_lines_by_chunk,),
+                     maxshape=(None,))
+
+    nb_lines_by_chunk = max(10, nb_lines(
+        np.dtype(np.int64).itemsize, 1, chunk_size * 1000))
+
+    g.create_dataset('file_index',
+                     (0,),
+                     dtype=np.int64,
+                     chunks=(nb_lines_by_chunk,),
+                     maxshape=(None,))
+
+    return g
+
+
+def _write_init_sparse_datasets(
+        g, features_type, features_dim, sparsity, chunk_size):
+    """Initializes sparse specific datasets."""
+
+    nb_lines_by_chunk = max(
+        10, nb_lines(features_type.itemsize, 1, chunk_size * 1000))
+
+    g.create_dataset('coordinates',
+                     (0, 2),
+                     dtype=np.float64,
+                     chunks=(nb_lines_by_chunk, 2),
+                     maxshape=(None, 2))
+
+    g.create_dataset('features',
+                     (0,),
+                     dtype=features_type,
+                     chunks=(nb_lines_by_chunk,),
+                     maxshape=(None,))
+
+    # guessed from sparsity, used to determine time chunking
+    nb_frames_by_chunk = max(10, nb_lines(
+        features_type.itemsize, int(round(sparsity * features_dim)),
+        chunk_size * 1000))
+
+    nb_lines_by_chunk = max(
+        10, nb_lines(np.dtype(np.int64).itemsize, 1,
+                     chunk_size * 1000))
+
+    g.create_dataset('frames',
+                     (0,),
+                     dtype=np.int64,
+                     chuns=(nb_lines_by_chunk,),
+                     maxshape=(None,))
+
+    g.attrs['dim'] = features_dim
+
+    return nb_frames_by_chunk
+
+
+def _write_init_dense_datasets(
+        g, features_type, features_dim, chunk_size):
+    """Initializes dense specific datasets."""
+
+    nb_frames_by_chunk = max(
+        10, nb_lines(features_type.itemsize, features_dim,
+                     chunk_size * 1000))
+
+    g.create_dataset('features',
+                     (0, features_dim),
+                     dtype=features_type,
+                     chunks=(nb_frames_by_chunk, features_dim),
+                     maxshape=(None, features_dim))
+
+    return nb_frames_by_chunk
 
 
 def nb_lines(item_size, n_columns, size_in_mem):
