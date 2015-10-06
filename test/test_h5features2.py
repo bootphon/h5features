@@ -8,23 +8,10 @@ import numpy as np
 import h5py
 import pytest
 
-from ABXpy.misc.generate_data import feature as generate_features
 import h5features2.h5features2 as h5f
 
-# TODO redondant with generate...
-def write_file(filename='test.h5', group='features', n_files=30,
-               max_frames=400):
-    features = []
-    times = []
-    files = []
-    for i in xrange(n_files):
-        n_frames = np.random.randint(max_frames)+1
-        features.append(np.random.randn(n_frames, 20))
-        times.append(np.linspace(0, 2, n_frames))
-        files.append('File %d' % (i+1))
-
-    h5f.write(filename, group, files, times, features)
-
+# TODO The test must be independant of ABXpy
+from ABXpy.misc.generate_data import feature as generate_features
 
 
 class TestH5FeaturesWrite:
@@ -54,7 +41,6 @@ class TestH5FeaturesWrite:
         msg = str(ioerror.value)
         assert self.filename in msg
         assert 'not an HDF5 file' in msg
-
 
     def test_simple_write(self):
         self.features_0 = np.random.randn(300, 20)
@@ -98,7 +84,11 @@ class TestH5FeaturesReadWrite:
             os.remove(self.filename)
 
     def test_concatenate(self):
-        """concatenate to existing dataset"""
+        """Cconcatenate to existing dataset.
+
+        This is a legacy test from h5features v 1.0.
+
+        """
         group = self.group
         filename = self.filename
 

@@ -148,7 +148,7 @@ def read(filename, group=None,
                 features = g['features'][i1:i2 + 1, :]  # i2 included
             times = g['times'][i1:i2 + 1]
         else:
-            # FIXME: implement this
+            # FIXME implement this
             raise IOError('reading sparse features not yet implemented')
             # will be different for version 1.0 and legacy code ...
 
@@ -215,12 +215,12 @@ def write(filename, group, files, times, features,
     # TODO Get it from setup.py
     version = '1.0'
 
-    # Check if file is writtable and if data will be appended, raise if error.
-    need_append = _check_write_filename(filename, group)
+    # # Check if file is writtable and if data will be appended, raise if error.
+    # need_append = _check_write_filename(filename, group)
 
     # Check for arguments consistency, raise if error.
     features_dim, features_type = _check_write_arguments(
-        features_format, chunk_size, features, files)
+        filename, group, features_format, chunk_size, features, files)
 
     # Step 2: preparing target file
 
