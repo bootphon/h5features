@@ -184,8 +184,11 @@ def write(filename, group, files, times, features,
 
     files : list of str -- List of files from which the features where extracted.
 
-    times : list of 1D numpy array like -- Time value for the features
-        array (e.g. the center of the time window).
+    times : list of 1D or 2D numpy array like -- Time value for the
+        features array. Elements of a 1D array are considered as the
+        center of the time window associated with the features. A 2D
+        array must have 2 columns corresponding to the begin and end
+        timestamps of the features time window.
 
     features : list of 2D numpy array like -- Features should have
         time along the lines and features along the columns
@@ -219,8 +222,8 @@ def write(filename, group, files, times, features,
     need_append = _check_write_filename(filename, group)
 
     # Check for arguments consistency, raise if error.
-    features_dim, features_type = _check_write_arguments(
-        features_format, chunk_size, features, files)
+    features_dim, features_type, time_format = _check_write_arguments(
+        features_format, chunk_size, features, files, times)
 
     # Step 2: preparing target file
 
@@ -293,7 +296,7 @@ def write(filename, group, files, times, features,
             nb_lines_by_chunk,), maxshape=(None,))
         g.attrs['format'] = features_format
 
-        # Step 3: preparing data for writing
+    # Step 3: preparing data for writing
     nb_existing_files = g['files'].shape[0]
     continue_last_file = False
     if nb_existing_files > 0:
@@ -409,7 +412,7 @@ def _check_write_filename(filename, group):
     return False
 
 
-def _check_write_arguments(features_format, chunk_size, features, files):
+def _check_write_arguments(features_format, chunk_size, features, files, times):
     """Consistency checks of write() arguments.
 
     This method is called by write() and check for errors in the input
@@ -458,13 +461,21 @@ def _check_write_arguments(features_format, chunk_size, features, files):
     if not len(set(files)) == len(files):
         raise IOError("all files must have different names")
 
+    # retrieve time format
     # TODO check that the times are increasing for each file
+    time_format = times[0].ndim
 
-    return features_dim, features_type
+    if time_format > 2:
+        raise IOError('times must be a list of 1D or 2D numpy arrays')
+
+    if not all([t.ndim == time_format for t in times]):
+        raise IOError('all times arrays must have the same dimension')
+
+    return features_dim, features_type, time_format
 
 
 def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
-                            h5type, version):
+                            h5type, version, time_format):
     """Raise IOError if the data is not appendable in the file."""
     filename = h5file.filename
 
@@ -495,6 +506,8 @@ def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
         raise IOError('mismatch between provided features dimension and already'
                       ' stored feature dimension.')
 
+    if not time_format == g['times'][0].ndim:
+        raise IOError('Files must have the same time format')
 
 def nb_lines(item_size, n_columns, size_in_mem):
     """

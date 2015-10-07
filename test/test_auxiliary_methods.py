@@ -48,7 +48,7 @@ class TestCheckWriteArguments:
         self.group = 'features'
         self.features_format = 'dense'
         self.chunk_size = 0.1
-        self.files, _, self.features = generate_features(10)
+        self.files, self.times, self.features = generate_features(10)
 
     def teardown(self):
         pass
@@ -56,29 +56,31 @@ class TestCheckWriteArguments:
     def test_features_format_good(self):
         for ff in ['dense', 'sparse']:
             h5f._check_write_arguments(ff, self.chunk_size,
-                                       self.features, self.files)
+                                       self.features, self.files,
+                                       self.times)
 
     def test_features_format_bad(self):
         with pytest.raises(IOError) as ioerror:
             h5f._check_write_arguments('dance', self.chunk_size,
-                                       self.features, self.files)
+                                       self.features, self.files, self.times)
         assert 'features_format' in str(ioerror.value)
 
     def test_chunk_size(self):
         with pytest.raises(IOError) as ioerror:
             h5f._check_write_arguments(self.features_format, 0,
-                                       self.features, self.files)
+                                       self.features, self.files, self.times)
         assert 'chunk_size below 8Ko' in str(ioerror.value)
 
         for coef in [1, 0.1, 0.01, 0.008]:
             h5f._check_write_arguments(self.features_format, coef,
-                                       self.features, self.files)
+                                       self.features, self.files, self.times)
 
     def test_features_dim_good(self):
-        fdim, _ = h5f._check_write_arguments(self.features_format,
-                                                self.chunk_size,
-                                                self.features,
-                                                self.files)
+        fdim, _, _ = h5f._check_write_arguments(self.features_format,
+                                             self.chunk_size,
+                                             self.features,
+                                             self.files,
+                                             self.times)
         assert fdim == 2
 
     def test_features_dim_bad(self):
@@ -88,19 +90,21 @@ class TestCheckWriteArguments:
         with pytest.raises(IOError) as ioerror:
             h5f._check_write_arguments(self.features_format,
                                        self.chunk_size, bad_features,
-                                       self.files)
+                                       self.files, self.times)
         assert ' the same feature dimension' in str(ioerror.value)
 
         with pytest.raises(IndexError):
-            h5f._check_write_arguments(self.features_format, self.chunk_size,
-                [np.array([1,2,3]),np.array([1,2])], self.files)
+            h5f._check_write_arguments(self.features_format,
+                                       self.chunk_size,
+                                       [np.array([1,2,3]),np.array([1,2])],
+                                       self.files, self.times)
 
     def test_features_empty(self):
         with pytest.raises(IOError) as ioerror:
             h5f._check_write_arguments(self.features_format,
                                        self.chunk_size,
                                        [np.array([]),np.array([])],
-                                       self.files)
+                                       self.files, self.times)
         assert ' files must be non-empty' in str(ioerror.value)
 
     # def test_features_dim_zero(self):
