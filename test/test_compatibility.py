@@ -24,12 +24,11 @@ class TestReadWriteCompatibility:
                      self.features)
 
     def teardown(self):
-        pass
-        # try:
-        #     os.remove(self.file_v1)
-        #     os.remove(self.file_v2)
-        # except:
-        #     pass
+        try:
+            os.remove(self.file_v1)
+            os.remove(self.file_v2)
+        except:
+            pass
 
     # silly test
     def test_files_exists(self):

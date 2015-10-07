@@ -4,14 +4,28 @@
 
 """
 
+import os
+
 import generate
-import h5features2
+import h5features2.h5features2 as h5f
 
 class TestTimes1D:
+    """Testing writing 1D (i.e. center times of windows)"""
+
     def setup(self):
-        self.files, self.times, self.features = generate.features(10)
+        self.filename = 'test.h5'
+        self.files, self.times, self.features = generate.features(10,
+                                                                  time_format=1)
 
     def teardown(self):
-        pass
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
 
-    # def test_
+    def test_write(self):
+        h5f.write(self.filename, 'group',
+                  self.files, self.times, self.features)
+        t, fe = h5f.read(self.filename)
+        print list(t.values())
+        print
+        print self.times
+        #assert t == self.times

@@ -237,7 +237,7 @@ def write(filename, group, files, times, features,
         # raise if the data is not appendable
         _check_write_appendable(h5file, group, datasets,
                                 features_format, features_dim,
-                                features_type, version)
+                                features_type, version, time_format)
         g = h5file.get(group)
 
     else:  # create h5 file
@@ -274,15 +274,28 @@ def write(filename, group, files, times, features,
             nb_frames_by_chunk = max(
                 10, nb_lines(features_type.itemsize, features_dim,
                              chunk_size * 1000))
-            g.create_dataset( 'features', (0, features_dim),
-                              dtype=features_type, chunks=(
-                                  nb_frames_by_chunk, features_dim),
-                              maxshape=(None, features_dim))
+            g.create_dataset('features', (0, features_dim),
+                             dtype=features_type, chunks=(
+                                 nb_frames_by_chunk, features_dim),
+                             maxshape=(None, features_dim))
 
-        g.create_dataset('times', (0,), dtype=np.float64, chunks=(
-            nb_frames_by_chunk,), maxshape=(None,))
+        # Create times dataset
+        if time_format == 1:
+            g.create_dataset('times',
+                             (0,),
+                             dtype=np.float64,
+                             chunks=(nb_frames_by_chunk,),
+                             maxshape=(None,))
+        else:
+            assert time_format == 2
+            g.create_dataset('times',
+                             shape=(0, 2),
+                             dtype=np.float64,
+                             chunks=(nb_frames_by_chunk, 2),
+                             maxshape=(None, 2))
+
+        # Create files dataset
         str_dtype = h5py.special_dtype(vlen=unicode)
-
         # typical filename is 20 characters i.e. around 20 bytes
         nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
         g.create_dataset(
@@ -350,9 +363,16 @@ def write(filename, group, files, times, features,
         g['features'].resize((nb + features.shape[0], d))
         g['features'][nb:, :] = features
 
-    nb, = g['times'].shape
-    g['times'].resize((nb + times.shape[0],))
-    g['times'][nb:] = times
+    # write times dataset
+    if time_format == 1:
+        nb, = g['times'].shape
+        g['times'].resize((nb + times.shape[0],))
+        g['times'][nb:] = times
+    else:
+        assert time_format == 2
+        nb,_ = g['times'].shape
+        g['times'].resize((nb + times.shape[0],2))
+        g['times'][nb:] = times
 
     if files:
         nb, = g['files'].shape
@@ -486,7 +506,7 @@ def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
     g = h5file.get(group)
 
     if not g.attrs['version'] == version:
-        raise IOError('Files was written with incompatible version of h5features')
+        raise IOError('Files have incompatible version of h5features')
 
     if not g.attrs['format'] == h5format:
         raise IOError('Files must have the same features format.')
@@ -505,6 +525,12 @@ def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
     if not f_dim == h5dim:
         raise IOError('mismatch between provided features dimension and already'
                       ' stored feature dimension.')
+
+    # TODO
+    # print '!!!!!!!!!!!!!!!!!!!   {}   !!!!!!!!!!!!!!'.format(time_format)
+    # print '!!!!!!!!!!!!!!!!!!!   {}   !!!!!!!!!!!!!!'.format(g['times'][0].ndim)
+    # print [x.shape for x in g['times']]
+    # print type(g ['times'] [0])
 
     if not time_format == g['times'][0].ndim:
         raise IOError('Files must have the same time format')
