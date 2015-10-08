@@ -14,8 +14,8 @@ class TestTimes1D:
 
     def setup(self):
         self.filename = 'test.h5'
-        self.files, self.times, self.features = generate.features(10,
-                                                                  time_format=1)
+        self.files, self.times, self.features = generate.features(
+            10, time_format=1)
 
     def teardown(self):
         if os.path.isfile(self.filename):
@@ -24,8 +24,18 @@ class TestTimes1D:
     def test_write(self):
         h5f.write(self.filename, 'group',
                   self.files, self.times, self.features)
+
         t, fe = h5f.read(self.filename)
-        print list(t.values())
-        print
-        print self.times
         #assert t == self.times
+
+
+class TestTimes2D:
+
+    def setup(self):
+        self.filename = 'test.h5'
+        self.files, self.times, self.features = generate.features(
+            10, time_format=2)
+
+    def teardown(self):
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
