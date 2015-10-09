@@ -15,6 +15,7 @@ def _times_value(n_frames, time_format):
         simple = np.linspace(0, 1, 3)
         return np.array([simple, simple+1])
 
+
 def features(n_items, n_feat=2, max_frames=3, time_format=1):
     """Random feature generator.
 

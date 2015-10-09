@@ -182,7 +182,8 @@ def write(filename, group, files, times, features,
     group : str -- h5 group to write the data in, or to append the
         data to if the group already exists in the file.
 
-    files : list of str -- List of files from which the features where extracted.
+    files : list of str -- List of files from which the features where
+        extracted.
 
     times : list of 1D or 2D numpy array like -- Time value for the
         features array. Elements of a 1D array are considered as the
@@ -532,7 +533,7 @@ def _check_write_appendable(h5file, group, datasets, h5format, h5dim,
     # print [x.shape for x in g['times']]
     # print type(g ['times'] [0])
 
-    if not time_format == g['times'][0].ndim:
+    if not time_format == g['times'][...].ndim:
         raise IOError('Files must have the same time format')
 
 def nb_lines(item_size, n_columns, size_in_mem):
