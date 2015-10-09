@@ -10,7 +10,7 @@ import pytest
 
 
 import generate
-import h5features2.h5features2 as h5f
+import h5features2.write as h5f
 
 
 class TestWriteCheckArguments:
