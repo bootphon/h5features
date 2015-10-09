@@ -109,17 +109,16 @@ class TestH5FeaturesReadWrite:
         # files, times, features = generate_features(30, 20, 400)
         # h5f.write(filename, 'features_0', files, times, features)
 
-
         # concatenate to existing dataset
         features_added_1 = np.zeros(shape=(1, 20))
         times_added_1 = np.linspace(0, 2, 1)
         h5f.write(filename, 'features', ['File 31'],
-                   [times_added_1], [features_added_1])
+                  [times_added_1], [features_added_1])
 
         features_added_2 = np.zeros(shape=(2, 20))
         times_added_2 = np.linspace(0, 2, 2)
         h5f.write(filename, 'features', ['File 31'],
-                   [times_added_2], [features_added_2])
+                  [times_added_2], [features_added_2])
 
         # read
         times_0_r, features_0_r = h5f.read(filename, group)

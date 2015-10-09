@@ -182,10 +182,14 @@ def write(filename, group, files, times, features,
     group : str -- h5 group to write the data in, or to append the
         data to if the group already exists in the file.
 
-    files : list of str -- List of files from which the features where extracted.
+    files : list of str -- List of files from which the features where
+        extracted.
 
-    times : list of 1D numpy array like -- Time value for the features
-        array (e.g. the center of the time window).
+    times : list of 1D or 2D numpy array like -- Time value for the
+        features array. Elements of a 1D array are considered as the
+        center of the time window associated with the features. A 2D
+        array must have 2 columns corresponding to the begin and end
+        timestamps of the features time window.
 
     features : list of 2D numpy array like -- Features should have
         time along the lines and features along the columns
@@ -215,8 +219,8 @@ def write(filename, group, files, times, features,
     # file format version number TODO Get it from setup.py
     version = '1.0'
 
-    features_dim, features_type = _write_check_arguments(
-        filename, group, features_format, chunk_size, features, files)
+    features_dim, features_type, time_format = _write_check_arguments(
+        filename, group, features_format, chunk_size, features, files, times)
 
     # The datasets that will be writted on the HDF5 file
     datasets = ['files', 'times', 'features', 'file_index']
@@ -232,7 +236,8 @@ def write(filename, group, files, times, features,
     if _write_need_to_append(
             h5file, group, datasets,
             features_format, features_dim, features_type,
-            version):
+            version, time_format):
+
         g = h5file.get(group)
 
     else:
@@ -297,9 +302,16 @@ def write(filename, group, files, times, features,
         g['features'].resize((nb + features.shape[0], d))
         g['features'][nb:, :] = features
 
-    nb, = g['times'].shape
-    g['times'].resize((nb + times.shape[0],))
-    g['times'][nb:] = times
+    # write times dataset
+    if time_format == 1:
+        nb, = g['times'].shape
+        g['times'].resize((nb + times.shape[0],))
+        g['times'][nb:] = times
+    else:
+        assert time_format == 2
+        nb,_ = g['times'].shape
+        g['times'].resize((nb + times.shape[0],2))
+        g['times'][nb:] = times
 
     if files:
         nb, = g['files'].shape
@@ -321,7 +333,7 @@ def simple_write(filename, group, times, features):
     write(filename, group, ['features'], [times], [features])
 
 def _write_check_arguments(
-        filename, group, features_format, chunk_size, features, files):
+        filename, group, features_format, chunk_size, features, files, times):
     """Consistency checks of write() arguments.
 
     This method is called by write(). It checks that filename can be
@@ -387,13 +399,21 @@ def _write_check_arguments(
     if not len(set(files)) == len(files):
         raise IOError("all files must have different names")
 
+    # retrieve time format
     # TODO check that the times are increasing for each file
+    time_format = times[0].ndim
 
-    return features_dim, features_type
+    if time_format > 2:
+        raise IOError('times must be a list of 1D or 2D numpy arrays')
+
+    if not all([t.ndim == time_format for t in times]):
+        raise IOError('all times arrays must have the same dimension')
+
+    return features_dim, features_type, time_format
 
 
 def _write_need_to_append(h5file, group, datasets, h5format, h5dim,
-                          h5type, version):
+                          h5type, version, time_format):
     """Return True if the data can be appended in the given group of the file.
 
     This internal method is called by write().
@@ -416,8 +436,7 @@ def _write_need_to_append(h5file, group, datasets, h5format, h5dim,
     g = h5file.get(group)
 
     if not g.attrs['version'] == version:
-        raise IOError('Files was written with incompatible'
-                      'version of h5features')
+        raise IOError('Files have incompatible version of h5features')
 
     if not g.attrs['format'] == h5format:
         raise IOError('Files must have the same features format.')
@@ -435,6 +454,13 @@ def _write_need_to_append(h5file, group, datasets, h5format, h5dim,
     if not f_dim == h5dim:
         raise IOError('mismatch between provided features dimension and already'
                       ' stored feature dimension.')
+
+    print time_format
+    print
+    print g['times'][...].ndim
+
+    if not time_format == g['times'][...].ndim:
+        raise IOError('Files must have the same time format')
 
     return True
 
@@ -540,7 +566,6 @@ def _write_init_dense_datasets(
                      maxshape=(None, features_dim))
 
     return nb_frames_by_chunk
-
 
 def nb_lines(item_size, n_columns, size_in_mem):
     """

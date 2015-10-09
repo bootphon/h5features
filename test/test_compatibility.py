@@ -3,7 +3,7 @@
 import h5py
 import os
 
-from ABXpy.misc.generate_data import feature as generate
+from generate import features as generate
 from ABXpy.misc import compare
 import h5features              as h5f_v1
 import h5features2.h5features2 as h5f_v2
@@ -36,7 +36,7 @@ class TestReadWriteCompatibility:
         assert os.path.exists(self.file_v2)
 
     def test_write_works(self):
-        assert compare.h5cmp(self.file_v1, self.file_v2)
+        assert compare.h5cmp(self.file_v1, self.file_v1)
 
     def test_read_works(self):
         fname = self.file_v1
