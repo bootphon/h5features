@@ -42,7 +42,7 @@ class TestH5FeaturesWrite:
             h5f.write(self.filename, 'group', [], [], [])
         msg = str(ioerror.value)
         assert self.filename in msg
-        assert 'not an HDF5 file' in msg
+        assert 'not a HDF5 file' in msg
 
     def test_simple_write(self):
         self.features_0 = np.random.randn(300, 20)

@@ -96,26 +96,40 @@ def simple_write(filename, group, times, features, fileid='features'):
 
 
 def _check_features(features):
+    """Raise IOError if features are not in a correct state.
+
+    Raise:
+
+    Raise IOError if one of the feature is empty, if features have not
+    all the same positive dimension, or if all features have not the
+    same data type.
+
+    Return:
+
+    features_dim : int -- Dimension of the features
+    features_type : type -- Data type of features scalars
+
+    """
     nb_frames = [x.shape[0] for x in features]
     if not all([n > 0 for n in nb_frames]):
-        raise IOError('all files must be non-empty')
+        raise IOError('all features must be non-empty')
 
     # retrieve features dimension
     dims = [x.shape[1] for x in features]
     features_dim = dims[0]
 
     if not features_dim > 0:
-        raise IOError("features dimension must be strictly positive.")
+        raise IOError('features dimension must be strictly positive.')
 
     if not all([d == features_dim for d in dims]):
-        raise IOError("all files must have the same feature dimension.")
+        raise IOError('all files must have the same feature dimension.')
 
     # retrieve features type
     types = [x.dtype for x in features]
     features_type = types[0]
 
     if not all([t == features_type for t in types]):
-        raise IOError("all files must have the same feature type.")
+        raise IOError('all files must have the same feature type.')
 
     return features_dim, features_type
 
@@ -123,7 +137,7 @@ def _check_features(features):
 def _check_files(files):
     """Raise if file names are not unique."""
     if not len(set(files)) == len(files):
-        raise IOError("all files must have different names.")
+        raise IOError('all files must have different names.')
 
 
 def _check_file(filename):
@@ -136,7 +150,7 @@ def _check_file(filename):
     # Raise if the file exists but is not HDF5
     if os.path.isfile(filename):
         if not h5py.is_hdf5(filename):
-            raise IOError('{} is not an HDF5 file.'.format(filename))
+            raise IOError('{} is not a HDF5 file.'.format(filename))
 
     # Raise if the file is not writable
     # TODO no need to create/delete the file.
@@ -152,15 +166,15 @@ def _check_file(filename):
 def _check_chunk_size(chunk_size):
     """Raise IOError if the size of a chunk (in Mo) is below 8 Ko."""
     if chunk_size < 0.008:
-        raise IOError('chunk_size below 8 Ko are not allowed as they'
+        raise IOError('chunk size below 8 Ko are not allowed as they'
                       ' result in poor performances.')
 
 
 def _check_features_format(features_format):
-    """"""
+    """Raise IOError if the features format is not 'dense' or 'sparse'"""
     if not features_format in  ['dense', 'sparse']:
         raise IOError(
-            "{} is a bad features_format, please choose 'dense' or 'sparse'"
+            "{} is a bad features format, please choose 'dense' or 'sparse'"
             .format(features_format))
 
 
@@ -171,7 +185,6 @@ def _check_times(times):
     have different dimensions.
 
     """
-    #
     # TODO check that the times are increasing for each file
     time_format = times[0].ndim
 
