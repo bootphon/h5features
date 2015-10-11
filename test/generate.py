@@ -49,7 +49,7 @@ def features(n_items, n_feat=2, max_frames=3, time_format=1):
     """
 
     items, times, features = [], [], []
-    for i in xrange(n_items):
+    for i in range(n_items):
         n_frames = np.random.randint(max_frames) + 1
         features.append(np.random.randn(n_frames, n_feat))
         # times.append(np.linspace(0, 1, n_frames))

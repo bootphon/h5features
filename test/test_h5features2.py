@@ -9,10 +9,12 @@ import h5py
 import pytest
 
 import h5features2.h5features2 as h5f
+import generate
 
-# TODO The test must be independant of ABXpy
-from ABXpy.misc.generate_data import feature as generate_features
-
+def test_raise_on_write_sparse():
+    with pytest.raises(NotImplementedError) as ioerror:
+        h5f.write('test.h5', 'group', None, None, None, features_format='sparse')
+    assert 'sparse' in str(ioerror.value)
 
 class TestH5FeaturesWrite:
     """Test write methods."""
@@ -50,22 +52,25 @@ class TestH5FeaturesWrite:
                          self.times_0, self.features_0)
 
         with h5py.File(self.filename, 'r') as f:
-            assert [u'f'] == f.keys()
+            assert ['f'] == list(f.keys ())
+
             g = f.get('f')
-            assert g.keys() == [u'features', u'file_index', u'files', u'times']
-            assert g.get('features').shape == (300,20)
-            assert g.get('file_index').shape == (1,)
-            assert g.get('files').shape == (1,)
-            assert g.get('times').shape == (300,)
+            assert list(g.keys()) == (
+                ['features', 'file_index', 'files', 'times'])
+
+            assert g['features'].shape == (300,20)
+            assert g['file_index'].shape == (1,)
+            assert g['files'].shape == (1,)
+            assert g['times'].shape == (300,)
 
     def test_write(self):
-        files, times, features = generate_features(30, 20, 10)
+        files, times, features = generate.features(30, 20, 10)
         h5f.write(self.filename, 'f', files, times, features)
 
         with h5py.File(self.filename, 'r') as f:
-            assert ['f'] == f.keys()
+            assert ['f'] == list(f.keys ())
             g = f.get('f')
-            assert g.keys() == [u'features', u'file_index', u'files', u'times']
+            assert list(g.keys()) == ['features', 'file_index', 'files', 'times']
             assert g.get('features').shape[1] == 20
             assert g.get('file_index').shape == (30,)
             assert g.get('files').shape == (30,)
@@ -106,7 +111,7 @@ class TestH5FeaturesReadWrite:
             times.append(np.linspace(0, 2, n_frames))
             files.append('File %d' % (i+1))
         h5f.write(filename, 'features', files, times, features)
-        # files, times, features = generate_features(30, 20, 400)
+        # files, times, features = generate.features(30, 20, 400)
         # h5f.write(filename, 'features_0', files, times, features)
 
         # concatenate to existing dataset
@@ -122,8 +127,8 @@ class TestH5FeaturesReadWrite:
 
         # read
         times_0_r, features_0_r = h5f.read(filename, group)
-        assert times_0_r.keys() == ['features']
-        assert features_0_r.keys() == ['features']
+        assert list(times_0_r.keys ()) == ['features']
+        assert list(features_0_r.keys ()) == ['features']
         assert all(times_0_r['features'] == times_0)
         assert (features_0_r['features'] == features_0).all()
 

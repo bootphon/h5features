@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='h5features2',
-    version='0.1.0',
+    version='0.1.2',
     license='MIT',
 
     description='h5features format file handler',
@@ -24,7 +24,7 @@ setup(
     packages=find_packages(exclude=['doc', 'test']),
 
     install_requires=[
-        'python >= 2.7',
+        #'python >= 2.7',
         'h5py >= 2.3.0',
         'numpy >= 1.8.0',
         'scipy >= 0.13.0',
