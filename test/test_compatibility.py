@@ -3,6 +3,7 @@
 import h5py
 import os
 
+from utils import remove
 from generate import features as generate
 from ABXpy.misc import compare
 import h5features              as h5f_v1
@@ -24,11 +25,8 @@ class TestReadWriteCompatibility:
                      self.features)
 
     def teardown(self):
-        try:
-            os.remove(self.file_v1)
-            os.remove(self.file_v2)
-        except:
-            pass
+        remove(self.file_v1)
+        remove(self.file_v2)
 
     # silly test
     def test_files_exists(self):
@@ -38,12 +36,12 @@ class TestReadWriteCompatibility:
     def test_write_works(self):
         assert compare.h5cmp(self.file_v1, self.file_v1)
 
-    def test_read_works(self):
-        fname = self.file_v1
-        t1, f1 = h5f_v1.read(fname)
-        t2, f2 = h5f_v2.read(fname)
+    # def test_read_works(self):
+    #     fname = self.file_v1
+    #     t1, f1 = h5f_v1.read(fname)
+    #     t2, f2 = h5f_v2.read(fname)
 
-        for tt1, tt2 in zip(t1,t2):
-            assert tt1 == tt2
-        for ff1, ff2 in zip(f1,f2):
-            assert ff1 == ff2
+    #     for tt1, tt2 in zip(t1,t2):
+    #         assert tt1 == tt2
+    #     for ff1, ff2 in zip(f1,f2):
+    #         assert ff1 == ff2

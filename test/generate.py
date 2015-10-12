@@ -16,6 +16,14 @@ def _times_value(n_frames, time_format):
         return np.array([simple, simple+1])
 
 
+def items(n_items):
+    """Random items generator"""
+    items = []
+    for i in range(n_items):
+        items.append('item {}'.format(i))
+    return items
+
+
 def features(n_items, n_feat=2, max_frames=3, time_format=1):
     """Random feature generator.
 

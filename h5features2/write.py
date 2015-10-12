@@ -5,8 +5,10 @@ import os
 import numpy as np
 import scipy.sparse as sp
 
+from h5features2.Items import Items
+from h5features2.Features import Features
 
-def write(filename, group_name, files, times, features,
+def write(filename, group_name, items_data, times_data, features_data,
           features_format='dense', chunk_size=0.1, sparsity=0.1):
     """Write in a h5features file.
 
@@ -21,16 +23,16 @@ def write(filename, group_name, files, times, features,
     group_name : str -- h5 group to write the data in, or to append
         the data to if the group already exists in the file.
 
-    files : list of str -- List of files from which the features where
+    items_data : list of str -- List of files from which the features where
         extracted.
 
-    times : list of 1D or 2D numpy array like -- Time value for the
+    times_data : list of 1D or 2D numpy array like -- Time value for the
         features array. Elements of a 1D array are considered as the
         center of the time window associated with the features. A 2D
         array must have 2 columns corresponding to the begin and end
         timestamps of the features time window.
 
-    features : list of 2D numpy array like -- Features should have
+    features_data : list of 2D numpy array like -- Features should have
         time along the lines and features along the columns
         (accomodating row-major storage in hdf5 files).
 
@@ -48,7 +50,7 @@ def write(filename, group_name, files, times, features,
     Raise
     -----
 
-    IOError if filename is not valid or if parameters are not consistents.
+    IOError if filename is not valid or if parameters are not consistent.
 
     NotImplementedError if features_format == 'sparse'
 
@@ -57,87 +59,58 @@ def write(filename, group_name, files, times, features,
     # TODO Get it from setup.py ?
     version = '1.0'
 
-    if features_format == 'sparse':
-        raise NotImplementedError('Writing sparse features is not implemented.')
+    items = Items(items_data)
+    features = Features(features_data)
 
     # Prepare parameters, look for errors and raise if any.
     _check_file(filename)
     _check_chunk_size(chunk_size)
-    _check_features_format(features_format)
-    _check_files(files)
     time_format = _check_times(times)
-    features_dim, features_type = _check_features(features)
 
     # Open target file for writing.
     with h5py.File(filename, mode='a') as h5file:
-        group = init_subgroups(h5file, group_name, features_format,
-                               features_dim, features_type,
-                               time_format, chunk_size, version,
-                               sparsity)
+        # If group does not exists, create it
+        if not group_name in h5file:
+            # TODO if something fails here, the file will be polluted,
+            # should we catch and del new datasets?
+
+            group = h5file.create_group(group_name)
+            group.attrs['version'] = version
+
+            nb_in_chucks = init_features(group, features_format, features_type,
+                                         features_dim, chunk_size, sparsity)
+            init_times(group, nb_in_chucks, time_format)
+            init_file_index(group, chunk_size)
+
+            # typical filename is 20 characters i.e. around 20 bytes
+            nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
+            items.create(group, nb_lines_by_chunk)
+
+        else: # The group exists
+            group = h5file[group_name]
+
+            # raise if we cannot append data to it.
+            _appendable(group, features_format, features_dim,
+                        features_type, version, time_format)
 
         # in case we append to the end of a file (this eventually
         # modifies 'files').
-        files, continue_last_file = _files_continue_last_file(group, files)
+        continue_last_item = items.continue_last_item(group)
 
         # build the files index before reshaping features
-        file_index = _files_index(group, features)
+        file_index = _files_index(group, features, items.group_name)
 
         # writing data
+        items.write(group)
         _write_features(group, features, features_format)
         _write_times(group, times, time_format)
-        _write_files(group, files)
-        _write_files_index(group, file_index, continue_last_file)
+        _write_files_index(group, file_index, continue_last_item)
 
 
 def simple_write(filename, group, times, features, fileid='features'):
     """Simplified version of write when there is only one file
     """
     write(filename, group, [fileid], [times], [features])
-
-
-def _check_features(features):
-    """Raise IOError if features are not in a correct state.
-
-    Raise:
-
-    Raise IOError if one of the feature is empty, if features have not
-    all the same positive dimension, or if all features have not the
-    same data type.
-
-    Return:
-
-    features_dim : int -- Dimension of the features
-    features_type : type -- Data type of features scalars
-
-    """
-    nb_frames = [x.shape[0] for x in features]
-    if not all([n > 0 for n in nb_frames]):
-        raise IOError('all features must be non-empty')
-
-    # retrieve features dimension
-    dims = [x.shape[1] for x in features]
-    features_dim = dims[0]
-
-    if not features_dim > 0:
-        raise IOError('features dimension must be strictly positive.')
-
-    if not all([d == features_dim for d in dims]):
-        raise IOError('all files must have the same feature dimension.')
-
-    # retrieve features type
-    types = [x.dtype for x in features]
-    features_type = types[0]
-
-    if not all([t == features_type for t in types]):
-        raise IOError('all files must have the same feature type.')
-
-    return features_dim, features_type
-
-
-def _check_files(files):
-    """Raise if file names are not unique."""
-    if not len(set(files)) == len(files):
-        raise IOError('all files must have different names.')
 
 
 def _check_file(filename):
@@ -170,14 +143,6 @@ def _check_chunk_size(chunk_size):
                       ' result in poor performances.')
 
 
-def _check_features_format(features_format):
-    """Raise IOError if the features format is not 'dense' or 'sparse'"""
-    if not features_format in  ['dense', 'sparse']:
-        raise IOError(
-            "{} is a bad features format, please choose 'dense' or 'sparse'"
-            .format(features_format))
-
-
 def _check_times(times):
     """Retrieve time format and raise on errors.
 
@@ -197,212 +162,75 @@ def _check_times(times):
     return time_format
 
 
-def init_subgroups(h5file, group_name, features_format, features_dim,
-                   features_type, time_format, chunk_size, version, sparsity):
-    """"""
-    # The datasets that will be writted on the HDF5 file
-    datasets = ['files', 'times', 'features', 'file_index']
-
-    if features_format == 'sparse':
-        datasets += ['frames', 'coordinates']
-
-    # Choose if data will be appended to an existing group or stored
-    # in a new one
-    is_append = _need_to_append(h5file, group_name, datasets,
-                                features_format, features_dim,
-                                features_type, version,
-                                time_format)
-    if is_append:
-        return h5file.get(group_name)
-    else:
-        return _write_init_datasets(h5file, group_name,
-                                    features_format, features_dim,
-                                    features_type, chunk_size,
-                                    version, sparsity)
-
-
-def _need_to_append(h5file, group_name, datasets, h5format, h5dim, h5type,
-                    version, time_format):
-    """Return True if the data can be appended in the given group of the file.
-
-    This internal method is called by write().
-
-    Raise:
-
-    Raise IOError if the data is not appendable in the file because of
-    some format error.
-
-    Return:
-
-    True if the data can be appended in the given group of the HDF5
-    file, False else.
-
-    """
-    if not group_name in h5file:
-        return False
-
-    group = h5file.get(group_name)
-
-    if not group.attrs['version'] == version:
+def _appendable(group, h5format, h5dim, h5type,
+                version, time_format):
+    """Raise IOError if the data is not appendable in the group."""
+    if not is_same_version(group, version):
         raise IOError('Files have incompatible version of h5features')
 
-    if not group.attrs['format'] == h5format:
+    if not is_same_features_format(group, h5format):
         raise IOError('Files must have the same features format.')
 
-    for dataset in datasets:
-        if not dataset in group:
-            raise IOError('group {} of file {} is not a valid h5features file:'
-                          ' missing dataset {}'
-                          .format(group_name, h5file.filename, dataset))
+    if not is_same_times_format(group, time_format):
+        raise IOError('Files must have the same time format')
 
-    if not group['features'].dtype == h5type:
+    if not is_same_datasets(group, h5format):
+        raise IOError('group {} is not a valid h5features file:'
+                      ' missing dataset'.format(group.name[1:]))
+
+    if not is_same_features_type(group, h5type):
         raise IOError('Files must have the same data type')
 
-    f_dim = (group.attrs['dim'] if h5format == 'sparse'
-             else group['features'].shape[1])
-
-    if not f_dim == h5dim:
+    if not is_same_features_dim(group, h5dim, h5format):
         raise IOError('mismatch between provided features dimension and already'
                       ' stored feature dimension.')
 
-    if not time_format == group['times'][...].ndim:
-        raise IOError('Files must have the same time format')
 
-    return True
+def is_same_version(group, version):
+    """Return True if local version and group version are the same."""
+    return group.attrs['version'] == version
 
 
-# FIXME if something fails here, the file will be polluted, should
-# we catch and del new datasets?
-# TODO Why don't use datasets variable ?
-def _write_init_datasets(h5file, group, features_format, features_dim,
-                         features_type, chunk_size, version, sparsity):
-    """Initializes HDF5 file datasets according to parameters."""
+def is_same_times_format(group, times_format):
+    return group['times'][...].ndim == times_format
 
-    g = h5file.create_group(group)
-    g.attrs['version'] = version
-    g.attrs['format'] = features_format
 
-    # init specific datasets for 'dense' and 'sparse' cases.
+def is_same_datasets(group, features_format):
+    # The datasets that will be writted on the HDF5 file
+    datasets = ['items', 'times', 'features', 'file_index']
     if features_format == 'sparse':
-        nb_frames_by_chunk = _write_init_sparse_datasets(
-            g, features_type, features_dim, sparsity, chunk_size)
+        datasets += ['frames', 'coordinates']
 
-    else:
-        nb_frames_by_chunk = _write_init_dense_datasets(
-            g, features_type, features_dim, chunk_size)
+    return all([d in group for d in datasets])
 
-    g.create_dataset('times',
-                     (0,),
-                     dtype=np.float64,
-                     chunks=(nb_frames_by_chunk,),
-                     maxshape=(None,))
 
-    # typical filename is 20 characters i.e. around 20 bytes
-    nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
-    str_dtype = h5py.special_dtype(vlen=str)
-
-    g.create_dataset('files',
-                     (0,),
-                     dtype=str_dtype,
-                     chunks=(nb_lines_by_chunk,),
-                     maxshape=(None,))
-
+def init_file_index(group, chunk_size):
+    """Initializes the file index subgroup."""
     nb_lines_by_chunk = max(10, nb_lines(
         np.dtype(np.int64).itemsize, 1, chunk_size * 1000))
-
-    g.create_dataset('file_index',
-                     (0,),
-                     dtype=np.int64,
-                     chunks=(nb_lines_by_chunk,),
-                     maxshape=(None,))
-
-    return g
+    group.create_dataset('file_index', (0,), dtype=np.int64,
+                         chunks=(nb_lines_by_chunk,), maxshape=(None,))
 
 
-def _write_init_sparse_datasets(g, features_type, features_dim, sparsity, chunk_size):
-    """Initializes sparse specific datasets."""
+def init_times(group, nb_in_chucks, times_format):
+    """Initilizes the times subgroup."""
+    # TODO smarter
+    if times_format == 1:
+        group.create_dataset('times', (0,), dtype=np.float64,
+                             chunks=(nb_in_chucks,), maxshape=(None,))
+    else:  # times_format == 2
+        group.create_dataset('times', (0,2), dtype=np.float64,
+                             chunks=(nb_in_chuks,2), maxshape=(None,2))
 
-    nb_lines_by_chunk = max(
-        10, nb_lines(features_type.itemsize, 1, chunk_size * 1000))
-
-    g.create_dataset('coordinates',
-                     (0, 2),
-                     dtype=np.float64,
-                     chunks=(nb_lines_by_chunk, 2),
-                     maxshape=(None, 2))
-
-    g.create_dataset('features',
-                     (0,),
-                     dtype=features_type,
-                     chunks=(nb_lines_by_chunk,),
-                     maxshape=(None,))
-
-    # guessed from sparsity, used to determine time chunking
-    nb_frames_by_chunk = max(10, nb_lines(
-        features_type.itemsize, int(round(sparsity * features_dim)),
-        chunk_size * 1000))
-
-    nb_lines_by_chunk = max(
-        10, nb_lines(np.dtype(np.int64).itemsize, 1,
-                     chunk_size * 1000))
-
-    g.create_dataset('frames',
-                     (0,),
-                     dtype=np.int64,
-                     chuns=(nb_lines_by_chunk,),
-                     maxshape=(None,))
-
-    g.attrs['dim'] = features_dim
-
-    return nb_frames_by_chunk
-
-
-def _write_init_dense_datasets(
-        g, features_type, features_dim, chunk_size):
-    """Initializes dense specific datasets."""
-
-    nb_frames_by_chunk = max(
-        10, nb_lines(features_type.itemsize, features_dim,
-                     chunk_size * 1000))
-
-    g.create_dataset('features',
-                     (0, features_dim),
-                     dtype=features_type,
-                     chunks=(nb_frames_by_chunk, features_dim),
-                     maxshape=(None, features_dim))
-
-    return nb_frames_by_chunk
 
 def nb_lines(item_size, n_columns, size_in_mem):
-    """
-    Auxiliary function
-    """
-    # item_size given in bytes, size_in_mem given in kilobytes
+    """Item_size given in bytes, size_in_mem given in kilobytes."""
     return int(round(size_in_mem * 1000. / (item_size * n_columns)))
 
 
-def _files_continue_last_file(group, files):
+def _files_index(group, features, items_group_name):
     """"""
-    continue_last_file = False
-
-    group_nb_files = group['files'].shape[0]
-    if group_nb_files > 0:
-        group_files = group['files'][...]
-        inter = list(set(group_files).intersection(files))
-        if inter:
-            if not (inter == [files[0]] and files[0] == group_files[-1]):
-                raise IOError('Data can be added only at the end'
-                              'of the last written file')
-
-            continue_last_file = True
-            files = files[1:]
-
-    return files, continue_last_file
-
-
-def _files_index(group, features):
-    """"""
-    group_nb_files = group['files'].shape[0]
+    group_nb_files = group[items_group_name].shape[0]
     if group_nb_files > 0:
         last_file_index = group['file_index'][-1]
     else:
@@ -412,12 +240,12 @@ def _files_index(group, features):
     files_index = np.cumsum([x.shape[0] for x in features])
     return last_file_index + files_index
 
+
 def _write_features(group, features, features_format):
-    """Write features to an HDF5 group.
+    """Write features data to the group.
 
-    Raise:
+    Raise NotImplementedError if features_format == 'sparse'
 
-    NotImplementedError if features_format == 'sparse'
     """
     if features_format == 'sparse':
         raise NotImplementedError('writing sparse features not implemented')
@@ -448,30 +276,24 @@ def _write_features(group, features, features_format):
         group['features'].resize((nb + features.shape[0], d))
         group['features'][nb:, :] = features
 
-def _write_times(g, times, times_format):
-    """"""
+def _write_times(group, times, times_format):
+    """Write times data to the group"""
     if times_format == 1:
         times = np.concatenate(times)
-        nb, = g['times'].shape
-        g['times'].resize((nb + times.shape[0],))
-        g['times'][nb:] = times
+        nb, = group['times'].shape
+        group['times'].resize((nb + times.shape[0],))
+        group['times'][nb:] = times
     else:
         assert times_format == 2
-        nb, _ = g['times'].shape
-        g['times'].resize((nb + times.shape[0],2))
-        g['times'][nb:] = times
-def _write_files(g, files):
-    """"""
+        nb, _ = group['times'].shape
+        group['times'].resize((nb + times.shape[0],2))
+        group['times'][nb:] = times
 
-    if files:
-        nb, = g['files'].shape
-        g['files'].resize((nb + len(files),))
-        g['files'][nb:] = files
 
-def _write_files_index(g, file_index, continue_last_file):
-    """"""
-    nb, = g['file_index'].shape
+def _write_files_index(group, file_index, continue_last_file):
+    """Write the files index to the group"""
+    nb, = group['file_index'].shape
     if continue_last_file:
         nb = nb - 1
-    g['file_index'].resize((nb + file_index.shape[0],))
-    g['file_index'][nb:] = file_index
+    group['file_index'].resize((nb + file_index.shape[0],))
+    group['file_index'][nb:] = file_index

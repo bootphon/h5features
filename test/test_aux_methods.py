@@ -8,21 +8,9 @@ import os
 import numpy as np
 import pytest
 
+from utils import remove, assert_raise
 import generate
 import h5features2.write as h5f
-
-
-def assert_raise(funct, arg, msg, except_type=IOError):
-    """Assert that func(arg) raises a specified exception containing msg."""
-    with pytest.raises(except_type) as error:
-        funct(arg)
-    assert msg in str(error.value)
-
-
-def remove(filename):
-    """Remove the file if it exists."""
-    if os.path.exists(filename):
-        os.remove(filename)
 
 
 class TestCheckFile:
@@ -51,19 +39,6 @@ class TestCheckFile:
         h5f._check_file(self.filename)
 
 
-class TestCheckFiles:
-    """Test of the _check_files method."""
-    def test_good(self):
-        h5f._check_files([])
-        h5f._check_files(['a', 'b'])
-        h5f._check_files([1])
-        h5f._check_files([1, 2])
-
-    def test_bad(self):
-        args = [[1, 1], ['a', 'b', 'c', 'a']]
-        error_msg = 'all files must have different names.'
-        for arg in args:
-            assert_raise(h5f._check_files, arg, error_msg)
 
 
 class TestChunkSize:
@@ -146,29 +121,27 @@ class TestWriteNeedToAppend:
 
         # read it with h5py
         self.f = h5py.File(self.filename, 'r')
-        self.g = self.f.get('features')
+        self.g = self.f.get(self.group)
 
     def teardown(self):
         self.f.close()
-        if os.path.isfile(self.filename):
-            os.remove(self.filename)
+        remove(self.filename)
 
     def test_basic_works(self):
-        assert h5f._need_to_append(
-            self.f, self.group, self.datasets, self.h5format,
-            self.h5dim, self.h5type, self.version, self.time_format)
+        h5f._appendable(self.g, self.h5format, self.h5dim,
+                        self.h5type, self.version, self.time_format)
 
     # TODO Not here
     def test_version(self):
         assert self.g.attrs['version'] == self.version
 
     def test_group(self):
-        assert not h5f._need_to_append(
-            self.f, 'toto', None, None, None, None, None, None)
+        with pytest.raises(IOError):
+            h5f._appendable(self.g, None, None, None, None, None)
 
-    def test_bad_dim(self):
-        with pytest.raises(IOError) as ioerror:
-            h5f._need_to_append(
-                self.f, self.group, self.datasets, self.h5format,
-                self.h5dim+1, self.h5type, self.version, self.times)
-        assert 'mismatch' in str(ioerror.value)
+    # def test_bad_dim(self):
+    #     with pytest.raises(IOError) as ioerror:
+    #         h5f._need_to_append(
+    #             self.f, self.group, self.datasets, self.h5format,
+    #             self.h5dim+1, self.h5type, self.version, self.times)
+    #     assert 'mismatch' in str(ioerror.value)

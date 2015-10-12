@@ -74,21 +74,21 @@ def read(filename, group=None,
 
     if to_internal_file is None:
         if from_internal_file is None:
-            to_internal_file = index['files'][-1]
+            to_internal_file = index['items'][-1]
         else:
             to_internal_file = from_internal_file
     if from_internal_file is None:
-        from_internal_file = index['files'][0]
+        from_internal_file = index['items'][0]
 
     try:
         # the second 'index' here refers to the list.index() method
-        f1 = index['files'].index(from_internal_file)
+        f1 = index['items'].index(from_internal_file)
     except ValueError:
         raise Exception('No entry for file %s in %s\\%s' %
                         (from_internal_file, filename, group))
 
     try:
-        f2 = index['files'].index(to_internal_file)
+        f2 = index['items'].index(to_internal_file)
     except ValueError:
         raise Exception('No entry for file %s in %s\\%s' %
                         (to_internal_file, filename, group))
@@ -151,7 +151,7 @@ def read(filename, group=None,
     else:
         features = [features]
         times = [times]
-    files = index['files'][f1:f2 + 1]
+    files = index['items'][f1:f2 + 1]
     features = dict(zip(files, features))
     times = dict(zip(files, times))
     return times, features
@@ -188,8 +188,8 @@ def read_index(filename, group=None):
             index = legacy_read_index(filename, group)
         else:
             assert version == "1.0", "unsupported version %s" % version
-            files = list(g['files'][...])
-            index = {'files': files, 'file_index': g['file_index'][...],
+            files = list(g['items'][...])
+            index = {'items': files, 'file_index': g['file_index'][...],
                      'times': g['times'][...], 'format': g.attrs['format']}
             # file_index contains the index of the end of each file
             if index['format'] == 'sparse':
