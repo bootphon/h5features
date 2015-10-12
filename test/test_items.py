@@ -1,15 +1,19 @@
-"""Test of the Items class."""
+"""Test of the h5features2.items module.
+
+@author: Mathieu Bernard <mmathieubernardd@gmail.com>
+"""
 
 import h5py
 
 import generate
 from utils import assert_raise, remove
-from h5features2.Items import Items
+from h5features2.items import Items
 
-class TestInit:
+
+class TestItemsInit:
     """Test of Items.__init__ and Items.check."""
     def test_good(self):
-        args = [[], ['a', 'b'], [1], [1, 2]]
+        args = [['a'], ['a', 'b'], [1], [1, 2]]
         for arg in args:
             assert arg == Items(arg).items
 

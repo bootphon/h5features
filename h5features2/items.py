@@ -6,8 +6,17 @@
 
 import h5py
 
+
+def unique_items(items):
+    """Return False if items is empty or have non-unique elements."""
+    if not items:
+        return False
+    return len(set(items)) == len(items)
+
+
 class Items(object):
     """This class manages items in h5features files."""
+
     def __init__(self, items, group_name='items'):
         """Initializes Items from a list of str.
 
@@ -15,15 +24,12 @@ class Items(object):
         which the features where extracted).
 
         """
-        # We check the items are valid before storing them
-        self.check(items)
+
+        if not unique_items(items):
+            raise IOError('all items must have different names.')
+
         self.items = items
         self.group_name = group_name
-
-    def check(self, items):
-        """Raise IOError if item names are not unique."""
-        if not len(set(items)) == len(items):
-            raise IOError('all items must have different names.')
 
     def create(self, group, nb_lines_by_chunk):
         """Creates an items subgroup in the given group.
@@ -79,6 +85,6 @@ class Items(object):
 
         """
         if self.items:
-            nb = group[self.group_name].shape[0]
-            group[self.group_name].resize((nb + len(self.items),))
-            group[self.group_name][nb:] = self.items
+            nitems = group[self.group_name].shape[0]
+            group[self.group_name].resize((nitems + len(self.items),))
+            group[self.group_name][nitems:] = self.items

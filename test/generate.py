@@ -18,32 +18,32 @@ def _times_value(n_frames, time_format):
 
 def items(n_items):
     """Random items generator"""
-    items = []
+    itm = []
     for i in range(n_items):
-        items.append('item {}'.format(i))
-    return items
+        itm.append('item {}'.format(i))
+    return itm
 
 
-def features(n_items, n_feat=2, max_frames=3, time_format=1):
+def features(n_items, dim=2, max_frames=3):
     """Random feature generator.
 
-    Generate random features for a set of items, given the feature
-    vector size and the maximum number of frames in items.
+    Generate random features, given the number of items the feature
+    dimension and the maximum number of frames in each items.
 
-    Parameters
-    ----------
+    """
+    feat = []
+    for _ in range(n_items):
+        n_frames = np.random.randint(max_frames) + 1
+        feat.append(np.random.randn(n_frames, dim))
+    return feat
 
-    n_items : int
-        number of items for which to generate features
 
-    n_feat : int, optional
-        dimension of the generated feature vector. Default is n_feat = 2
+def full(n_items, dim=2, max_frames=3, tformat=1):
+    """Random (items, features, times) generator.
 
-    max_frame : int, optional
-        number of frames for each item is randomly choosen in [1,max_frame]
-
-    time_format : int optional
-        format of the time arrays. 1 -> 1D arrays. 2 -> 2D arrays (for v2)
+    Generate a random tuple of (items, features, times) for a set of
+    items, given the features dimension, the maximum number of
+    frames in items and the time format (either 1 or 2).
 
     Return
     ------
@@ -56,12 +56,11 @@ def features(n_items, n_feat=2, max_frames=3, time_format=1):
 
     """
 
-    items, times, features = [], [], []
+    itm, times, feat = [], [], []
     for i in range(n_items):
         n_frames = np.random.randint(max_frames) + 1
-        features.append(np.random.randn(n_frames, n_feat))
-        # times.append(np.linspace(0, 1, n_frames))
-        times.append(_times_value(n_frames, time_format))
-        items.append('s%d' % i)
+        feat.append(np.random.randn(n_frames, dim))
+        times.append(_times_value(n_frames, tformat))
+        itm.append('s%d' % i)
 
-    return items, times, features
+    return itm, times, feat
