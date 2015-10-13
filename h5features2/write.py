@@ -77,8 +77,8 @@ def write(filename, group_name, items_data, times_data, features_data,
             group = h5file.create_group(group_name)
             group.attrs['version'] = version
 
-            nb_in_chucks = init_features(group, features_format, features_type,
-                                         features_dim, chunk_size, sparsity)
+            nb_in_chucks = features.create(group, chunk_size, sparsity)
+
             init_times(group, nb_in_chucks, time_format)
             init_file_index(group, chunk_size)
 

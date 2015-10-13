@@ -84,7 +84,7 @@ class Features(object):
                 group['features'].dtype == self.dtype and
                 dim == self.dim)
 
-    def create(self):
+    def create(self, group, chunk_size, sparsity):
         """Initialize the features subgoup."""
         group.attrs['format'] = features_format
 
