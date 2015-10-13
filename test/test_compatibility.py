@@ -4,7 +4,7 @@ import h5py
 import os
 
 from utils import remove
-from generate import features as generate
+import generate
 from ABXpy.misc import compare
 import h5features              as h5f_v1
 import h5features2.h5features2 as h5f_v2
@@ -17,7 +17,7 @@ class TestReadWriteCompatibility:
         self.file_v2 = 'v2.h5'
         self.teardown() # in case files already exist, remove it
 
-        self.items, self.times, self.features = generate(20,10)
+        self.items, self.times, self.features = generate.full(20,10)
         h5f_v1.write(self.file_v1, 'features', self.items, self.times,
                      self.features)
 

@@ -32,8 +32,7 @@ class TestTimes:
     # detected by py.test as a test function.
     def _test_wr(self, time_format):
         """Test retrieving times and files after a write/read operation."""
-        files, t_gold, feat = generate.features(
-            self.nbitems, time_format=time_format)
+        files, t_gold, feat = generate.full(self.nbitems, tformat=time_format)
 
         h5f.write(self.filename, self.group, files, t_gold, feat)
         t, _ = h5f.read(self.filename, self.group)
