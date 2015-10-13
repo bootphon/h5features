@@ -1,4 +1,4 @@
-"""Provides the Features class to the h5features module.
+"""Provides Features class to the h5features module.
 
 TODO Describe the structure of features.
 
@@ -6,6 +6,7 @@ TODO Describe the structure of features.
 
 """
 
+import numpy as np
 import scipy.sparse as sp
 
 from h5features2.chunk import nb_lines

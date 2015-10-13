@@ -5,8 +5,10 @@ import os
 import numpy as np
 
 from h5features2.items import Items
+from h5features2.times import Times
 from h5features2.features import Features, SparseFeatures, parse_dformat
 from h5features2.chunk import nb_lines
+from h5features2.index import Index
 
 def write(filename, groupname, items_data, times_data, features_data,
           dformat='dense', chunk_size=0.1, sparsity=0.1):
@@ -63,13 +65,12 @@ def write(filename, groupname, items_data, times_data, features_data,
     check_file(filename)
     check_chunk_size(chunk_size)
     items = Items(items_data)
+    times = Times(times_data)
 
     if parse_dformat(dformat) == 'dense':
         features = Features(features_data)
     else:
         features = SparseFeatures(features_data, sparsity)
-
-    tformat = check_times(times_data)
 
     # Open target file for writing.
     with h5py.File(filename, mode='a') as h5file:
@@ -81,8 +82,9 @@ def write(filename, groupname, items_data, times_data, features_data,
             group = h5file.create_group(groupname)
             group.attrs['version'] = version
 
-            nb_in_chucks = features.create(group, chunk_size)
-            init_times(group, nb_in_chucks, tformat)
+            nb_in_chunks = features.create(group, chunk_size)
+            times.create(group, nb_in_chunks)
+
             init_file_index(group, chunk_size)
 
             # typical filename is 20 characters i.e. around 20 bytes
@@ -93,19 +95,18 @@ def write(filename, groupname, items_data, times_data, features_data,
             group = h5file[groupname]
 
             # raise if we cannot append data to it.
-            appendable(group, features, version, tformat)
+            appendable(group, features, times, version)
 
-        # in case we append to the end of a file (this eventually
-        # modifies 'files').
+        # in case we append to the end of an existing item
         continue_last_item = items.continue_last_item(group)
 
-        # build the files index before reshaping features
+        # build the index before reshaping features
         file_index = _files_index(group, features.features, items.group_name)
 
         # writing data
         items.write(group)
-        _write_features(group, features, dformat)
-        _write_times(group, times_data, tformat)
+        features.write(group)
+        times.write(group)
         _write_files_index(group, file_index, continue_last_item)
 
 
@@ -145,31 +146,12 @@ def check_chunk_size(chunk_size):
                       ' result in poor performances.')
 
 
-def check_times(times):
-    """Retrieve time format and raise on errors.
-
-    Raise IOError if the time format is not 1 or 2, or if times arrays
-    have different dimensions.
-
-    """
-    # TODO check that the times are increasing for each file
-    time_format = times[0].ndim
-
-    if time_format > 2:
-        raise IOError('times must be a list of 1D or 2D numpy arrays.')
-
-    if not all([t.ndim == time_format for t in times]):
-        raise IOError('all times arrays must have the same dimension.')
-
-    return time_format
-
-
-def appendable(group, features, version, time_format):
+def appendable(group, features, times, version):
     """Raise IOError if the data is not appendable in the group."""
     if not is_same_version(group, version):
         raise IOError('Files have incompatible version of h5features')
 
-    if not is_same_times_format(group, time_format):
+    if not times.is_compatible(group):
         raise IOError('Files must have the same time format')
 
     if not is_same_datasets(group, features.dformat):
@@ -183,10 +165,6 @@ def appendable(group, features, version, time_format):
 def is_same_version(group, version):
     """Return True if local version and group version are the same."""
     return group.attrs['version'] == version
-
-
-def is_same_times_format(group, times_format):
-    return group['times'][...].ndim == times_format
 
 
 def is_same_datasets(group, features_format):
@@ -206,17 +184,6 @@ def init_file_index(group, chunk_size):
                          chunks=(nb_lines_by_chunk,), maxshape=(None,))
 
 
-def init_times(group, nb_in_chunks, times_format):
-    """Initilizes the times subgroup."""
-    # TODO smarter
-    if times_format == 1:
-        group.create_dataset('times', (0,), dtype=np.float64,
-                             chunks=(nb_in_chunks,), maxshape=(None,))
-    else:  # times_format == 2
-        group.create_dataset('times', (0,2), dtype=np.float64,
-                             chunks=(nb_in_chunks,2), maxshape=(None,2))
-
-
 def _files_index(group, features, items_group_name):
     """"""
     group_nb_files = group[items_group_name].shape[0]
@@ -228,27 +195,6 @@ def _files_index(group, features, items_group_name):
 
     files_index = np.cumsum([x.shape[0] for x in features])
     return last_file_index + files_index
-
-
-def _write_features(group, features, features_format):
-    """Write features data to the group.
-
-    Raise NotImplementedError if features_format == 'sparse'
-
-    """
-
-def _write_times(group, times, times_format):
-    """Write times data to the group"""
-    if times_format == 1:
-        times = np.concatenate(times)
-        nb, = group['times'].shape
-        group['times'].resize((nb + times.shape[0],))
-        group['times'][nb:] = times
-    else:
-        assert times_format == 2
-        nb, _ = group['times'].shape
-        group['times'].resize((nb + times.shape[0],2))
-        group['times'][nb:] = times
 
 
 def _write_files_index(group, file_index, continue_last_file):

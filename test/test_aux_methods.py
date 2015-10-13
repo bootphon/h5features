@@ -10,6 +10,7 @@ from utils import remove, assert_raise
 import generate
 import h5features2.write as h5f
 from h5features2.features import Features
+from h5features2.times import Times
 
 
 class TestCheckFile:
@@ -70,6 +71,7 @@ class TestWriteAppendable:
         # create a simple feature file
         items, times, feat = generate.full(10, dim=self.dim)
         self.features = Features(feat)
+        self.times = Times(times)
         h5f.write(self.filename, self.group, items, times, feat)
 
         # read it with h5py
@@ -81,7 +83,7 @@ class TestWriteAppendable:
         remove(self.filename)
 
     def test_basic_works(self):
-        h5f.appendable(self.g, self.features, self.version, self.tformat)
+        h5f.appendable(self.g, self.features, self.times, self.version)
 
     # TODO Not here
     def test_version(self):

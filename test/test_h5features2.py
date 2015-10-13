@@ -59,7 +59,6 @@ class TestH5FeaturesWrite:
             assert list(g.keys()) == (
                 ['features', 'file_index', 'items', 'times'])
 
-            # TODO BUG
             assert g['features'].shape == (300,20)
             assert g['file_index'].shape == (1,)
             assert g['items'].shape == (1,)
@@ -76,7 +75,6 @@ class TestH5FeaturesWrite:
             assert g.get('features').shape[1] == 20
             assert g.get('file_index').shape == (30,)
             assert g.get('items').shape == (30,)
-            # TODO BUG
             assert g.get('features').shape[0] == g.get('times').shape[0]
 
 
@@ -133,8 +131,7 @@ class TestH5FeaturesReadWrite:
         assert list(times_0_r.keys ()) == ['features']
         assert list(features_0_r.keys ()) == ['features']
         assert all(times_0_r['features'] == times_0)
-        # TODO BUG
-        #assert all(features_0_r['features'] == features_0)
+        assert (features_0_r['features'] == features_0).all()
 
         times_r, features_r = h5f.read(filename, 'features')
         assert set(times_r.keys()) == set(files+['File 31'])
@@ -142,14 +139,9 @@ class TestH5FeaturesReadWrite:
 
         for i, f in  enumerate(files):
             assert all(times_r[f] == times[i])
-
-            # TODO BUG
-            # assert (features_r[f] == features[i]).all()
-
+            assert (features_r[f] == features[i]).all()
             assert all(times_r['File 31'] ==
                        np.concatenate([times_added_1, times_added_2]))
-
-            # TODO BUG
-            # assert (features_r['File 31'] ==
-            #         np.concatenate([features_added_1,
-            #                         features_added_2], axis=0) ).all()
+            assert (features_r['File 31'] ==
+                    np.concatenate([features_added_1,
+                                    features_added_2], axis=0) ).all()
