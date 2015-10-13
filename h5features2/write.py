@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 from h5features2.items import Items
-from h5features2.features import Features
+from h5features2.features import Features, SparseFeatures, parse_dformat
 from h5features2.chunk import nb_lines
 
 def write(filename, groupname, items_data, times_data, features_data,
@@ -63,7 +63,12 @@ def write(filename, groupname, items_data, times_data, features_data,
     check_file(filename)
     check_chunk_size(chunk_size)
     items = Items(items_data)
-    features = Features(features_data, dformat)
+
+    if parse_dformat(dformat) == 'dense':
+        features = Features(features_data)
+    else:
+        features = SparseFeatures(features_data, sparsity)
+
     tformat = check_times(times_data)
 
     # Open target file for writing.
@@ -76,7 +81,7 @@ def write(filename, groupname, items_data, times_data, features_data,
             group = h5file.create_group(groupname)
             group.attrs['version'] = version
 
-            nb_in_chucks = features.create(group, chunk_size, sparsity)
+            nb_in_chucks = features.create(group, chunk_size)
             init_times(group, nb_in_chucks, tformat)
             init_file_index(group, chunk_size)
 
