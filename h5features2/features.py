@@ -77,12 +77,12 @@ def parse_dim(features):
 class Features(object):
     """This class manages features in h5features files."""
 
-    def __init__(self, features):
-        """Initializes Features with a list of features.
+    def __init__(self, data, name='features'):
+        """Initializes Features with data.
 
         Parameters:
 
-        features : list of 2D numpy array like -- Features should have
+        data : list of 2D numpy array like -- Features should have
             time along the lines and features along the columns
             (accomodating row-major storage in hdf5 files).
 
@@ -91,23 +91,24 @@ class Features(object):
         IOError if features are badly formatted.
 
         """
-        if contains_empty(features):
+        if contains_empty(data):
             raise IOError('all features must be non-empty')
 
+        self.name = name
         self.dformat = 'dense'
-        self.dtype = parse_dtype(features)
-        self.dim = parse_dim(features)
-        self.features = features
+        self.dtype = parse_dtype(data)
+        self.dim = parse_dim(data)
+        self.data = data
 
     def is_compatible(self, group):
         """Return True if features are appendable to a HDF5 group."""
         return (group.attrs['format'] == self.dformat and
-                group['features'].dtype == self.dtype and
+                group[self.name].dtype == self.dtype and
                 self.get_features_dim(group) == self.dim)
 
     def get_features_dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""
-        return group['features'].shape[1]
+        return group[self.name].shape[1]
 
     def create(self, group, chunk_size):
         """Initialize the features subgoup."""
@@ -116,9 +117,7 @@ class Features(object):
         nb_frames_by_chunk = max(
             10, nb_lines(self.dtype.itemsize, self.dim, chunk_size*1000))
 
-        group.create_dataset('features',
-                             (0, self.dim),
-                             dtype=self.dtype,
+        group.create_dataset(self.name, (0, self.dim), dtype=self.dtype,
                              chunks=(nb_frames_by_chunk, self.dim),
                              maxshape=(None, self.dim))
 
@@ -127,20 +126,20 @@ class Features(object):
 
     def write(self, group):
         """Write stored features to a given group."""
-        self.features = [x.todense() if sp.issparse(x)
-                    else x for x in self.features]
-        self.features = np.concatenate(self.features, axis=0)
+        self.data = [x.todense() if sp.issparse(x)
+                     else x for x in self.data]
+        self.data = np.concatenate(self.data, axis=0)
 
-        nb, d = group['features'].shape
-        group['features'].resize((nb + self.features.shape[0], d))
-        group['features'][nb:, :] = self.features
+        nb, d = group[self.name].shape
+        group[self.name].resize((nb + self.data.shape[0], d))
+        group[self.name][nb:, :] = self.data
 
 
 class SparseFeatures(Features):
     """This class is specialized for managing sparse matrices as features."""
 
-    def __init__(self, features, sparsity):
-        Features.__init__(self, features)
+    def __init__(self, data, sparsity, name='features'):
+        Features.__init__(self, data, name)
         self.dformat = 'sparse'
         self.sparsity = sparsity
 
@@ -160,7 +159,7 @@ class SparseFeatures(Features):
         group.create_dataset('coordinates', (0, 2), dtype=np.float64,
                              chunks=(nb_lines_by_chunk, 2), maxshape=(None, 2))
 
-        group.create_dataset('features', (0,), dtype=self.dtype,
+        group.create_dataset(self.name, (0,), dtype=self.dtype,
                              chunks=(nb_lines_by_chunk,), maxshape=(None,))
 
         # guessed from sparsity, used to determine time chunking

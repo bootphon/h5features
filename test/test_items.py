@@ -15,7 +15,7 @@ class TestItemsInit:
     def test_good(self):
         args = [['a'], ['a', 'b'], [1], [1, 2]]
         for arg in args:
-            assert arg == Items(arg).items
+            assert arg == Items(arg).data
 
     def test_bad(self):
         args = [[1, 1], [1, 2, 2], ['a', 'b', 'c', 'a']]
@@ -51,10 +51,10 @@ class TestCreate:
     def test_write(self):
         self.items.create(self.group, 10)
         self.items.write(self.group)
-        writes = self.group[self.items.group_name][...]
+        writes = self.group[self.items.name][...]
 
         assert len(writes) == 10
-        assert self.items.items == list(writes)
+        assert self.items.data == list(writes)
 
     def test_writetwice(self):
         pass

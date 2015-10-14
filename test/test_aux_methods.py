@@ -9,6 +9,7 @@ import pytest
 from utils import remove, assert_raise
 import generate
 import h5features2.write as h5f
+from h5features2 import chunk
 from h5features2.features import Features
 from h5features2.times import Times
 
@@ -46,13 +47,13 @@ class TestChunkSize:
     def test_good(self):
         args = [0.008, 0.01, 12, 1e30]
         for arg in args:
-            h5f.check_chunk_size(arg)
+            chunk.check_size(arg)
 
     def test_bad(self):
         args = [0.008-1e-2, .0001, 0, -1e30]
         msg = 'chunk size below 8 Ko are not allowed'
         for arg in args:
-            assert_raise(h5f.check_chunk_size, arg, msg)
+            assert_raise(chunk.check_size, arg, msg)
 
 
 
