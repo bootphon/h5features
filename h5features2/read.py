@@ -6,10 +6,16 @@ import numpy as np
 import scipy.sparse as sp
 
 
-def read(filename, group=None,
-         from_internal_file=None, to_internal_file=None,
-         from_time=None, to_time=None,
-         index=None):
+def fetch_index(group, element):
+    """Look for the given element in the given group (a list)."""
+    try:
+        return group.index(element)
+    except ValueError:
+        raise IOError('No entry for item {} in {}'.format(element, group))
+
+
+def read(filename, groupname=None, from_item=None, to_item=None,
+         from_time=None, to_time=None, index=None):
     """Reads in a h5features file.
 
     Parameters
@@ -18,23 +24,23 @@ def read(filename, group=None,
     filename : filename
         hdf5 file potentially serving as a container for many small files
 
-    group : str
+    groupname : str
         h5 group to read the data from
 
-    from_internal_file : str, optional
-        Read the data starting from this file. (defaults to the first stored
-        file)
+    from_item : str, optional
+        Read the data starting from this item. (defaults to the first stored
+        item)
 
-    to_internal_file : str, optional
-        Read the data until reaching the file. (defaults to from_internal_file
-        if it was specified and to the last stored file otherwise)
+    to_item : str, optional
+        Read the data until reaching the item. (defaults to from_item
+        if it was specified and to the last stored item otherwise)
 
     from_time : float, optional
-        (defaults to the beginning time in from_internal_file)
+        (defaults to the beginning time in from_item)
         the specified times are included in the output
 
     to_time : float, optional
-        (defaults to the ending time in to_internal_file)
+        (defaults to the ending time in to_item)
         the specified times are included in the output
 
     index : int, optional
@@ -67,42 +73,29 @@ def read(filename, group=None,
 
     # If no index provided, build it
     if index is None:
-        index = read_index(filename, group)
+        index = read_index(filename, groupname)
 
-    if group is None:
-        group = index['group']
+    if groupname is None:
+        groupname = index['group']
 
-    if to_internal_file is None:
-        if from_internal_file is None:
-            to_internal_file = index['items'][-1]
+    if to_item is None:
+        if from_item is None:
+            to_item = index['items'][-1]
         else:
-            to_internal_file = from_internal_file
-    if from_internal_file is None:
-        from_internal_file = index['items'][0]
+            to_item = from_item
+    if from_item is None:
+        from_item = index['items'][0]
 
-    try:
-        # the second 'index' here refers to the list.index() method
-        f1 = index['items'].index(from_internal_file)
-    except ValueError:
-        raise Exception('No entry for file %s in %s\\%s' %
-                        (from_internal_file, filename, group))
+    f1 = fetch_index(index['items'], from_item)
+    f2 = fetch_index(index['items'], to_item)
+    if not f2 >= f1:
+        raise IOError('Item {} is located after item {} in file {}'
+                      .format(from_item, to_item, filename))
 
-    try:
-        f2 = index['items'].index(to_internal_file)
-    except ValueError:
-        raise Exception('No entry for file %s in %s\\%s' %
-                        (to_internal_file, filename, group))
-
-    assert f2 >= f1, ("Internal file %s is located after internal file %s in "
-                      "the h5features file %s" %
-                      (from_internal_file, to_internal_file, filename))
-
-    # index associated with the beginning of from_internal_file :
+    # index associated with the begin/end of from/to_item :
     f1_start = 0 if f1 == 0 else index['file_index'][f1 - 1] + 1
-    f1_end = index['file_index'][f1]
     f2_start = 0 if f2 == 0 else index['file_index'][f2 - 1] + 1
-
-    # index associated with the end of to_internal_file :
+    f1_end = index['file_index'][f1]
     f2_end = index['file_index'][f2]
 
     if from_time is None:
@@ -113,9 +106,9 @@ def read(filename, group=None,
             # smallest time larger or equal to from_time
             i1 = f1_start + np.where(times >= from_time)[0][0]
         except IndexError:
-            raise Exception('from_time %f is larger than the biggest time in '
-                            'from_internal_file %s' %
-                            (from_time, from_internal_file))
+            raise IOError('from_time {} is larger than the biggest time in '
+                            'from_item {}'.format(from_time, from_internal_file))
+
     if to_time is None:
         i2 = f2_end
     else:
@@ -129,14 +122,14 @@ def read(filename, group=None,
                             (to_time, to_internal_file))
 
     # Step 2: access actual data
-    with h5py.File(filename, 'r') as f:
-        g = f[group]
+    with h5py.File(filename, 'r') as h5file:
+        group = h5file[groupname]
         if index['format'] == 'dense':
             if index['legacy']:
-                features = g['features'][:, i1:i2 + 1].T  # i2 included
+                features = group['features'][:, i1:i2 + 1].T  # i2 included
             else:
-                features = g['features'][i1:i2 + 1, :]  # i2 included
-            times = g['times'][i1:i2 + 1]
+                features = group['features'][i1:i2 + 1, :]  # i2 included
+            times = group['times'][i1:i2 + 1]
         else:
             # FIXME implement this
             raise IOError('reading sparse features not yet implemented')

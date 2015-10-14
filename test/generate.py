@@ -7,38 +7,41 @@
 import numpy as np
 
 
-def _times_value(n_frames, time_format):
+def _times_value(nframes, tformat):
     """Generate a new random value for times"""
-    if time_format == 1:
-        return np.linspace(0, 1, n_frames)
+    if tformat == 1:
+        return np.linspace(0, 1, nframes)
     else:
-        simple = np.linspace(0, 1, 3)
-        return np.array([simple, simple+1])
+        simple = np.linspace(0, 1, nframes)
+        return np.array([simple, simple+1]).T
 
 
-def items(n_items):
-    """Random items generator"""
-    itm = []
-    for i in range(n_items):
-        itm.append('item {}'.format(i))
-    return itm
+def _nframes(max_frames):
+    """Return a random number of frames in [1, max_frames]."""
+    return np.random.randint(max_frames) + 1
 
 
-def features(n_items, dim=2, max_frames=3):
-    """Random feature generator.
+def items(nitems):
+    """Item names generator"""
+    return ['item {}'.format(i) for i in range(nitems)]
+
+
+def times(nitems, max_frames=3, tformat=1):
+    """Random times data generator."""
+    return [_times_value(_nframes(max_frames), tformat) for _ in range(nitems)]
+
+
+def features(nitems, dim=2, max_frames=3):
+    """Random features data generator.
 
     Generate random features, given the number of items the feature
     dimension and the maximum number of frames in each items.
 
     """
-    feat = []
-    for _ in range(n_items):
-        n_frames = np.random.randint(max_frames) + 1
-        feat.append(np.random.randn(n_frames, dim))
-    return feat
+    return [np.random.randn(_nframes(max_frames), dim) for _ in range(nitems)]
 
 
-def full(n_items, dim=2, max_frames=3, tformat=1):
+def full(nitems, dim=2, max_frames=3, tformat=1):
     """Random (items, features, times) generator.
 
     Generate a random tuple of (items, features, times) for a set of
@@ -55,12 +58,9 @@ def full(n_items, dim=2, max_frames=3, tformat=1):
     We have len(files) == len(times) == len(features) == n_items
 
     """
-
-    itm, times, feat = [], [], []
-    for i in range(n_items):
-        n_frames = np.random.randint(max_frames) + 1
-        feat.append(np.random.randn(n_frames, dim))
-        times.append(_times_value(n_frames, tformat))
-        itm.append('s%d' % i)
-
-    return itm, times, feat
+    times, feat = [], []
+    for _ in range(nitems):
+        nframes = _nframes(max_frames)
+        feat.append(np.random.randn(nframes, dim))
+        times.append(_times_value(nframes, tformat))
+    return items(nitems), times, feat

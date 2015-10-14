@@ -1,14 +1,15 @@
 """Provides a write function for h5features files."""
 
 import h5py
-import os
 import numpy as np
+import os
 
-from h5features2.items import Items
-from h5features2.times import Times
+
+from h5features2 import chunk
 from h5features2.features import Features, SparseFeatures, parse_dformat
-from h5features2.chunk import nb_lines
 from h5features2.index import Index
+from h5features2.items import Items
+from h5features2.times import Times, Times2D, parse_times
 
 def write(filename, groupname, items_data, times_data, features_data,
           dformat='dense', chunk_size=0.1, sparsity=0.1):
@@ -57,39 +58,40 @@ def write(filename, groupname, items_data, times_data, features_data,
     NotImplementedError if features_format == 'sparse'
 
     """
-    # File format version
-    # TODO Get it from setup.py ?
+    # File format version TODO Get it from setup.py
     version = '1.0'
 
     # Prepare parameters, look for errors and raise if any.
     check_file(filename)
-    check_chunk_size(chunk_size)
+    chunk.check_size(chunk_size)
+    index = Index()
     items = Items(items_data)
-    times = Times(times_data)
 
-    if parse_dformat(dformat) == 'dense':
-        features = Features(features_data)
-    else:
-        features = SparseFeatures(features_data, sparsity)
+    # Instanciate either 1D or 2D Times class
+    times = (Times2D(times_data)
+             if parse_times(times_data) == 2
+             else Times(times_data))
 
-    # Open target file for writing.
+    # Instanciate either dense or sparse Features class
+    features = (SparseFeatures(features_data, sparsity)
+                if parse_dformat(dformat) == 'sparse'
+                else Features(features_data))
+
+    # Open the HDF5 file for writing/appending.
     with h5py.File(filename, mode='a') as h5file:
-        # If group does not exists, create it
+        # If group does not exists in file, create it
         if not groupname in h5file:
-            # TODO if something fails here, the file will be polluted,
-            # should we catch and del new datasets?
-
             group = h5file.create_group(groupname)
             group.attrs['version'] = version
 
             nb_in_chunks = features.create(group, chunk_size)
             times.create(group, nb_in_chunks)
 
-            init_file_index(group, chunk_size)
-
             # typical filename is 20 characters i.e. around 20 bytes
-            nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
+            nb_lines_by_chunk = max(10, chunk.nb_lines(20, 1, chunk_size * 1000))
             items.create(group, nb_lines_by_chunk)
+
+            index.create(group, chunk_size)
 
         else: # The group exists
             group = h5file[groupname]
@@ -97,17 +99,12 @@ def write(filename, groupname, items_data, times_data, features_data,
             # raise if we cannot append data to it.
             appendable(group, features, times, version)
 
-        # in case we append to the end of an existing item
-        continue_last_item = items.continue_last_item(group)
-
-        # build the index before reshaping features
-        file_index = _files_index(group, features.features, items.group_name)
-
         # writing data
+        # TODO assert no side effects here !
+        index.write(group, items, features)
         items.write(group)
         features.write(group)
         times.write(group)
-        _write_files_index(group, file_index, continue_last_item)
 
 
 def simple_write(filename, group, times, features, fileid='features'):
@@ -139,13 +136,6 @@ def check_file(filename):
             raise IOError(error)
 
 
-def check_chunk_size(chunk_size):
-    """Raise IOError if the size of a chunk (in Mo) is below 8 Ko."""
-    if chunk_size < 0.008:
-        raise IOError('chunk size below 8 Ko are not allowed as they'
-                      ' result in poor performances.')
-
-
 def appendable(group, features, times, version):
     """Raise IOError if the data is not appendable in the group."""
     if not is_same_version(group, version):
@@ -167,32 +157,10 @@ def is_same_version(group, version):
     return group.attrs['version'] == version
 
 
-def is_same_datasets(group, features_format):
+def is_same_datasets(group, dformat):
     # The datasets that will be writted on the HDF5 file
     datasets = ['items', 'times', 'features', 'file_index']
-    if features_format == 'sparse':
+    if dformat == 'sparse':
         datasets += ['frames', 'coordinates']
 
     return all([d in group for d in datasets])
-
-
-def init_file_index(group, chunk_size):
-    """Initializes the file index subgroup."""
-    nb_lines_by_chunk = max(10, nb_lines(
-        np.dtype(np.int64).itemsize, 1, chunk_size * 1000))
-
-    group.create_dataset('file_index', (0,), dtype=np.int64,
-                         chunks=(nb_lines_by_chunk,), maxshape=(None,))
-
-
-def _files_index(group, features, items_group_name):
-    """"""
-    group_nb_files = group[items_group_name].shape[0]
-    if group_nb_files > 0:
-        last_file_index = group['file_index'][-1]
-    else:
-        # indexing from 0
-        last_file_index = -1
-
-    files_index = np.cumsum([x.shape[0] for x in features])
-    return last_file_index + files_index
