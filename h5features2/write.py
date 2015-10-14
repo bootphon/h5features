@@ -180,6 +180,7 @@ def init_file_index(group, chunk_size):
     """Initializes the file index subgroup."""
     nb_lines_by_chunk = max(10, nb_lines(
         np.dtype(np.int64).itemsize, 1, chunk_size * 1000))
+
     group.create_dataset('file_index', (0,), dtype=np.int64,
                          chunks=(nb_lines_by_chunk,), maxshape=(None,))
 
@@ -195,12 +196,3 @@ def _files_index(group, features, items_group_name):
 
     files_index = np.cumsum([x.shape[0] for x in features])
     return last_file_index + files_index
-
-
-def _write_files_index(group, file_index, continue_last_file):
-    """Write the files index to the group"""
-    nitems, = group['file_index'].shape
-    if continue_last_file:
-        nitems -= 1
-    group['file_index'].resize((nitems + file_index.shape[0],))
-    group['file_index'][nitems:] = file_index
