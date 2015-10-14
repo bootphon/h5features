@@ -164,6 +164,7 @@ def read_index(filename, group=None):
     """
     with h5py.File(filename, 'r') as f:
         if group is None:
+            # Trying to read the first and only group in file
             groups = [g for g in f]
             assert len(groups) <= 1, ("There are several groups in file %s, "
                                       "you should specify which one should be "

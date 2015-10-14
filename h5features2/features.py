@@ -112,6 +112,7 @@ class Features(object):
 
     def create(self, group, chunk_size):
         """Initialize the features subgoup."""
+        print(chunk_size)
         group.attrs['format'] = self.dformat
 
         nb_frames_by_chunk = max(
