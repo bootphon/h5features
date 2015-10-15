@@ -51,7 +51,7 @@ def parse_dtype(features):
     types = [x.dtype for x in features]
     dtype = types[0]
     if not all([t == dtype for t in types]):
-        raise IOError('all files must have the same feature type.')
+        raise IOError('features must be homogeneous.')
     return dtype
 
 

@@ -10,6 +10,7 @@ import pytest
 
 import h5features2.h5features2 as h5f
 import generate
+from utils import remove, assert_raise
 
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)
@@ -22,18 +23,21 @@ class TestH5FeaturesWrite:
 
     def setup(self):
         self.filename = 'test.h5'
-        self.teardown()
 
     def teardown(self):
-        if os.path.exists(self.filename):
-            os.remove(self.filename)
+        remove(self.filename)
 
-    def test_bad_file(self):
+    def test_bad_data(self):
         with pytest.raises(IOError) as ioerror:
             h5f.write('/silly/path/to/no/where.h5', 'group', [], [], [])
-        msg = str(ioerror.value)
-        assert '/silly/path' in msg
-        assert 'No such file' in msg
+        assert 'data is empty' == str(ioerror.value)
+
+    def test_bad_file(self):
+        a, b, c = generate.full(2)
+        with pytest.raises(IOError) as ioerror:
+            h5f.write('/silly/path/to/no/where.h5', 'group', a, b, c)
+        assert all([s in str(ioerror.value)]
+                   for s in ['/silly/path', 'No such file'])
 
     def test_bad_file2(self):
         with open(self.filename, 'w') as f:

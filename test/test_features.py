@@ -58,7 +58,7 @@ class TestParseDType:
     def test_bad(self):
         arg = self.data
         arg[0] = arg[0].astype(int)
-        assert_raise(parse_dtype, arg, 'must have the same')
+        assert_raise(parse_dtype, arg, 'homogeneous')
 
     def test_not_iterable(self):
         args = [self.data.append(np.array([])), 1]

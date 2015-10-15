@@ -9,12 +9,13 @@ from h5features2.times import Times, Times2D, parse_times
 
 def write(filename, groupname, items_data, times_data, features_data,
           dformat='dense', chunk_size=0.1, sparsity=0.1):
-    """Write in a h5features file.
+    """Write h5features data in a HDF5 file.
 
-    This function is a wrapper to the Writer class. It has two purposes:
+    This function is a wrapper to the Writer class. It has three purposes:
 
-    - Check input arguments for errors, see details below
-    - Create Items, Times, Features objects and send them to the Writer.
+    - Check parameters for errors (see details below),
+    - Create Items, Times and Features objects
+    - Send them to the Writer.
 
     Parameters
     ----------
@@ -54,24 +55,29 @@ def write(filename, groupname, items_data, times_data, features_data,
     Raise
     -----
 
-    IOError if filename is not valid or if parameters are not consistent.
-
+    IOError if the filename is not valid or parameters are inconsistent.
     NotImplementedError if features_format == 'sparse'
 
     """
-    # Prepare writer and data, look for errors and raise if any.
+    # Prepare the writer, raise on error
     writer = Writer(filename, chunk_size)
+
+    # Prepare the items, raise on error
     items = Items(items_data)
+
+    # Prepare the times according to format, raise on error
     times = (Times2D(times_data)
              if parse_times(times_data) == 2
              else Times(times_data))
+
+    # Prepare the features according to format, raise on error
     features = (SparseFeatures(features_data, sparsity)
                 if parse_dformat(dformat) == 'sparse'
                 else Features(features_data))
 
-    # Write all that stuff as the specified group in a HDF5 file
+    # Write all that stuff in the HDF5 file's specified group
     data = {'items':items, 'times':times, 'features':features}
-    writer.write(groupname, data)
+    writer.write(data, groupname)
 
 
 def simple_write(filename, group, times, features, fileid='features'):

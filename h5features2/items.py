@@ -4,49 +4,66 @@
 
 """
 
-import h5py
+from h5py import special_dtype
 
 
-def unique_items(items):
-    """Return False if items is empty or have non-unique elements."""
-    if not items:
-        return False
-    return len(set(items)) == len(items)
+def unique(iterable):
+    """Return True if all elements in the iterable are unique, False else."""
+    return len(set(iterable)) == len(iterable)
 
 
 class Items(object):
     """This class manages items in h5features files."""
 
     def __init__(self, data, name='items'):
-        """Initializes Items from data.
+        """Initializes an Items dataset from raw data.
 
-        data : list of str -- A list of items (e.g. files from
-        which the features where extracted).
+        Parameters:
+
+        data : list of str
+            A list of item names (e.g. files from which the features
+            where extracted). Each name of the list must be unique.
+
+        name : str (default is 'items')
+            The name of this items dataset.
+
+        Raise:
+
+        IOError if data is empty or if one or more names are not
+        unique in the list.
 
         """
+        if not data:
+            raise IOError('data is empty')
 
-        if not unique_items(data):
+        if not unique(data):
             raise IOError('all items must have different names.')
 
         self.data = data
         self.name = name
 
-    def create(self, group, nb_lines_by_chunk):
+    def create(self, group, items_by_chunk):
         """Creates an items subgroup in the given group.
 
-        group : HDF5 Group -- The group where to create the 'files'
-        subgroup.
+        Parameters
+        ----------
 
-        nb_lines_by_chunk : int -- Number of lines (ie filenames)
-        stored in a single data chunk.
+        group : HDF5 Group
+            The group where to create the 'files' subgroup.
+
+        items_by_chunk : int
+            Number of items stored in a single data chunk.
 
         """
-        str_dtype = h5py.special_dtype(vlen=str)
+        str_dtype = special_dtype(vlen=str)
         group.create_dataset(self.name, (0,), dtype=str_dtype,
-                             chunks=(nb_lines_by_chunk,), maxshape=(None,))
+                             chunks=(items_by_chunk,), maxshape=(None,))
+
+    def is_compatible(self, group):
+        return self.continue_last_item(group)
 
     def continue_last_item(self, group):
-        """Return True if we can continue writing to last item in the group.
+        """Return True if we can continue writing to the last item in the group.
 
         This method compares the shared items between the given group
         and self. Given these shared items, three cases can occur:
@@ -61,13 +78,14 @@ class Items(object):
 
         """
         # Get items already present in the group
-        group_items = group[self.name][...]
+        items_group = group[self.name][...]
 
         # Shared items between self and the group
-        nb_shared = len(set(group_items).intersection(self.data))
+        # TODO Really usefull to compute the whole intersection ?
+        nb_shared = len(set(items_group).intersection(self.data))
         if nb_shared == 1:
             # Assert the last item in group is the first item in self.
-            if not self.data[0] == group_items[-1]:
+            if not self.data[0] == items_group[-1]:
                 raise IOError('data can be added only at the end'
                               'of the last written file.')
             self.data = self.data[1:]
@@ -84,7 +102,9 @@ class Items(object):
         We assume the items subgroup exists in the given group.
 
         """
-        if self.data:
-            nitems = group[self.name].shape[0]
-            group[self.name].resize((nitems + len(self.data),))
-            group[self.name][nitems:] = self.data
+        # The HDF5 group where to write data
+        items_group = group[self.name]
+
+        nitems = items_group.shape[0]
+        items_group.resize((nitems + len(self.data),))
+        items_group[nitems:] = self.data
