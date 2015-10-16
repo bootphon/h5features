@@ -11,6 +11,7 @@ import os
 from h5features2 import chunk
 from h5features2.index import Index
 
+
 def parse_filename(filename):
     """Check if the file is a writable HDF5 file.
 
