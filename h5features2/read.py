@@ -5,6 +5,8 @@ import os
 import numpy as np
 import scipy.sparse as sp
 
+from h5features2.index import Index
+
 
 def fetch_index(group, element):
     """Look for the given element in the given group (a list)."""
@@ -12,6 +14,23 @@ def fetch_index(group, element):
         return group.index(element)
     except ValueError:
         raise IOError('No entry for item {} in {}'.format(element, group))
+
+def read_index(filename, groupname):
+    with h5py.File(filename, 'r') as h5file:
+        group = h5file[groupname]
+
+        legacy = False
+        try:
+            version = group.attrs['version']
+        except KeyError:
+            legacy = True
+
+        index = (LegacyIndex().read(group) if legacy
+                 else Index().read(group))
+        # TODO remove that, silly
+        index['legacy'] = legacy
+
+    return index
 
 
 def read(filename, groupname=None, from_item=None, to_item=None,
@@ -25,7 +44,7 @@ def read(filename, groupname=None, from_item=None, to_item=None,
         hdf5 file potentially serving as a container for many small files
 
     groupname : str
-        h5 group to read the data from
+        h5 group to read the data from.
 
     from_item : str, optional
         Read the data starting from this item. (defaults to the first stored
@@ -49,12 +68,11 @@ def read(filename, groupname=None, from_item=None, to_item=None,
     Returns
     -------
 
-    times : dict
-        a dictionary of 1D arrays
+    times : dict --- A dictionary of 1D arrays values (keys are items)
 
-    features : dict
-        a dictionary of 2D arrays with the 'feature' dimension along the
-        columns and the 'time' dimension along the lines
+    features : dict --- A dictionary of 2D arrays values (keys are items)
+        with the 'feature' dimension along the columns and the 'time'
+        dimension along the lines
 
     .. note:: Note that all the files that are present on disk between
         file1 and file2 will be loaded and returned. It's the
@@ -71,10 +89,11 @@ def read(filename, groupname=None, from_item=None, to_item=None,
     """
     # Step 1: parse arguments and find read coordinates from metadata
 
-    # If no index provided, build it
+    # If no index provided, load it from file
     if index is None:
         index = read_index(filename, groupname)
 
+    # TODO what the fuck ??
     if groupname is None:
         groupname = index['group']
 
@@ -86,6 +105,7 @@ def read(filename, groupname=None, from_item=None, to_item=None,
     if from_item is None:
         from_item = index['items'][0]
 
+
     f1 = fetch_index(index['items'], from_item)
     f2 = fetch_index(index['items'], to_item)
     if not f2 >= f1:
@@ -93,10 +113,10 @@ def read(filename, groupname=None, from_item=None, to_item=None,
                       .format(from_item, to_item, filename))
 
     # index associated with the begin/end of from/to_item :
-    f1_start = 0 if f1 == 0 else index['file_index'][f1 - 1] + 1
-    f2_start = 0 if f2 == 0 else index['file_index'][f2 - 1] + 1
-    f1_end = index['file_index'][f1]
-    f2_end = index['file_index'][f2]
+    f1_start = 0 if f1 == 0 else index['index'][f1 - 1] + 1
+    f2_start = 0 if f2 == 0 else index['index'][f2 - 1] + 1
+    f1_end = index['index'][f1]
+    f2_end = index['index'][f2]
 
     if from_time is None:
         i1 = f1_start
@@ -136,7 +156,7 @@ def read(filename, groupname=None, from_item=None, to_item=None,
             # will be different for version 1.0 and legacy code ...
 
     if f2 > f1:
-        file_ends = index['file_index'][f1:f2] - f1_start
+        file_ends = index['index'][f1:f2] - f1_start
         # FIXME change axis from 1 to 0, but need to check that this doesn't
         # break compatibility with matlab generated files
         features = np.split(features, file_ends + 1, axis=0)
@@ -148,75 +168,3 @@ def read(filename, groupname=None, from_item=None, to_item=None,
     features = dict(zip(files, features))
     times = dict(zip(files, times))
     return times, features
-
-
-def read_index(filename, group=None):
-    """
-
-    Parameters:
-
-    filename : str
-        HDF5 file to read index from
-
-    group : str, optional
-        h5 group in the HDF5 file to read the index from
-
-    """
-    with h5py.File(filename, 'r') as f:
-        if group is None:
-            # Trying to read the first and only group in file
-            groups = [g for g in f]
-            assert len(groups) <= 1, ("There are several groups in file %s, "
-                                      "you should specify which one should be "
-                                      "read" % filename)
-            assert len(groups) > 0, ("There are no group in file %s, "
-                                     "impossible to read" % filename)
-            group = groups[0]
-        g = f[group]
-        legacy = False
-        try:
-            version = g.attrs['version']
-        except KeyError:
-            legacy = True
-        if legacy:
-            index = legacy_read_index(filename, group)
-        else:
-            assert version == "1.0", "unsupported version %s" % version
-            files = list(g['items'][...])
-            index = {'items': files, 'file_index': g['file_index'][...],
-                     'times': g['times'][...], 'format': g.attrs['format']}
-            # file_index contains the index of the end of each file
-            if index['format'] == 'sparse':
-                index['dim'] = g.attrs['dim']
-                index['frames'] = g['frames'][...]
-        index['group'] = group
-        index['legacy'] = legacy
-        return index
-
-
-def legacy_read_index(filename, group=None):
-    """
-    legacy code for supporting reading feature written from matlab bindings
-    """
-    with h5py.File(filename, 'r') as f:
-        if group is None:
-            groups = [g for g in f]
-            assert len(
-                groups) <= 1, (
-                    "There are several groups in file %s, you should specify "
-                    "which one should be read" % filename)
-            assert len(
-                groups) > 0, (
-                    "There are no group in file %s, impossible to read"
-                    % filename)
-            group = groups[0]
-        g = f[group]
-        files = ''.join([unichr(int(c)) for c in g['files'][...]]).replace(
-            '/-', '/').split('/\\')  # parse unicode to strings
-        # file_index contains the index of the end of each file:
-        index = {'files': files, 'file_index': np.int64(g['file_index'][...]),
-                 'times': g['times'][...], 'format': g.attrs['format']}
-        if index['format'] == 'sparse':
-            index['dim'] = g.attrs['dim']  # FIXME: type ?
-            index['frames'] = g['lines'][...]  # FIXME: type ?
-    return index

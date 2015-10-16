@@ -73,6 +73,7 @@ class TestIsCompatible:
 
     def teardown(self):
         remove(self.filename)
+        remove('test.h5.tmp')
 
     def test_on_empty_group(self):
         group = self.h5file.create_group('group')

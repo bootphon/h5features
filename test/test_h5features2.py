@@ -61,10 +61,10 @@ class TestH5FeaturesWrite:
 
             g = f.get('f')
             assert list(g.keys()) == (
-                ['features', 'file_index', 'items', 'times'])
+                ['features', 'index', 'items', 'times'])
 
             assert g['features'].shape == (300,20)
-            assert g['file_index'].shape == (1,)
+            assert g['index'].shape == (1,)
             assert g['items'].shape == (1,)
             assert g['times'].shape == (300,)
 
@@ -75,9 +75,9 @@ class TestH5FeaturesWrite:
         with h5py.File(self.filename, 'r') as f:
             assert ['f'] == list(f.keys ())
             g = f.get('f')
-            assert list(g.keys()) == ['features', 'file_index', 'items', 'times']
+            assert list(g.keys()) == ['features', 'index', 'items', 'times']
             assert g.get('features').shape[1] == 20
-            assert g.get('file_index').shape == (30,)
+            assert g.get('index').shape == (30,)
             assert g.get('items').shape == (30,)
             assert g.get('features').shape[0] == g.get('times').shape[0]
 

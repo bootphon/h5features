@@ -48,6 +48,10 @@ class Writer(object):
             raise IOError('chunk size is below 8 Ko')
         self.chunk_size = chunk_size
 
+        # Init an empty index
+        self.index = Index()
+
+
 
     def write(self, data, groupname='features'):
         """Write h5features data in a specified group.
@@ -63,9 +67,6 @@ class Writer(object):
         """
         # Open the HDF5 file for writing/appending.
         with h5py.File(self.filename, mode='a') as h5file:
-            # Init an empty index
-            index = Index()
-
             # If the group already exists, try to append data.
             if groupname in h5file:
                 group = h5file[groupname]
@@ -88,11 +89,11 @@ class Writer(object):
                     20, 1, self.chunk_size * 1000))
 
                 data['items'].create(group, nb_lines_by_chunk)
-                index.create(group, self.chunk_size)
+                self.index.create(group, self.chunk_size)
 
             # writing data
             # TODO assert no side effects here !
-            index.write(group, data['items'], data['features'])
+            self.index.write(group, data['items'], data['features'])
             data['items'].write(group)
             data['features'].write(group)
             data['times'].write(group)
@@ -111,8 +112,10 @@ class Writer(object):
         return group.attrs['version'] == self.version
 
     def is_same_datasets(self, group, data):
-        # TODO build datasets as attribute -> deal with custom names
-        datasets = ['items', 'times', 'features', 'file_index']
+        datasets = [data['items'].name,
+                    data['times'].name,
+                    data['features'].name,
+                    self.index.name]
         if data['features'].dformat == 'sparse':
             datasets += ['frames', 'coordinates']
         return all([d in group for d in datasets])

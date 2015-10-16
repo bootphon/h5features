@@ -52,7 +52,6 @@ class TestWriteAppendable:
         # init default parameters
         self.filename = 'test.h5'
         self.group = 'features'
-        # self.datasets = ['files', 'times', 'features', 'file_index']
 
         # create a simple feature file
         items, times, feat = generate.full(10)
