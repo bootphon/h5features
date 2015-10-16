@@ -6,12 +6,13 @@
 
 import h5py
 import os
-from numpy.random import randn as randn
+from numpy.random import randn
 import pytest
 
 import generate
 from utils import assert_raise, remove
-import h5features2
+from h5features2.write import write
+from h5features2.read import read
 from h5features2.times import *
 
 
@@ -59,7 +60,7 @@ class TestTimes1D:
     def setup(self):
         items, self.data, feats = generate.full(10,tformat=1)
         self.filename = 'test.h5'
-        h5features2.write.write(self.filename, 'group', items, self.data, feats)
+        write(self.filename, 'group', items, self.data, feats)
         self.group = h5py.File(self.filename, 'a')['group']
 
     def teardown(self):
@@ -120,8 +121,8 @@ class TestReadWriteLevel:
     def _test_wr(self, time_format):
         """Test retrieving times and files after a write/read operation."""
         files, t_gold, feat = generate.full(self.nbitems, tformat=time_format)
-        h5features2.write.write(self.filename, self.group, files, t_gold, feat)
-        t, _ = h5features2.read.read(self.filename, self.group)
+        write(self.filename, self.group, files, t_gold, feat)
+        t, _ = read(self.filename, self.group)
 
         assert len(t) == self.nbitems
 
