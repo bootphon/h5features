@@ -6,6 +6,8 @@
 
 import numpy as np
 
+from h5features2.dataset import Dataset
+
 def parse_times(times):
     """Return the time format from raw times arrays, raise on errors.
 
@@ -54,8 +56,9 @@ def parse_times(times):
     return tformat
 
 
-class Times(object):
+class Times(Dataset):
     """This class manages times related operations for h5features files."""
+
     def __init__(self, data, name='times'):
         self.tformat = 1
         self.name = name

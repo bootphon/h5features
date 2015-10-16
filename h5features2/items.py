@@ -5,14 +5,9 @@
 """
 
 from h5py import special_dtype
+from h5features2.dataset import Dataset
 
-
-def unique(iterable):
-    """Return True if all elements in the iterable are unique, False else."""
-    return len(set(iterable)) == len(iterable)
-
-
-class Items(object):
+class Items(Dataset):
     """This class manages items in h5features files."""
 
     def __init__(self, data, name='items'):
@@ -36,7 +31,7 @@ class Items(object):
         if not data:
             raise IOError('data is empty')
 
-        if not unique(data):
+        if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
         self.data = data
@@ -59,8 +54,11 @@ class Items(object):
         group.create_dataset(self.name, (0,), dtype=str_dtype,
                              chunks=(items_by_chunk,), maxshape=(None,))
 
+
     def is_compatible(self, group):
-        return self.continue_last_item(group)
+        items_in_group = group[self.name][...]
+        return (not set(items_in_group).intersection(self.data)
+                or self.continue_last_item(group))
 
     def continue_last_item(self, group):
         """Return True if we can continue writing to the last item in the group.
@@ -77,29 +75,31 @@ class Items(object):
         - Otherwise raise IOError.
 
         """
-        # Get items already present in the group
-        items_group = group[self.name][...]
+
+        items_in_group = group[self.name][...]
 
         # Shared items between self and the group
         # TODO Really usefull to compute the whole intersection ?
-        nb_shared = len(set(items_group).intersection(self.data))
-        if nb_shared == 1:
+        shared = set(items_in_group).intersection(self.data)
+        nshared = len(shared)
+
+        if nshared == 0:
+            return False
+        elif nshared == 1:
             # Assert the last item in group is the first item in self.
-            if not self.data[0] == items_group[-1]:
+            if not self.data[0] == items_in_group[-1]:
                 raise IOError('data can be added only at the end'
                               'of the last written file.')
             self.data = self.data[1:]
             return True
-        elif nb_shared > 1:
-            raise IOError('groups cannot have more than one shared items.')
         else:
-            # No shared items
-            return False
+            # print(items_in_group, '\n'*3, self.data)
+            raise IOError('groups cannot have more than one shared items.')
 
     def write(self, group):
-        """Write stored items to the given group.
+        """Write stored items to the given HDF5 group.
 
-        We assume the items subgroup exists in the given group.
+        We assume that self.create() has been called.
 
         """
         # The HDF5 group where to write data

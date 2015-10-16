@@ -80,7 +80,6 @@ def write(filename, groupname, items_data, times_data, features_data,
     writer.write(data, groupname)
 
 
-def simple_write(filename, group, times, features, fileid='features'):
-    """Simplified version of write when there is only one file
-    """
-    write(filename, group, [fileid], [times], [features])
+def simple_write(filename, group, times, features, item='item'):
+    """Simplified version of write when there is only one item."""
+    write(filename, group, [item], [times], [features])

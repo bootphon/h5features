@@ -10,7 +10,7 @@ import numpy as np
 import scipy.sparse as sp
 
 from h5features2.chunk import nb_lines
-
+from h5features2.dataset import Dataset
 
 def contains_empty(features):
     """Return True if one of the features is empty, False else."""
@@ -29,11 +29,7 @@ def contains_empty(features):
 
 
 def parse_dformat(dformat):
-    """Return dformat or raise if error.
-
-    dformat must be 'dense' or 'sparse'. Raise IOError else.
-
-    """
+    """Return `dformat` or raise if it is not 'dense' or 'sparse'"""
     if not dformat in ['dense', 'sparse']:
         raise IOError(
             "{} is a bad features format, please choose 'dense' or 'sparse'"
@@ -74,7 +70,7 @@ def parse_dim(features):
 
 
 
-class Features(object):
+class Features(Dataset):
     """This class manages features in h5features files."""
 
     def __init__(self, data, name='features'):
@@ -112,7 +108,6 @@ class Features(object):
 
     def create(self, group, chunk_size):
         """Initialize the features subgoup."""
-        print(chunk_size)
         group.attrs['format'] = self.dformat
 
         nb_frames_by_chunk = max(
@@ -123,7 +118,6 @@ class Features(object):
                              maxshape=(None, self.dim))
 
         return nb_frames_by_chunk
-
 
     def write(self, group):
         """Write stored features to a given group."""

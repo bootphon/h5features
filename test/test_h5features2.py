@@ -83,69 +83,81 @@ class TestH5FeaturesWrite:
 
 
 class TestH5FeaturesReadWrite:
-    """Test more advanced read/write facilities."""
+    """Test more advanced read/write facilities.
+
+    This is a legacy test from h5features-1.0. It ensures the
+    top-down compatibility of the module from current version to 1.0.
+
+    """
 
     def setup(self):
         self.filename = 'test.h5'
-        self.group = 'features_0'
+        self.dim = 20 # Dimensions of the features
 
     def teardown(self):
-        if os.path.isfile(self.filename):
-            os.remove(self.filename)
+        remove(self.filename)
 
-    def test_concatenate(self):
-        """Cconcatenate to existing dataset.
-
-        This is a legacy test from h5features v 1.0.
-
-        """
-        group = self.group
-        filename = self.filename
-
-        features_0 = np.random.randn(300, 20)
+    def test_write_simple(self):
+        # write/read a file with a single item
+        features_0 = np.random.randn(300, self.dim)
         times_0 = np.linspace(0, 2, 300)
-        h5f.simple_write(filename, group, times_0, features_0)
+        h5f.simple_write(self.filename, 'group1', times_0, features_0, 'item')
+        t0, f0 = h5f.read(self.filename, 'group1')
 
-        n_files = 30
-        features = []
-        times = []
-        files = []
-        for i in range(n_files):
-            n_frames = np.random.randint(400)+1
-            features.append(np.random.randn(n_frames, 20))
-            times.append(np.linspace(0, 2, n_frames))
-            files.append('File %d' % (i+1))
-        h5f.write(filename, 'features', files, times, features)
-        # files, times, features = generate.features(30, 20, 400)
-        # h5f.write(filename, 'features_0', files, times, features)
+        times_0_r, features_0_r = h5f.read(self.filename, 'group1')
+        assert list(times_0_r.keys()) == ['item']
+        assert list(features_0_r.keys ()) == ['item']
+        assert all(times_0_r['item'] == times_0)
+        assert (features_0_r['item'] == features_0).all()
 
-        # concatenate to existing dataset
-        features_added_1 = np.zeros(shape=(1, 20))
-        times_added_1 = np.linspace(0, 2, 1)
-        h5f.write(filename, 'features', ['File 31'],
-                  [times_added_1], [features_added_1])
 
-        features_added_2 = np.zeros(shape=(2, 20))
-        times_added_2 = np.linspace(0, 2, 2)
-        h5f.write(filename, 'features', ['File 31'],
-                  [times_added_2], [features_added_2])
+    def test_append(self):
+        """Append a new item to an existing dataset."""
+        i, t, f = generate.full(30, self.dim, 40, items_root='File')
+        h5f.write(self.filename, 'group', i, t, f)
 
-        # read
-        times_0_r, features_0_r = h5f.read(filename, group)
-        assert list(times_0_r.keys ()) == ['features']
-        assert list(features_0_r.keys ()) == ['features']
-        assert all(times_0_r['features'] == times_0)
-        assert (features_0_r['features'] == features_0).all()
+        # append new item to existing dataset
+        features_added = np.zeros(shape=(1, self.dim))
+        times_added = np.linspace(0, 2, 1)
+        h5f.write(self.filename, 'group', ['File_31'],
+                  [times_added], [features_added])
 
-        times_r, features_r = h5f.read(filename, 'features')
-        assert set(times_r.keys()) == set(files+['File 31'])
-        assert set(features_r.keys()) == set(files+['File 31'])
+        with pytest.raises(IOError) as err:
+            h5f.write(self.filename, 'group', ['File_3'],
+                      [times_added], [features_added])
+        assert 'data can be added only at the end' in str(err.value)
 
-        for i, f in  enumerate(files):
-            assert all(times_r[f] == times[i])
-            assert (features_r[f] == features[i]).all()
-            assert all(times_r['File 31'] ==
-                       np.concatenate([times_added_1, times_added_2]))
-            assert (features_r['File 31'] ==
-                    np.concatenate([features_added_1,
-                                    features_added_2], axis=0) ).all()
+
+        # read it
+        times_r, features_r = h5f.read(self.filename, 'group')
+        assert set(times_r.keys()) == set(i+['File_31'])
+        assert set(features_r.keys()) == set(i+['File_31'])
+        assert all(times_r['File_31'] == times_added)
+        assert (features_r['File_31'] == features_added).all()
+
+    # def test_concat(self):
+    #     """Concatenate new data to an existing item in an existing file."""
+    #     i, t, f = generate.full(1, self.dim, 4, items_root='File')
+    #     h5f.write(self.filename, 'group', i, t, f)
+    #     assert ['File_0'] == i
+
+    #     # concatenate new item to an existing one
+    #     features_added = np.zeros(shape=(2, self.dim))
+    #     times_added = np.linspace(0, 2, 2)
+    #     h5f.write(self.filename, 'group', ['File_0'],
+    #               [times_added], [features_added])
+
+    #     # read it
+    #     times_r, features_r = h5f.read(self.filename, 'group')
+    #     assert list(times_r.keys()) == i == ['File_0']
+    #     assert list(features_r.keys()) == i == ['File_0']
+
+    #     for ii, ff in enumerate(i):
+    #         assert all(times_r[ff] == t[ii])
+    #         assert (features_r[ff] == f[ii]).all()
+
+    #     print(times_r['File_0'], '\n'*2, t[-1], '\n'*2, times_added)
+    #     assert times_r['File_0'] == np.concatenate([t[-1], times_added])
+    #     assert (features_r['File_0'] == np.concatenate([f[-1],
+    #                                                     features_added],
+    #                                                    axis=0) ).all()

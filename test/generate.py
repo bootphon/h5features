@@ -21,9 +21,9 @@ def _nframes(max_frames):
     return np.random.randint(max_frames) + 1
 
 
-def items(nitems):
+def items(nitems, root='item'):
     """Item names generator"""
-    return ['item {}'.format(i) for i in range(nitems)]
+    return ['{}_{}'.format(root, i) for i in range(nitems)]
 
 
 def times(nitems, max_frames=3, tformat=1):
@@ -41,7 +41,7 @@ def features(nitems, dim=2, max_frames=3):
     return [np.random.randn(_nframes(max_frames), dim) for _ in range(nitems)]
 
 
-def full(nitems, dim=2, max_frames=3, tformat=1):
+def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
     """Random (items, features, times) generator.
 
     Generate a random tuple of (items, features, times) for a set of
@@ -63,4 +63,4 @@ def full(nitems, dim=2, max_frames=3, tformat=1):
         nframes = _nframes(max_frames)
         feat.append(np.random.randn(nframes, dim))
         times.append(_times_value(nframes, tformat))
-    return items(nitems), times, feat
+    return items(nitems, items_root), times, feat

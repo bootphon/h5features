@@ -3,10 +3,16 @@
 @author: Mathieu Bernard
 """
 
+import h5py
 import pytest
-from utils import remove, assert_raise
-from h5features2.writer import Writer
 
+import generate
+from utils import remove, assert_raise
+from h5features2.write import write
+from h5features2.writer import Writer
+from h5features2.features import Features
+from h5features2.times import Times
+from h5features2.items import Items
 
 class TestInit:
     """Test of Writer.__init__"""
@@ -37,3 +43,50 @@ class TestInit:
             with pytest.raises(IOError) as err:
                 Writer(self.filename, arg)
             assert msg in str(err.value)
+
+
+class TestWriteAppendable:
+    """Test of the _appendable() method."""
+
+    def setup(self):
+        # init default parameters
+        self.filename = 'test.h5'
+        self.group = 'features'
+        # self.datasets = ['files', 'times', 'features', 'file_index']
+
+        # create a simple feature file
+        items, times, feat = generate.full(10)
+        self.features = Features(feat)
+        self.times = Times(times)
+        self.items = Items(items)
+        self.items2 = Items([i+'2' for i in items])
+        write(self.filename, self.group, items, times, feat)
+
+        # read it with h5py
+        self.f = h5py.File(self.filename, 'r')
+        self.g = self.f.get(self.group)
+
+    def teardown(self):
+        self.f.close()
+        remove(self.filename)
+
+    def test_basic_works(self):
+        w = Writer(self.filename)
+        w.is_compatible(self.g, {'features':self.features,
+                                 'items':self.items2,
+                                 'times':self.times})
+
+    def test_version(self):
+        assert self.g.attrs['version'] == Writer(self.filename).version
+
+    # def test_group(self):
+    #     with pytest.raises(IOError):
+    #         w = h5f.writer.Writer(self.filename)
+    #         w.is_appendable(self.g, None)
+
+    # def test_bad_dim(self):
+    #     with pytest.raises(IOError) as ioerror:
+    #         h5f._need_to_append(
+    #             self.f, self.group, self.datasets, self.h5format,
+    #             self.h5dim+1, self.h5type, self.version, self.times)
+    #     assert 'mismatch' in str(ioerror.value)
