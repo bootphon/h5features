@@ -72,7 +72,7 @@ class Writer(object):
 
                 # raise if we cannot append
                 if not self.is_compatible(group, data):
-                    raise IOError('data not appendable in group {}'
+                    raise IOError('data is not appendable to the group {}'
                                   .format(groupname))
 
             else:

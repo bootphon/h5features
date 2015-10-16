@@ -107,7 +107,7 @@ def read(filename, groupname=None, from_item=None, to_item=None,
             i1 = f1_start + np.where(times >= from_time)[0][0]
         except IndexError:
             raise IOError('from_time {} is larger than the biggest time in '
-                            'from_item {}'.format(from_time, from_internal_file))
+                            'from_item {}'.format(from_time, from_item))
 
     if to_time is None:
         i2 = f2_end
@@ -119,7 +119,7 @@ def read(filename, groupname=None, from_item=None, to_item=None,
         except IndexError:
             raise Exception('to_time %f is smaller than the smallest time in '
                             'to_internal_file %s' %
-                            (to_time, to_internal_file))
+                            (to_time, to_item))
 
     # Step 2: access actual data
     with h5py.File(filename, 'r') as h5file:
