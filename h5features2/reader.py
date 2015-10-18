@@ -87,48 +87,20 @@ class Reader(object):
         to_item) the specified times are included in the output
 
         """
-        items_group = self.index['items']
-        if to_item is None:
-            to_item = items_group[-1] if from_item is None else from_item
-        if from_item is None:
-            from_item = items_group[0]
 
-        item1 = self._get_item(items_group, from_item)
-        item2 = self._get_item(items_group, to_item)
-        if not item2 >= item1:
-            raise IOError('from_item {} is located after to_item {} in file {}'
-                          .format(from_item, to_item, self.filename))
+        from_item, to_item = self._get_items(from_item, to_item)
 
         # index associated with the begin/end of from/to_item :
+        # TODO put that in Index ?
         index_group = self.index['index']
-        item1_start = 0 if item1 == 0 else index_group[item1 - 1] + 1
-        item2_start = 0 if item2 == 0 else index_group[item2 - 1] + 1
-        item1_end = index_group[item1]
-        item2_end = index_group[item2]
+        item1_start = 0 if from_item == 0 else index_group[from_item - 1] + 1
+        item1_end = index_group[from_item]
 
-        if from_time is None:
-            i1 = item1_start
-        else:
-            # the end is included...
-            times = index_group['times'][item1_start:item1_end + 1]
-            try:
-                # smallest time larger or equal to from_time
-                i1 = item1_start + np.where(times >= from_time)[0][0]
-            except IndexError:
-                raise IOError('from_time {} is larger than the biggest time in '
-                              'from_item {}'.format(from_time, from_item))
+        item2_start = 0 if to_item == 0 else index_group[to_item - 1] + 1
+        item2_end = index_group[to_item]
 
-        if to_time is None:
-            i2 = item2_end
-        else:
-            # the end is included...
-            times = index_group['times'][item2_start:item2_end + 1]
-            try:
-                # largest time smaller or equal to to_time
-                i2 = item2_start + np.where(times <= to_time)[0][-1]
-            except IndexError:
-                raise Exception('to_time {} is smaller than the smallest time '
-                                'in to_item {}'.format(to_time, to_item))
+        i1 = self._get_from_time(from_time, from_item, item1_start, item1_end)
+        i2 = self._get_to_time(to_time, to_item, item2_start, item2_end)
 
         # Step 2: access actual data
         features_group = self.group['features']
@@ -142,8 +114,8 @@ class Reader(object):
             # FIXME implement this. will be different for v1.0 and legacy
             raise IOError('reading sparse features not yet implemented')
 
-        if item2 > item1:
-            file_ends = index_group[item1:item2] - item1_start
+        if to_item > from_item:
+            file_ends = index_group[from_item:to_item] - item1_start
             # FIXME change axis from 1 to 0, but need to check that this doesn't
             # break compatibility with matlab generated files
             features = np.split(features, file_ends + 1, axis=0)
@@ -152,14 +124,58 @@ class Reader(object):
             features = [features]
             times = [times]
 
-        items = items_group[item1:item2 + 1]
+        items = self.index['items'][from_item:to_item + 1]
         return items, times, features
 
+    def _get_items(self, from_item, to_item):
+        """Look for the given element in the given items list."""
+        items_group = self.index['items']
 
-    def _get_item(self, group, element):
-        """Look for the given element in the given group (a list)."""
-        try:
-            return group.index(element)
-        except ValueError:
-            raise IOError('No entry for item {} in the group {} in {}'
-                          .format(element, self.filename, self.groupname))
+        if to_item is None:
+            to_item = items_group[-1] if from_item is None else from_item
+        if from_item is None:
+            from_item = items_group[0]
+
+        res = []
+        for item in [from_item, to_item]:
+            try:
+                res.append(items_group.index(item))
+            except ValueError:
+                raise IOError('No entry for item {} in the group {} in {}'
+                              .format(item, self.groupname, self.filename))
+
+        if not res[1] >= res[0]:
+            raise IOError('from_item {} is located after to_item {} in file {}'
+                          .format(res[0], res[1], self.filename))
+
+        return res[0], res[1]
+
+    def _get_from_time(self, from_time, from_item, item_start, item_end):
+        times_group = self.index['times']
+        if from_time is None:
+            i1 = item_start
+        else:
+            # the end is included...
+            times = times_group[item_start:item_end + 1]
+            try:
+                # smallest time larger or equal to from_time
+                i1 = item_start + np.where(times >= from_time)[0][0]
+            except IndexError:
+                raise IOError('from_time {} is larger than the biggest time in '
+                              'from_item {}'.format(from_time, from_item))
+        return i1
+
+    def _get_to_time(self, to_time, to_item, item_start, item_end):
+        times_group = self.index['times']
+        if to_time is None:
+            i2 = item_end
+        else:
+            # the end is included...
+            times = times_group[item_start:item_end + 1]
+            try:
+                # smallest time larger or equal to from_time
+                i2 = item_start + np.where(times <= to_time)[0][-1]
+            except IndexError:
+                raise IOError('to_time {} is smaller than the smallest time in '
+                              'to_item {}'.format(to_time, to_item))
+        return i2
