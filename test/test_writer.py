@@ -8,11 +8,11 @@ import pytest
 
 import generate
 from utils import remove, assert_raise
-from h5features2.write import write
+from h5features2.h5features2 import write
 from h5features2.writer import Writer
-from h5features2.features import Features
-from h5features2.times import Times
-from h5features2.items import Items
+from h5features2.dataset.features import Features
+from h5features2.dataset.times import Times
+from h5features2.dataset.items import Items
 
 class TestInit:
     """Test of Writer.__init__"""

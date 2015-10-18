@@ -10,7 +10,7 @@ import numpy as np
 import scipy.sparse as sp
 
 from h5features2.chunk import nb_lines
-from h5features2.dataset import Dataset
+from h5features2.dataset.dataset import Dataset
 
 def contains_empty(features):
     """Return True if one of the features is empty, False else."""

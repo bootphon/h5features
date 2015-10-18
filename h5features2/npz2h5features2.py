@@ -82,7 +82,6 @@ def convert(npz_folder, h5_filename='./features.features'):
 
 # detects whether the script was called from command-line
 if __name__ == '__main__':
-
     import argparse
 
     parser = argparse.ArgumentParser()

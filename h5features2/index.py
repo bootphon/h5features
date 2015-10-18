@@ -52,6 +52,7 @@ class Index(object):
         return index
 
 class LegacyIndex(Index):
+    """TODO"""
     def read(self, group):
         files = ''.join([unichr(int(c)) for c in group['files'][...]]).replace(
             '/-', '/').split('/\\')  # parse unicode to strings

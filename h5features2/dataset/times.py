@@ -6,7 +6,7 @@
 
 import numpy as np
 
-from h5features2.dataset import Dataset
+from h5features2.dataset.dataset import Dataset
 
 def parse_times(times):
     """Return the time format from raw times arrays, raise on errors.
