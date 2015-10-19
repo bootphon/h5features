@@ -49,9 +49,8 @@ class Writer(object):
             raise IOError('chunk size is below 8 Ko')
         self.chunk_size = chunk_size
 
-        self.index = Index()
 
-    def write(self, data, groupname='features'):
+    def write(self, data, groupname='features', append=True):
         """Write h5features data in a specified group.
 
         Parameters
@@ -66,15 +65,16 @@ class Writer(object):
 
         # Open the HDF5 file for writing/appending.
         with h5py.File(self.filename, mode='a') as h5file:
+            index = Index()
             # If the group already exists, try to append data.
             if groupname in h5file:
                 group = h5file[groupname]
-
-                # raise if we cannot append
-                if not self.is_compatible(group, data):
+                # raise if we want but cannot append
+                if append and not self.is_compatible(group, data):
                     raise IOError('data is not appendable to the group {} in {}'
                                   .format(groupname, self.filename))
-
+                if not append:
+                    del group
             else:
                 # The group does not exist, create it
                 group = h5file.create_group(groupname)
@@ -87,12 +87,13 @@ class Writer(object):
                 nb_lines_by_chunk = max(10, nb_lines(20, 1, self.chunk_size*1000))
 
                 data['items'].create(group, nb_lines_by_chunk)
-                self.index.create(group, self.chunk_size)
+                index.create(group, self.chunk_size)
 
-            # writing data TODO assert no side effects here... In that
+            # writing data
+            # TODO assert no side effects here... In that
             # order it's order but what happens if it is changed?
             # e.g. writting features concat them in place...
-            self.index.write(group, data['items'], data['features'])
+            index.write(group, data['items'], data['features'])
             data['items'].write(group)
             data['features'].write(group)
             data['times'].write(group)
@@ -105,14 +106,17 @@ class Writer(object):
                      for k in ('features', 'items', 'times')]))
 
     def is_same_version(self, group):
-        """Return True if local version and group version are the same."""
-        return group.attrs['version'] == self.version
+        """Return True if self and group versions are the same."""
+        try:
+            return group.attrs['version'] == self.version
+        except IndexError:
+            return False
 
+    # TODO bad design: self or data ? And the index ?
     def is_same_datasets(self, group, data):
         datasets = [data['items'].name,
                     data['times'].name,
-                    data['features'].name,
-                    self.index.name]
+                    data['features'].name]
         if data['features'].dformat == 'sparse':
             datasets += ['frames', 'coordinates']
         return all([d in group for d in datasets])

@@ -74,7 +74,11 @@ class Times(Dataset):
                              chunks=(nb_in_chunks,), maxshape=(None,))
 
     def write(self, group):
-        """Write times data to the group."""
+        """Write times data to the group.
+
+        This corrupt self.data.
+
+        """
         self.data = np.concatenate(self.data)
         nb = group[self.name].shape[0]
 
