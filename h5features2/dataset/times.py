@@ -60,9 +60,9 @@ class Times(Dataset):
     """This class manages times related operations for h5features files."""
 
     def __init__(self, data, name='times'):
-        self.tformat = 1
-        self.name = name
+        Dataset.__init__(self, name)
         self.data = data
+        self.tformat = 1
 
     def is_compatible(self, group):
         """Return True if times data can be appended to the given group."""
@@ -95,7 +95,7 @@ class Times2D(Times):
 
     def write(self, group):
         """Write times data to the group"""
-        self.data = np.concatenate(self.data, axis=1)
+        self.data = np.concatenate(self.data, axis=0)
         nb = group[self.name].shape[0]
 
         group[self.name].resize((nb + self.data.shape[0], 2))

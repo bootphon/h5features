@@ -112,11 +112,11 @@ class TestReadWriteLevel:
         self._test_wr(1)
 
     # TODO make this pass !
-    # def test_wr_2D(self):
-    #     self._test_wr(2)
+    def test_wr_2D(self):
+        self._test_wr(2)
 
-    # This function is prefixed by an in underscore so that it is not
-    # detected by py.test as a test function.
+    # This function is prefixed by an underscore so that it is not
+    # detected by pytest as a test function.
     def _test_wr(self, time_format):
         """Test retrieving times and files after a write/read operation."""
         files, t_gold, feat = generate.full(self.nbitems, tformat=time_format)

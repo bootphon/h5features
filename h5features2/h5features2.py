@@ -1,22 +1,8 @@
-"""Provides functions to read/write in h5features files.
+"""Provides the read() and write() wrapper functions."""
 
-The h5features file format is briefly documented at
-http://abxpy.readthedocs.org/en/latest/FilesFormat.html#features-file
-
-"""
-
-#import h5features2 as h5f
 from h5features2.reader import Reader
 from h5features2.writer import Writer
 from h5features2 import dataset
-# from h5features2.times import Times
-# from h5features2.items import Items
-
-# TODO test read() still compatible with legacy version (need
-# transpose at some point ?)
-# TODO implement sparse functionalities
-# TODO introduce support for empty internal files ?
-
 
 
 def read(filename, groupname, from_item=None, to_item=None,
@@ -77,7 +63,8 @@ def read(filename, groupname, from_item=None, to_item=None,
     reader = Reader(filename, groupname, index)
     items, times, features = reader.read(from_item, to_item,
                                          from_time, to_time)
-    return dict(zip(items, times)), dict(zip(items, features))
+    return (dict(zip(items.data, times.data)),
+            dict(zip(items.data, features.data)))
 
 
 def write(filename, groupname, items_data, times_data, features_data,

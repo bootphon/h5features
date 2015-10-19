@@ -9,7 +9,7 @@ TODO Describe the structure of features.
 import numpy as np
 import scipy.sparse as sp
 
-from h5features2.chunk import nb_lines
+from h5features2.utils import nb_lines
 from h5features2.dataset.dataset import Dataset
 
 def contains_empty(features):
@@ -167,9 +167,7 @@ class SparseFeatures(Features):
 
         group.create_dataset('frames', (0,), dtype=np.int64,
                              chuns=(nb_lines_by_chunk,), maxshape=(None,))
-
         group.attrs['dim'] = self.dim
-
         return nb_frames_by_chunk
 
     def write(self, group):

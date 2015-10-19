@@ -7,10 +7,10 @@ TODO
 """
 
 import numpy as np
-from h5features2.chunk import nb_lines
+from h5features2.utils import nb_lines
 
 class Index(object):
-    """TODO"""
+    """Index class for version 1.1 (current version)"""
     def __init__(self, name='index'):
         self.name = name
 
@@ -51,7 +51,27 @@ class Index(object):
 
         return index
 
-class LegacyIndex(Index):
+class IndexV1_0(Index):
+    """Index class for version 1.0"""
+    def __init__(self, name='file_index'):
+        Index.__init__(self, name)
+
+    def read(self, group):
+        """Read and return a stored index in an HDF5 group."""
+        items = list(group['files'][...])
+        index = {'items': items,
+                 'index': group['file_index'][...],
+                 'times': group['times'][...],
+                 'format': group.attrs['format']}
+
+        # index contains the index of the end of each file
+        if index['format'] == 'sparse':
+            index['dim'] = g.attrs['dim']
+            index['frames'] = g['frames'][...]
+        return index
+
+
+class IndexV0_1(IndexV1_0):
     """TODO"""
     def read(self, group):
         files = ''.join([unichr(int(c)) for c in group['files'][...]]).replace(

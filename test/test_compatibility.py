@@ -10,11 +10,11 @@ import h5features              as h5f_v1
 import h5features2.h5features2 as h5f_v2
 
 class TestReadWriteCompatibility:
-    """Test that v1 and v2 behave equally."""
+    """Test that v1.0 and v1.1 behave equally."""
 
     def setup(self):
-        self.file_v1 = 'v1.h5'
-        self.file_v2 = 'v2.h5'
+        self.file_v1 = 'v1.0.h5'
+        self.file_v2 = 'v1.1.h5'
         self.teardown() # in case files already exist, remove it
 
         self.items, self.times, self.features = generate.full(20,10)
@@ -36,12 +36,12 @@ class TestReadWriteCompatibility:
     def test_write_works(self):
         assert compare.h5cmp(self.file_v1, self.file_v1)
 
-    # def test_read_works(self):
-    #     fname = self.file_v1
-    #     t1, f1 = h5f_v1.read(fname)
-    #     t2, f2 = h5f_v2.read(fname)
+    def test_read_works(self):
+        fname = self.file_v1
+        t1, f1 = h5f_v1.read(fname, 'features')
+        t2, f2 = h5f_v2.read(fname, 'features')
 
-    #     for tt1, tt2 in zip(t1,t2):
-    #         assert tt1 == tt2
-    #     for ff1, ff2 in zip(f1,f2):
-    #         assert ff1 == ff2
+        for tt1, tt2 in zip(t1,t2):
+            assert tt1 == tt2
+        for ff1, ff2 in zip(f1,f2):
+            assert ff1 == ff2
