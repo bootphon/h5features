@@ -78,6 +78,7 @@ class Writer(object):
                 # The group does not exist, create it
                 group = h5file.create_group(groupname)
                 group.attrs['version'] = self.version
+                # TODO uniformize chunk stuffs...
 
                 nb_in_chunks = data['features'].create(group, self.chunk_size)
                 data['times'].create(group, nb_in_chunks)
@@ -93,10 +94,10 @@ class Writer(object):
             # order it's order but what happens if it is changed?
             # e.g. writting features concat them in place...
             index.write(group, data['items'], data['features'])
-            data['items'].write(group)
-            data['features'].write(group)
-            data['times'].write(group)
+            for dataset in data.values():
+                dataset.write(group)
 
+    # TODO raise error message ?
     def is_compatible(self, group, data):
         """Raise IOError if the data is not compatible with the group."""
         return (self.is_same_version(group) and
