@@ -64,6 +64,15 @@ class Times(Dataset):
         self.data = data
         self.tformat = 1
 
+    def __eq__(self, other):
+        """Equality operator"""
+        try:
+            return (Dataset.__eq__(self, other) and
+                    self.tformat == other.tformat and
+                    self.data == other.data)
+        except AttributeError:
+            return False
+
     def is_compatible(self, group):
         """Return True if times data can be appended to the given group."""
         return group[self.name][...].ndim == self.tformat

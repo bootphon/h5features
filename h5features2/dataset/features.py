@@ -90,11 +90,22 @@ class Features(Dataset):
         if contains_empty(data):
             raise IOError('all features must be non-empty')
 
-        self.name = name
+        Dataset.__init__(self, name)
         self.dformat = 'dense'
         self.dtype = parse_dtype(data)
         self.dim = parse_dim(data)
         self.data = data
+
+    def __eq__(self, other):
+        """Equality operator"""
+        try:
+            return (Dataset.__eq__(self, other) and
+                    other.dformat == self.dformat and
+                    other.dtype == self.dtype and
+                    other.dim == self.dim and
+                    other.data == self.data)
+        except AttributeError:
+            return False
 
     def is_compatible(self, group):
         """Return True if features are appendable to a HDF5 group."""
@@ -139,6 +150,14 @@ class SparseFeatures(Features):
         self.sparsity = sparsity
 
         raise NotImplementedError('Writing sparse features is not implemented.')
+
+    def __eq__(self, other):
+        """Equality operator"""
+        try:
+            return (Features.__eq__(self, other) and
+                    self.sparsity == other.sparsity)
+        except AttributeError:
+            return False
 
     def get_features_dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""

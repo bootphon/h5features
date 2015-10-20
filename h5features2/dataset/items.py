@@ -34,8 +34,18 @@ class Items(Dataset):
         if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
+        Dataset.__init__(self, name)
         self.data = data
-        self.name = name
+
+
+    def __eq__(self, other):
+        """Equality operator"""
+        try:
+            return (Dataset.__eq__(self, other) and
+                    self.data == other.data)
+        except AttributeError:
+            return False
+
 
     def create(self, group, items_by_chunk):
         """Creates an items subgroup in the given group.

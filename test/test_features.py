@@ -130,3 +130,42 @@ class TestFeaturesParse:
 
         # TODO test with [np.array([1,2,3]),np.array([1,2])]
         # and [np.array([1,2,3]),np.array([1,2])]
+
+
+class TestEq:
+    """Test equality"""
+    def setup(self):
+        self.feat = Features(generate.features(20, 10, 30))
+
+    def teardown(self):
+        pass
+
+    def test_good(self):
+        assert self.feat == self.feat
+
+        feat = Features(self.feat.data)
+        feat.dformat = 'spam'
+        assert not feat.dformat == self.feat.dformat
+        assert not feat == self.feat
+
+        feat = Features(self.feat.data)
+        feat.name = 'spam a lot'
+        assert not feat == self.feat
+
+        feat = Features(self.feat.data)
+        feat.data = [1, 2, 3, [1, 2]]
+        assert not feat.data == self.feat.data
+        assert not feat == self.feat
+
+    def test_bad(self):
+        assert not self.feat == self.feat.name
+        assert not self.feat == self.feat.data
+        assert not self.feat == ''
+        assert not self.feat == None
+
+    def test_polymorph(self):
+        feat = Features(self.feat.data, self.feat.name)
+        assert not feat.__ne__(self.feat)
+        assert feat.__eq__(self.feat)
+        assert feat == self.feat
+        assert not feat != self.feat

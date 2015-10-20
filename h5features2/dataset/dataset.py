@@ -5,6 +5,7 @@
 """
 
 # TODO Some pythonic way ensuring this is an abstract class (ABC) ?
+# TODO Let self.data live here
 class Dataset(object):
     """The Dataset class is an **abstract base class** of h5features data.
 
@@ -15,9 +16,8 @@ class Dataset(object):
     def __init__(self, name):
         self.name = name
 
-    # TODO implement this in childs
     def __eq__(self, other):
-        pass
+        return self.name == other.name
 
     def is_appendable_to(self, group):
         pass
