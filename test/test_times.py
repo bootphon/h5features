@@ -5,7 +5,6 @@
 """
 
 import h5py
-import os
 from numpy.random import randn
 import pytest
 
@@ -31,11 +30,11 @@ class TestParseTimes:
 
     def test_bad_format(self):
         # 3D
-        assert_raise(parse_times, [randn(2,2,2)], '1D or 2D numpy arrays')
+        assert_raise(parse_times, [randn(2, 2, 2)], '1D or 2D numpy arrays')
         # 2D with shape[1] != 2
-        assert_raise(parse_times, [randn(10,3)], 'must have 2 elements')
-        assert_raise(parse_times, [randn(5,1)],  'must have 2 elements')
-        assert_raise(parse_times, [randn(2,1)],  'must have 2 elements')
+        assert_raise(parse_times, [randn(10, 3)], 'must have 2 elements')
+        assert_raise(parse_times, [randn(5, 1)], 'must have 2 elements')
+        assert_raise(parse_times, [randn(2, 1)], 'must have 2 elements')
 
     def test_bad_dims(self):
         for arg in [self.t1+self.t2,
@@ -45,7 +44,7 @@ class TestParseTimes:
 
 
 def test_times_init():
-    # Test silly data input
+    """Test silly data input"""
     for arg in [[], 1, 'spam', generate.times(5)]:
         t1, t2 = Times(arg), Times2D(arg)
         assert t1.name == t2.name == 'times'
@@ -59,41 +58,42 @@ class TestTimes1D:
     def setup(self):
         items, self.data, feats = generate.full(10,tformat=1)
         self.filename = 'test.h5'
+        self.teardown()
         write(self.filename, 'group', items, self.data, feats)
         self.group = h5py.File(self.filename, 'a')['group']
 
     def teardown(self):
         remove(self.filename)
 
-    def test_compatible(self):
+    def test_appendable(self):
         t = Times(generate.times(5, tformat=1))
-        assert t.is_compatible(self.group)
+        assert t.is_appendable_to(self.group)
 
         t = Times(generate.times(5, 12, tformat=1))
-        assert t.is_compatible(self.group)
+        assert t.is_appendable_to(self.group)
 
         t = Times(generate.times(10, 1, tformat=2))
-        assert t.is_compatible(self.group)
+        assert t.is_appendable_to(self.group)
 
         t = Times2D(generate.times(5, 1, tformat=1))
-        assert not t.is_compatible(self.group)
+        assert not t.is_appendable_to(self.group)
 
         t = Times2D(generate.times(10, 1, tformat=2))
-        assert not t.is_compatible(self.group)
+        assert not t.is_appendable_to(self.group)
 
     def test_create(self):
         t1 = Times(self.data, name='try1')
-        t1.create(self.group, 10)
+        t1.create_dataset(self.group, 10)
         assert t1.name in self.group
         assert len(self.group[t1.name]) == 0
 
         # we can't create an existing group
         with pytest.raises(RuntimeError) as err:
-            t1.create(self.group, 10)
+            t1.create_dataset(self.group, 10)
         assert 'Name already exists' in str(err.value)
 
         t2 = Times([], name='toto')
-        t2.create(self.group, 10)
+        t2.create_dataset(self.group, 10)
         assert t2.name in self.group
         assert len(self.group[t2.name]) == 0
 
@@ -111,7 +111,6 @@ class TestReadWriteLevel:
     def test_wr_1D(self):
         self._test_wr(1)
 
-    # TODO make this pass !
     def test_wr_2D(self):
         self._test_wr(2)
 
@@ -119,17 +118,16 @@ class TestReadWriteLevel:
     # detected by pytest as a test function.
     def _test_wr(self, time_format):
         """Test retrieving times and files after a write/read operation."""
-        files, t_gold, feat = generate.full(self.nbitems, tformat=time_format)
-        write(self.filename, self.group, files, t_gold, feat)
+        items, t_gold, feat = generate.full(self.nbitems, tformat=time_format)
+        write(self.filename, self.group, items, t_gold, feat)
         t, _ = read(self.filename, self.group)
 
         assert len(t) == self.nbitems
+        if time_format == 2:
+            assert all([tt.shape[1] == time_format for tt in t.values()])
 
         # build a dict from gold to compare with t
         d = {}
-        for k, v in zip(files, t_gold):
-            d[k] = v
-
+        for k, v in zip(items, t_gold): d[k] = v
         # compare the two dicts
-        for dd, tt in zip(d, t):
-            assert tt == dd
+        for dd, tt in zip(d, t): assert tt == dd

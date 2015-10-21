@@ -9,8 +9,7 @@ TODO Describe the structure of features.
 import numpy as np
 import scipy.sparse as sp
 
-from h5features2.utils import nb_lines
-from h5features2.dataset.dataset import Dataset
+from h5features2.dataset.dataset import Dataset, _nb_per_chunk
 
 def contains_empty(features):
     """Return True if one of the features is empty, False else."""
@@ -90,45 +89,52 @@ class Features(Dataset):
         if contains_empty(data):
             raise IOError('all features must be non-empty')
 
-        Dataset.__init__(self, name)
         self.dformat = 'dense'
         self.dtype = parse_dtype(data)
         self.dim = parse_dim(data)
-        self.data = data
+        super().__init__(data, name)
 
     def __eq__(self, other):
-        """Equality operator"""
         try:
-            return (Dataset.__eq__(self, other) and
-                    other.dformat == self.dformat and
+            return (other.dformat == self.dformat and
                     other.dtype == self.dtype and
                     other.dim == self.dim and
-                    other.data == self.data)
+                    super().__eq__(other))
         except AttributeError:
             return False
 
-    def is_compatible(self, group):
+    def is_appendable_to(self, group):
         """Return True if features are appendable to a HDF5 group."""
         return (group.attrs['format'] == self.dformat and
                 group[self.name].dtype == self.dtype and
-                self.get_features_dim(group) == self.dim)
+                # We use a method because dim differs in dense and sparse.
+                self._dim(group) == self.dim)
 
-    def get_features_dim(self, group):
+    def _dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""
         return group[self.name].shape[1]
 
-    def create(self, group, chunk_size):
+
+    def create_dataset(self, group, chunk_size):
         """Initialize the features subgoup."""
         group.attrs['format'] = self.dformat
+        super().create_dataset(group, self.dtype, self.dim, chunk_size)
+        self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
+                                          self.dim, chunk_size)
+    # def nb_per_chunk(self, chunk_size):
+    #     """Return the number of feature frames that can be stored in a chunk.
 
-        nb_frames_by_chunk = max(
-            10, nb_lines(self.dtype.itemsize, self.dim, chunk_size*1000))
+    #     *chunk_size* is the size in MBytes of a file chunk.
 
-        group.create_dataset(self.name, (0, self.dim), dtype=self.dtype,
-                             chunks=(nb_frames_by_chunk, self.dim),
-                             maxshape=(None, self.dim))
-
-        return nb_frames_by_chunk
+    #     """
+    #     # The try/except block ensure nb_per_chunk is computed only
+    #     # once per class instance.
+    #     try:
+    #         return self._nb_per_chunk
+    #     except AttributeError:
+    #         self._nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
+    #                                           self.dim, chunk_size)
+    #         return self._nb_per_chunk
 
     def write(self, group):
         """Write stored features to a given group."""
@@ -145,49 +151,46 @@ class SparseFeatures(Features):
     """This class is specialized for managing sparse matrices as features."""
 
     def __init__(self, data, sparsity, name='features'):
-        Features.__init__(self, data, name)
+        super().__init__(data, name)
         self.dformat = 'sparse'
         self.sparsity = sparsity
 
         raise NotImplementedError('Writing sparse features is not implemented.')
 
     def __eq__(self, other):
-        """Equality operator"""
         try:
-            return (Features.__eq__(self, other) and
-                    self.sparsity == other.sparsity)
+            return self.sparsity == other.sparsity and super().__eq__(other)
         except AttributeError:
             return False
 
-    def get_features_dim(self, group):
+    def _dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""
         return group.attrs['dim']
 
-    def create(self, group, chunk_size):
+    def create_dataset(self, group, chunk_size):
         """Initializes sparse specific datasets."""
         group.attrs['format'] = self.dformat
+        group.attrs['dim'] = self.dim
 
-        nb_lines_by_chunk = max(
-            10, nb_lines(self.dtype.itemsize, 1, chunk_size * 1000))
+        # for storing sparse data we don't use the self.nb_per_chunk,
+        # which is only used by the Writer to determine times chunking.
+        per_chunk = _nb_per_chunk(self.dtype.itemsize, 1, chunk_size)
 
         group.create_dataset('coordinates', (0, 2), dtype=np.float64,
-                             chunks=(nb_lines_by_chunk, 2), maxshape=(None, 2))
+                             chunks=(per_chunk, 2), maxshape=(None, 2))
 
         group.create_dataset(self.name, (0,), dtype=self.dtype,
-                             chunks=(nb_lines_by_chunk,), maxshape=(None,))
+                             chunks=(per_chunk,), maxshape=(None,))
 
-        # guessed from sparsity, used to determine time chunking
-        nb_frames_by_chunk = max(10, nb_lines(self.dtype.itemsize,
-                                              int(round(self.sparsity*self.dim)),
-                                              chunk_size*1000))
+        dtype = np.int64
+        chunks = (_nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
+        group.create_dataset('frames', (0,), dtype=dtype,
+                             chunks=chunks, maxshape=(None,))
 
-        nb_lines_by_chunk = max(10, nb_lines(np.dtype(np.int64).itemsize,
-                                             1, chunk_size*1000))
-
-        group.create_dataset('frames', (0,), dtype=np.int64,
-                             chuns=(nb_lines_by_chunk,), maxshape=(None,))
-        group.attrs['dim'] = self.dim
-        return nb_frames_by_chunk
+        # Needed by Times.create_dataset
+        self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
+                                          int(round(self.sparsity*self.dim)),
+                                          chunk_size)
 
     def write(self, group):
         pass

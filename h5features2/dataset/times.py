@@ -60,27 +60,29 @@ class Times(Dataset):
     """This class manages times related operations for h5features files."""
 
     def __init__(self, data, name='times'):
-        Dataset.__init__(self, name)
-        self.data = data
+        super().__init__(data, name)
         self.tformat = 1
 
     def __eq__(self, other):
         """Equality operator"""
         try:
-            return (Dataset.__eq__(self, other) and
-                    self.tformat == other.tformat and
-                    self.data == other.data)
+            return super().__eq__(other) and self.tformat == other.tformat
         except AttributeError:
             return False
 
-    def is_compatible(self, group):
+    def is_appendable_to(self, group):
         """Return True if times data can be appended to the given group."""
         return group[self.name][...].ndim == self.tformat
 
-    def create(self, group, nb_in_chunks):
+    def create_dataset(self, group, per_chunk):
         """Creates an empty times dataset in the given group."""
-        group.create_dataset(self.name, (0,), dtype=np.float64,
-                             chunks=(nb_in_chunks,), maxshape=(None,))
+        dim = self.tformat
+        shape = (0,) if dim == 1 else (0, dim)
+        maxshape = (None,) if dim == 1 else (None, dim)
+        dtype = np.float64
+        chunks = (per_chunk,) if dim == 1 else (per_chunk, dim)
+        group.create_dataset(self.name, shape, dtype=dtype,
+                             chunks=chunks, maxshape=maxshape)
 
     def write(self, group):
         """Write times data to the group.
@@ -99,12 +101,8 @@ class Times2D(Times):
     """Specialized class for 2D times arrays."""
     def __init__(self, data, name='times'):
         Times.__init__(self, data, name)
+        # overloaded from Times
         self.tformat = 2
-
-    def create(self, group, nb_in_chunks):
-        """Creates an empty times dataset in the given group."""
-        group.create_dataset(self.name, (0,2), dtype=np.float64,
-                             chunks=(nb_in_chunks,2), maxshape=(None,2))
 
     def write(self, group):
         """Write times data to the group"""

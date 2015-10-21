@@ -80,9 +80,10 @@ class Reader(object):
         This method raise IOError if version is not either 0.1, 1.0 or 1.1
 
         """
-        # decode from bytes to str
         version = ('0.1' if not 'version' in self.group.attrs
                    else self.group.attrs['version'])
+
+        # decode from bytes to str
         if type(version) == bytes:
             version = version.decode()
 
@@ -132,7 +133,7 @@ class Reader(object):
         # Step 2: access actual data
         features_group = self.group['features']
         if self.index['format'] == 'sparse':
-            # FIXME implement this. will be different for v1.0 and legacy
+            # TODO implement this. will be different for v1.0 and legacy
             raise IOError('reading sparse features not yet implemented')
         else:
             # i2 included
@@ -147,7 +148,7 @@ class Reader(object):
         # Several items case
         else:
             item_ends = index_group[from_item:to_item] - item1_start
-            # FIXME change axis from 1 to 0, but need to check that this doesn't
+            # TODO change axis from 1 to 0, but need to check that this doesn't
             # break compatibility with matlab generated files
             features = np.split(features, item_ends + 1, axis=0)
             times = np.split(times, item_ends + 1)

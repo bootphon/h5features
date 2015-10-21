@@ -5,10 +5,9 @@
 """
 
 import h5py
-import numpy as np
 import os
 
-from h5features2.utils import is_supported_version, nb_lines
+from h5features2.utils import is_supported_version
 from h5features2.index import Index
 
 class Writer(object):
@@ -55,61 +54,71 @@ class Writer(object):
         Parameters
         ----------
 
-        data : dict --- TODO document this!
+        - data : dict --- TODO document this!
 
-        groupname : str, optional --- The name of the group in which
-            to write the data.
+        - groupname : str, optional --- The name of the group in which
+             to write the data.
+
+        - append : bool, optional --- This parameter has no effect if
+             the *groupname* is not an existing group in the file. If
+             set to True (default), try to append new data in the
+             group. If False erase all data in the group before
+             writing.
 
         """
-        # TODO Raise if
-        # Open the HDF5 file for writing/appending.
+        # shortcut from parameters
+        items = data['items']
+        times = data['times']
+        featu = data['features']
+
+        # Open the HDF5 file for writing/appending in the group.
         with h5py.File(self.filename, mode='a') as h5file:
+            # Initialize an empty index
             index = Index()
-            # If the group already exists, try to append data.
+
+            # The group already exists
             if groupname in h5file:
                 group = h5file[groupname]
-                # raise if we want but cannot append
-                if append and not self.is_compatible(group, data):
+
+                # want to append data, raise if we cannot
+                if append and not self.is_appendable_to(group, data):
                     raise IOError('data is not appendable to the group {} in {}'
                                   .format(groupname, self.filename))
+
+                # want to overwrite, delete the existing group
                 if not append:
                     del group
             else:
                 # The group does not exist, create it
                 group = h5file.create_group(groupname)
                 group.attrs['version'] = self.version
-                # TODO uniformize chunk stuffs...
 
-                nb_in_chunks = data['features'].create(group, self.chunk_size)
-                data['times'].create(group, nb_in_chunks)
+                # Then initialize it with empty datasets
+                featu.create_dataset(group, self.chunk_size)
+                items.create_dataset(group, self.chunk_size)
+                index.create_dataset(group, self.chunk_size)
+                # TODO design problem here since chunking the times
+                # depends on features chunks...
+                times.create_dataset(group, featu.nb_per_chunk)
 
-                # typical filename is 20 characters i.e. around 20 bytes
-                nb_lines_by_chunk = max(10, nb_lines(20, 1, self.chunk_size*1000))
-
-                data['items'].create(group, nb_lines_by_chunk)
-                index.create(group, self.chunk_size)
-
-            # writing data
-            # TODO assert no side effects here... In that
-            # order it's order but what happens if it is changed?
+            # writing data TODO assert no side effects here,
             # e.g. writting features concat them in place...
             index.write(group, data['items'], data['features'])
-            for dataset in data.values():
-                dataset.write(group)
+            for dataset in ['items', 'times', 'features']:
+                data[dataset].write(group)
 
-    # TODO raise error message ?
-    def is_compatible(self, group, data):
-        """Raise IOError if the data is not compatible with the group."""
+    def is_appendable_to(self, group, data):
+        """Return True if the data is appendable to the group."""
         return (self.is_same_version(group) and
                 self.is_same_datasets(group, data) and
-                all([data[k].is_compatible(group)
+                all([data[k].is_appendable_to(group)
                      for k in ('features', 'items', 'times')]))
 
     def is_same_version(self, group):
         """Return True if self and group versions are the same."""
         try:
             return group.attrs['version'] == self.version
-        except IndexError:
+        except IndexError: # version '0.1' doesn't have a version attribute
             return False
 
     # TODO bad design: self or data ? And the index ?

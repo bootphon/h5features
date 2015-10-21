@@ -7,20 +7,19 @@ TODO
 """
 
 import numpy as np
-from h5features2.utils import nb_lines
+from h5features2.dataset.dataset import _nb_per_chunk
 
 class Index(object):
     """Index class for version 1.1 (current version)"""
     def __init__(self, name='index'):
         self.name = name
 
-    def create(self, group, chunk_size):
+    def create_dataset(self, group, chunk_size):
         """Create an empty index dataset in the given group."""
-        nb_lines_by_chunk = max(10, nb_lines(
-            np.dtype(np.int64).itemsize, 1, chunk_size * 1000))
-
-        group.create_dataset(self.name, (0,), dtype=np.int64,
-                             chunks=(nb_lines_by_chunk,), maxshape=(None,))
+        dtype=np.int64
+        chunks = (_nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
+        group.create_dataset(self.name, (0,), dtype=dtype,
+                             chunks=chunks, maxshape=(None,))
 
     def write(self, group, items, features):
         """Write the index to the given HDF5 group."""
@@ -80,6 +79,6 @@ class IndexV0_1(IndexV1_0):
         index = {'files': files, 'index': np.int64(group['index'][...]),
                  'times': group['times'][...], 'format': group.attrs['format']}
         if index['format'] == 'sparse':
-            index['dim'] = group.attrs['dim']  # FIXME: type ?
-            index['frames'] = group['lines'][...]  # FIXME: type ?
+            index['dim'] = group.attrs['dim']  # TODO type ?
+            index['frames'] = group['lines'][...]  # TODO type ?
         return index

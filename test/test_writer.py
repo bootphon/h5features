@@ -71,7 +71,7 @@ class TestWriteAppendable:
 
     def test_basic_works(self):
         w = Writer(self.filename)
-        w.is_compatible(self.g, {'features':self.features,
+        w.is_appendable_to(self.g, {'features':self.features,
                                  'items':self.items2,
                                  'times':self.times})
 

@@ -5,6 +5,7 @@
 """
 
 from h5py import special_dtype
+#from h5features2.utils import nb_per_chunk
 from h5features2.dataset.dataset import Dataset
 
 class Items(Dataset):
@@ -15,12 +16,12 @@ class Items(Dataset):
 
         Parameters:
 
-        data : list of str
-            A list of item names (e.g. files from which the features
-            where extracted). Each name of the list must be unique.
+        - data : list of str --- A list of item names (e.g. files from
+            which the features where extracted). Each name of the list
+            must be unique.
 
-        name : str (default is 'items')
-            The name of this items dataset.
+        - name : str --- The name of this items dataset. Default is
+            'items'.
 
         Raise:
 
@@ -34,41 +35,27 @@ class Items(Dataset):
         if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
-        Dataset.__init__(self, name)
-        self.data = data
+        super().__init__(data, name)
 
 
     def __eq__(self, other):
-        """Equality operator"""
-        try:
-            return (Dataset.__eq__(self, other) and
-                    self.data == other.data)
-        except AttributeError:
-            return False
+        return super().__eq__(other)
 
-
-    def create(self, group, items_by_chunk):
+    def create_dataset(self, group, chunk_size):
         """Creates an items subgroup in the given group.
 
-        Parameters
-        ----------
+        Parameters:
 
-        group : HDF5 Group
-            The group where to create the 'files' subgroup.
-
-        items_by_chunk : int
-            Number of items stored in a single data chunk.
+        - group : HDF5 Group --- The group where to create the 'files' subgroup.
+        - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
 
         """
-        str_dtype = special_dtype(vlen=str)
-        group.create_dataset(self.name, (0,), dtype=str_dtype,
-                             chunks=(items_by_chunk,), maxshape=(None,))
+        super().create_dataset(group, special_dtype(vlen=str), 1, chunk_size)
 
 
-    def is_compatible(self, group):
-        items_in_group = group[self.name][...]
-        return (not set(items_in_group).intersection(self.data)
-                or self.continue_last_item(group))
+    def is_appendable_to(self, group):
+        return (not set(group[self.name][...]).intersection(self.data) or
+                self.continue_last_item(group))
 
     def continue_last_item(self, group):
         """Return True if we can continue writing to the last item in the group.
@@ -85,7 +72,6 @@ class Items(Dataset):
         - Otherwise raise IOError.
 
         """
-
         items_in_group = group[self.name][...]
 
         # Shared items between self and the group
