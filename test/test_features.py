@@ -3,6 +3,7 @@
 @author: Mathieu Bernard <mmathieubernardd@gmail.com>
 """
 
+import h5py
 import numpy as np
 import pytest
 
@@ -133,9 +134,8 @@ class TestFeaturesParse:
 
 
 class TestEq:
-    """Test equality"""
     def setup(self):
-        self.feat = Features(generate.features(20, 10, 30))
+        self.feat = Features(generate.features(2, 10, 30))
 
     def teardown(self):
         pass
@@ -169,3 +169,19 @@ class TestEq:
         assert feat.__eq__(self.feat)
         assert feat == self.feat
         assert not feat != self.feat
+
+class TestFeatures:
+    def setup(self):
+        self.filename = 'test.h5'
+        self.group = h5py.File(self.filename, 'w').create_group('group')
+        self.data = generate.features(10,5,100)
+        self.feat = Features(self.data)
+
+    def teardown(self):
+        remove(self.filename)
+
+    def test_side_effect(self):
+        feat2 = Features(self.feat.data)
+        self.feat.create_dataset(self.group, 10)
+        self.feat.write(self.group)
+        assert self.feat == feat2

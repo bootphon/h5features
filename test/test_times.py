@@ -43,16 +43,6 @@ class TestParseTimes:
             assert_raise(parse_times, arg, 'the same dimension')
 
 
-def test_times_init():
-    """Test silly data input"""
-    for arg in [[], 1, 'spam', generate.times(5)]:
-        t1, t2 = Times(arg), Times2D(arg)
-        assert t1.name == t2.name == 'times'
-        assert t1.data == t2.data == arg
-        assert t1.tformat == 1
-        assert t2.tformat == 2
-
-
 class TestTimes1D:
     """Test the Times class."""
     def setup(self):
@@ -75,7 +65,7 @@ class TestTimes1D:
         t = Times(generate.times(10, 1, tformat=2))
         assert t.is_appendable_to(self.group)
 
-        t = Times2D(generate.times(5, 1, tformat=1))
+        t = Times2D(generate.times(5, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
         t = Times2D(generate.times(10, 1, tformat=2))
@@ -96,6 +86,34 @@ class TestTimes1D:
         t2.create_dataset(self.group, 10)
         assert t2.name in self.group
         assert len(self.group[t2.name]) == 0
+
+    def test_side_effect(self):
+        t = Times(self.data)
+        t2 = Times(self.data)
+        t.write(self.group)
+        assert t == t2
+
+class TestTimes2D:
+    """Test of the Times2D class"""
+    def setup(self):
+        self.filename = 'test.h5'
+        self.group = h5py.File(self.filename).create_group('group')
+        self.data = generate.times(10,20,2)
+
+    def teardown(self):
+        remove(self.filename)
+
+    def test_init(self):
+        assert_raise(Times2D, generate.times(10), 'must be 2D')
+        assert Times2D(self.data).tformat == 2
+
+    def test_side_effect(self):
+        t = Times2D(self.data)
+        t2 = Times2D(self.data)
+        t.create_dataset(self.group, per_chunk=100)
+        t.write(self.group)
+        assert t == t2
+
 
 
 class TestReadWriteLevel:

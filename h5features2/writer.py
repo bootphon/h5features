@@ -86,19 +86,19 @@ class Writer(object):
                                   .format(groupname, self.filename))
 
                 # want to overwrite, delete the existing group
+                # TODO test that
                 if not append:
                     del group
             else:
-                # The group does not exist, create it
+                # The group does not exist, create it...
                 group = h5file.create_group(groupname)
                 group.attrs['version'] = self.version
 
-                # Then initialize it with empty datasets
+                # ... and initialize it with empty datasets
                 featu.create_dataset(group, self.chunk_size)
                 items.create_dataset(group, self.chunk_size)
                 index.create_dataset(group, self.chunk_size)
-                # TODO design problem here since chunking the times
-                # depends on features chunks...
+                # chunking the times depends on features chunks
                 times.create_dataset(group, featu.nb_per_chunk)
 
             # writing data TODO assert no side effects here,

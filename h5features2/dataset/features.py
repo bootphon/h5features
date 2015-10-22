@@ -114,37 +114,29 @@ class Features(Dataset):
         """Return the dimension of features stored in a HDF5 group."""
         return group[self.name].shape[1]
 
-
+    # TODO Document create_dataset order : Features before Times
     def create_dataset(self, group, chunk_size):
         """Initialize the features subgoup."""
         group.attrs['format'] = self.dformat
         super().create_dataset(group, self.dtype, self.dim, chunk_size)
+
+        # attribute declared outside init is not safe. Used because
+        # Times.create_dataset need it
         self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
                                           self.dim, chunk_size)
-    # def nb_per_chunk(self, chunk_size):
-    #     """Return the number of feature frames that can be stored in a chunk.
-
-    #     *chunk_size* is the size in MBytes of a file chunk.
-
-    #     """
-    #     # The try/except block ensure nb_per_chunk is computed only
-    #     # once per class instance.
-    #     try:
-    #         return self._nb_per_chunk
-    #     except AttributeError:
-    #         self._nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
-    #                                           self.dim, chunk_size)
-    #         return self._nb_per_chunk
 
     def write(self, group):
         """Write stored features to a given group."""
-        self.data = [x.todense() if sp.issparse(x)
+        data = [x.todense() if sp.issparse(x)
                      else x for x in self.data]
-        self.data = np.concatenate(self.data, axis=0)
+        data = np.concatenate(data, axis=0)
 
-        nb, d = group[self.name].shape
-        group[self.name].resize((nb + self.data.shape[0], d))
-        group[self.name][nb:, :] = self.data
+        nb_group, dim = group[self.name].shape
+        nb_data = data.shape[0]
+        new_size = nb_group + nb_data
+
+        group[self.name].resize((new_size, dim))
+        group[self.name][nb_group:, :] = data
 
 
 class SparseFeatures(Features):

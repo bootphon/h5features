@@ -66,7 +66,7 @@ def wrapper_is_compat(l1, l2):
     remove('test.h5.tmp')
     return res
 
-class TestIsCompatible:
+class TestIsAppendableTo:
     def setup(self):
         self.filename = 'test.h5'
         self.items = Items(generate.items(10))
@@ -123,15 +123,39 @@ class TestWrite:
     def test_write(self):
         self.items.create_dataset(self.group, 10)
         self.items.write(self.group)
-        writes = self.group[self.items.name][...]
+        writed = self.group[self.items.name][...]
 
-        assert len(writes) == 10
-        assert self.items.data == list(writes)
+        assert len(writed) == 10
+        assert self.items.data == list(writed)
+        assert self.items == Items(list(writed))
 
-    # TODO
-    def test_write_twice(self):
-        pass
+    def test_init_by_copy(self):
+        """creating items copy data"""
+        items2 = Items(self.items.data)
+        items2.data = [items2.data[1]]
+        assert not items2 == self.items
 
-    # TODO
+    def test_side_effect(self):
+        items2 = Items(self.items.data)
+        self.items.create_dataset(self.group, 10)
+        self.items.write(self.group)
+        assert self.items == items2
+
     def test_append(self):
-        pass
+        self.items.create_dataset(self.group, 10)
+        writed = self.group[self.items.name]
+        assert len(writed[...]) == 0
+
+        self.items.write(self.group)
+        assert len(writed[...]) == 10
+
+        self.items.write(self.group)
+        assert len(writed[...]) == 20
+
+        items2 = Items(generate.items(5))
+        items2.write(self.group)
+        assert len(writed[...]) == 25
+
+        del self.group[self.items.name]
+        self.items.create_dataset(self.group, 10)
+        assert len(self.group[self.items.name][...]) == 0

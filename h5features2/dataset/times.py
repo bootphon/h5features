@@ -64,7 +64,6 @@ class Times(Dataset):
         self.tformat = 1
 
     def __eq__(self, other):
-        """Equality operator"""
         try:
             return super().__eq__(other) and self.tformat == other.tformat
         except AttributeError:
@@ -85,29 +84,31 @@ class Times(Dataset):
                              chunks=chunks, maxshape=maxshape)
 
     def write(self, group):
-        """Write times data to the group.
+        """Write times data to the group."""
+        nb_data = sum([d.shape[0] for d in self.data])
+        nb_group = group[self.name].shape[0]
+        new_size = nb_group + nb_data
 
-        This corrupt self.data.
+        group[self.name].resize((new_size,))
+        group[self.name][nb_group:] = np.concatenate(self.data)
 
-        """
-        self.data = np.concatenate(self.data)
-        nb = group[self.name].shape[0]
-
-        group[self.name].resize((nb + self.data.shape[0],))
-        group[self.name][nb:] = self.data
-
-
+# TODO No need to specialize, make Times more generic
 class Times2D(Times):
     """Specialized class for 2D times arrays."""
+
     def __init__(self, data, name='times'):
-        Times.__init__(self, data, name)
-        # overloaded from Times
+        if not all([d.ndim == 2 for d in data]):
+            raise IOError('data must be 2D.')
+
+        super().__init__(data, name)
+        # must be after super() because overloaded from Times
         self.tformat = 2
 
     def write(self, group):
         """Write times data to the group"""
-        self.data = np.concatenate(self.data, axis=0)
-        nb = group[self.name].shape[0]
+        nb_data = sum([d.shape[0] for d in self.data])
+        nb_group = group[self.name].shape[0]
+        new_size = nb_group + nb_data
 
-        group[self.name].resize((nb + self.data.shape[0], 2))
-        group[self.name][nb:] = self.data
+        group[self.name].resize((new_size, 2))
+        group[self.name][nb_group:] = np.concatenate(self.data, axis=0)
