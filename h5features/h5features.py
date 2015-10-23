@@ -1,8 +1,8 @@
 """Provides the read() and write() wrapper functions."""
 
-from h5features.reader import Reader
-from h5features.writer import Writer
-from h5features import dataset
+from .reader import Reader
+from .writer import Writer
+from . import dataset
 
 
 def read(filename, groupname, from_item=None, to_item=None,
