@@ -3,9 +3,8 @@
 
 import argparse
 import os
-#import h5features2
-from h5features2.reader import Reader
-from h5features2.writer import Writer
+from h5features.reader import Reader
+from h5features.writer import Writer
 
 def converter(filein, fileout, version='1.1', groupname='features',verb=False):
     reader = Reader(filein, 'features')
@@ -29,7 +28,7 @@ def converter(filein, fileout, version='1.1', groupname='features',verb=False):
         #     assert stuff[0] == stuff[1]
 
 def main():
-    """Run a h5features2 converter from parsed arguments."""
+    """Run a h5features converter from parsed arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('input', help='h5features input file to read')
     parser.add_argument('-g', '--group',

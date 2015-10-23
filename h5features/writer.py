@@ -7,8 +7,8 @@
 import h5py
 import os
 
-from h5features2.utils import is_supported_version
-from h5features2.index import Index
+from h5features.utils import is_supported_version
+from h5features.index import Index
 
 class Writer(object):
     """This class provides an interface for writing h5features to HDF5 files."""

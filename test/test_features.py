@@ -9,7 +9,7 @@ import pytest
 
 import generate
 from utils import remove, assert_raise
-from h5features2.dataset.features import *
+from h5features.dataset.features import *
 
 
 def test_contains_empty_good():

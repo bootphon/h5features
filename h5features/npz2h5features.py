@@ -16,9 +16,7 @@ Created on Fri May  2 09:33:20 2014
 """
 import os
 import numpy as np
-
-# TODO: dirty dev shortcut for debug
-import h5features2 as h5features
+import h5features
 
 def npz_to_h5features(path, files, h5_filename, h5_groupname, batch_size=500):
     """Append a list of npz files to a h5features file.

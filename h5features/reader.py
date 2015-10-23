@@ -1,13 +1,13 @@
-"""Provides the Reader class to the h5features2 package."""
+"""Provides the Reader class to the h5features package."""
 
 import h5py
 import numpy as np
 
-from h5features2.index import Index, IndexV0_1, IndexV1_0
-from h5features2.utils import is_supported_version
-from h5features2.dataset.items import Items
-from h5features2.dataset.features import Features
-from h5features2.dataset.times import Times
+from h5features.index import Index, IndexV0_1, IndexV1_0
+from h5features.utils import is_supported_version
+from h5features.dataset.items import Items
+from h5features.dataset.features import Features
+from h5features.dataset.times import Times
 
 class Reader(object):
     """This class enables reading from h5features files.

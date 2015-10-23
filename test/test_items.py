@@ -1,4 +1,4 @@
-"""Test of the h5features2.items module.
+"""Test of the h5features.items module.
 
 @author: Mathieu Bernard <mmathieubernardd@gmail.com>
 """
@@ -8,7 +8,7 @@ import pytest
 
 import generate
 from utils import assert_raise, remove
-from h5features2.dataset.items import Items
+from h5features.dataset.items import Items
 
 
 class TestItemsInit:
@@ -50,7 +50,6 @@ class TestCreate:
         self.group.create_dataset(self.items.name, (0,))
         with pytest.raises(RuntimeError) as err:
             self.items.create_dataset(self.group, 10)
-        assert 'Name already exists' in str(err.value)
 
 
 def wrapper_is_compat(l1, l2):
@@ -79,7 +78,7 @@ class TestIsAppendableTo:
     def test_on_empty_group(self):
         group = self.h5file.create_group('group')
         assert_raise(self.items.is_appendable_to, group,
-                     "'items' doesn't exist", KeyError)
+                     "unable to open object", KeyError)
 
         # Create an empty items group
         self.items.create_dataset(group, 10)

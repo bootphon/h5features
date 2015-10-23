@@ -1,4 +1,4 @@
-"""Test the times module of h5features2 package.
+"""Test the times module of h5features package.
 
 @author: Mathieu Bernard
 
@@ -10,8 +10,8 @@ import pytest
 
 import generate
 from utils import assert_raise, remove
-from h5features2.h5features2 import write, read
-from h5features2.dataset.times import *
+from h5features.h5features import write, read
+from h5features.dataset.times import *
 
 
 class TestParseTimes:
@@ -80,7 +80,7 @@ class TestTimes1D:
         # we can't create an existing group
         with pytest.raises(RuntimeError) as err:
             t1.create_dataset(self.group, 10)
-        assert 'Name already exists' in str(err.value)
+        assert 'unable to create' in str(err.value)
 
         t2 = Times([], name='toto')
         t2.create_dataset(self.group, 10)

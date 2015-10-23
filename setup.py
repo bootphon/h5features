@@ -1,35 +1,56 @@
 # coding: utf-8
+'''
+h5features
 
-"""A setup module for the h5features2 python package"""
+Note that "python setup.py test" invokes pytest on the package. With appropriately
+configured setup.cfg, this will check both xxx_test modules and docstrings.
 
+Copyright 2015, Mathieu Bernard.
+Licensed under GPLv3.
+'''
+import sys
 from setuptools import setup, find_packages
-#from codecs import open
-from os import path
+from setuptools.command.test import test as TestCommand
 
-# Get the long description from the README file
-HERE = path.abspath(path.dirname(__file__))
-with open(path.join(HERE, 'README.rst'), encoding='utf-8') as f:
-    LONG_DESCRIPTION = f.read()
+# This is a plug-in for setuptools that will invoke py.test
+# when you run python setup.py test
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
 
-setup(
-    name='h5features2',
-    version='0.1.1',
-    license='MIT',
+    def run_tests(self):
+        # import here, because outside the required eggs aren't loaded yet
+        import pytest
+        sys.exit(pytest.main(self.test_args))
 
-    description='h5features format file handler',
-    long_description=LONG_DESCRIPTION,
-    url='https://github.com/bootphon/h5features',
+version = "1.1.0"
 
-    author='Thomas Schatz, Roland Thiollière, Mathieu Bernard',
-    author_email='mmathieubernardd@gmail.com',
-
-    packages=find_packages(exclude=['docs', 'test']),
-
-    install_requires=[
+setup(name='h5features',
+      version=version,
+      description='h5features format file handler',
+      long_description=open('README.rst').read(),
+      classifiers=[ # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+          'Development Status :: 1 - Planning',
+          'Programming Language :: Python'
+      ],
+      keywords='HDF5 h5py features',
+      author='Thomas Schatz, Roland Thiolliere, Mathieu Bernard',
+      author_email='mmathieubernardd@gmail.com',
+      url='https://github.com/bootphon/h5features',
+      license='GPLv3',
+      packages=find_packages(exclude=['test']),
+      include_package_data=True,
+      modules=['h5feature'],
+      zip_safe=False,
+      tests_require=['pytest'],
+      cmdclass={'test': PyTest},
+      install_requires=[
         #'python >= 2.7',
         'h5py >= 2.3.0',
         'numpy >= 1.8.0',
         'scipy >= 0.13.0',
         'numpydoc'
-    ],
-)
+      ],
+  )

@@ -1,10 +1,10 @@
-"""Test the chunk facilities in the h5features2 module."""
+"""Test the chunk facilities in the h5features module."""
 
 import h5py
 
 import generate
 from utils import remove
-from h5features2.dataset.items import Items
+from h5features.dataset.items import Items
 
 
 class TestChunk:

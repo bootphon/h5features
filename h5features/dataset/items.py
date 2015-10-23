@@ -5,8 +5,7 @@
 """
 
 from h5py import special_dtype
-#from h5features2.utils import nb_per_chunk
-from h5features2.dataset.dataset import Dataset
+from h5features.dataset.dataset import Dataset
 
 class Items(Dataset):
     """This class manages items in h5features files."""
