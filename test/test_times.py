@@ -80,7 +80,7 @@ class TestTimes1D:
         # we can't create an existing group
         with pytest.raises(RuntimeError) as err:
             t1.create_dataset(self.group, 10)
-        assert 'unable to create' in str(err.value)
+        assert 'Unable to create' in str(err.value)
 
         t2 = Times([], name='toto')
         t2.create_dataset(self.group, 10)

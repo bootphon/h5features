@@ -103,6 +103,9 @@ class Features(Dataset):
         except AttributeError:
             return False
 
+    def __ne__(self, other):
+        return not self.__eq__(other)    
+
     def is_appendable_to(self, group):
         """Return True if features are appendable to a HDF5 group."""
         return (group.attrs['format'] == self.dformat and
