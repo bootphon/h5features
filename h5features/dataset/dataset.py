@@ -13,36 +13,39 @@ class Dataset(object):
     'Features' which all together constitutes an h5features file.
 
     """
-    def __init__(self, data, name):
+    def __init__(self, data, name, dim, dtype):
         self.name = name
+        self.dim = dim
+        self.dtype = dtype
         self.data = data
 
     def __eq__(self, other):
-        return self.name == other.name and self.data == other.data
+        try:
+            return (self.name == other.name and
+                    self.dim == other.dim and
+                    self.dtype == other.dtype and
+                    self.data == other.data)
+        except AttributeError:
+            return False
 
-    # def is_appendable_to(self, group):
-    #     return
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
-    # def write(self, group):
-    #     return
+    def create_dataset(self, group, chunk_size):
+        shape = (0,) if self.dim == 1 else (0, self.dim)
+        maxshape = (None,) if self.dim == 1 else (None, self.dim)
 
-    # def read(self, group):
-    #     return
-
-    def create_dataset(self, group, dtype, dim, chunk_size):
-        shape = (0,) if dim == 1 else (0, dim)
-        maxshape = (None,) if dim == 1 else (None, dim)
-
-        if dtype == np.dtype('O'):
-            # if dtype is a variable str, guess representative size is 20 Bytes
-            per_chunk = _nb_per_chunk(20, dim, chunk_size)
+        if self.dtype == np.dtype('O'):
+            # if dtype is a variable str, guess representative size is 20 bytes
+            per_chunk = _nb_per_chunk(20, self.dim, chunk_size)
         else:
-            per_chunk = _nb_per_chunk(np.dtype(dtype).itemsize, dim, chunk_size)
+            per_chunk = _nb_per_chunk(np.dtype(self.dtype).itemsize,
+                                      self.dim, chunk_size)
 
-        chunks = (per_chunk,) if dim == 1 else (per_chunk, dim)
+        chunks = (per_chunk,) if self.dim == 1 else (per_chunk, self.dim)
 
         # raise if per_chunk >= 4 Gb, this is requested by h5py
-        group.create_dataset(self.name, shape, dtype=dtype,
+        group.create_dataset(self.name, shape, dtype=self.dtype,
                              chunks=chunks, maxshape=maxshape)
 
 
@@ -65,5 +68,4 @@ def _nb_per_chunk(item_size, item_dim, chunk_size):
     # from Mbytes to bytes
     size = chunk_size * 10.**6
     ratio = int(round(size / (item_size*item_dim)))
-    print('ratio: {}'.format(ratio))
     return max(10, ratio)

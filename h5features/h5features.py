@@ -126,9 +126,7 @@ def write(filename, groupname, items_data, times_data, features_data,
     items = dataset.items.Items(items_data)
 
     # Prepare the times according to format, raise on error
-    times = (dataset.times.Times2D(times_data)
-             if dataset.times.parse_times(times_data) == 2
-             else dataset.times.Times(times_data))
+    times = dataset.times.Times(times_data)
 
     # Prepare the features according to format, raise on error
     features = (dataset.features.SparseFeatures(features_data, sparsity)

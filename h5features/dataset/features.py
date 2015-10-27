@@ -11,6 +11,7 @@ import scipy.sparse as sp
 
 from h5features.dataset.dataset import Dataset, _nb_per_chunk
 
+
 def contains_empty(features):
     """Return True if one of the features is empty, False else."""
     # Is features empty ?
@@ -90,30 +91,25 @@ class Features(Dataset):
             raise IOError('all features must be non-empty')
 
         self.dformat = 'dense'
-        self.dtype = parse_dtype(data)
-        self.dim = parse_dim(data)
-        super(Features, self).__init__(data, name)
+        dtype = parse_dtype(data)
+        dim = parse_dim(data)
+        super(Features, self).__init__(data, name, dim, dtype)
 
     def __eq__(self, other):
         try:
             return (other.dformat == self.dformat and
-                    other.dtype == self.dtype and
-                    other.dim == self.dim and
                     super(Features, self).__eq__(other))
         except AttributeError:
             return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)    
 
     def is_appendable_to(self, group):
         """Return True if features are appendable to a HDF5 group."""
         return (group.attrs['format'] == self.dformat and
                 group[self.name].dtype == self.dtype and
                 # We use a method because dim differs in dense and sparse.
-                self._dim(group) == self.dim)
+                self._group_dim(group) == self.dim)
 
-    def _dim(self, group):
+    def _group_dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""
         return group[self.name].shape[1]
 
@@ -121,7 +117,7 @@ class Features(Dataset):
     def create_dataset(self, group, chunk_size):
         """Initialize the features subgoup."""
         group.attrs['format'] = self.dformat
-        super(Features, self).create_dataset(group, self.dtype, self.dim, chunk_size)
+        super(Features, self).create_dataset(group, chunk_size)
 
         # attribute declared outside init is not safe. Used because
         # Times.create_dataset need it
@@ -158,7 +154,7 @@ class SparseFeatures(Features):
         except AttributeError:
             return False
 
-    def _dim(self, group):
+    def _group_dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""
         return group.attrs['dim']
 

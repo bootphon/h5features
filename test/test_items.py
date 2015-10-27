@@ -78,7 +78,7 @@ class TestIsAppendableTo:
     def test_on_empty_group(self):
         group = self.h5file.create_group('group')
         assert_raise(self.items.is_appendable_to, group,
-                     "Unable to open object", KeyError)
+                     "open object", KeyError)
 
         # Create an empty items group
         self.items.create_dataset(group, 10)

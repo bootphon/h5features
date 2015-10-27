@@ -34,22 +34,22 @@ class Items(Dataset):
         if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
-        super(Items, self).__init__(data, name)
+        super(Items, self).__init__(data, name, 1, special_dtype(vlen=str))
 
 
-    def __eq__(self, other):
-        return super(Items, self).__eq__(other)
+    # def __eq__(self, other):
+    #     return super(Items, self).__eq__(other)
 
-    def create_dataset(self, group, chunk_size):
-        """Creates an items subgroup in the given group.
+    # def create_dataset(self, group, chunk_size):
+    #     """Creates an items subgroup in the given group.
 
-        Parameters:
+    #     Parameters:
 
-        - group : HDF5 Group --- The group where to create the 'files' subgroup.
-        - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
+    #     - group : HDF5 Group --- The group where to create the 'files' subgroup.
+    #     - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
 
-        """
-        super(Items, self).create_dataset(group, special_dtype(vlen=str), 1, chunk_size)
+    #     """
+    #     super(Items, self).create_dataset(group, chunk_size)
 
 
     def is_appendable_to(self, group):
@@ -88,7 +88,6 @@ class Items(Dataset):
             self.data = self.data[1:]
             return True
         else:
-            # print(items_in_group, '\n'*3, self.data)
             raise IOError('groups cannot have more than one shared items.')
 
     def write(self, group):
