@@ -2,6 +2,9 @@
 h5features
 ==========
 
+.. image:: badge-license
+    :target: http://www.gnu.org/licenses/gpl-3.0.txt
+
 .. image:: https://travis-ci.org/mmmaat/h5features2.svg?branch=master
     :target: https://travis-ci.org/mmmaat/h5features2
 
