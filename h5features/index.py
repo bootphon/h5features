@@ -7,7 +7,7 @@ TODO
 """
 
 import numpy as np
-from h5features.dataset.dataset import _nb_per_chunk
+from .dataset.dataset import _nb_per_chunk
 
 class Index(object):
     """Index class for version 1.1 (current version)"""

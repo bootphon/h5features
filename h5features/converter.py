@@ -3,8 +3,8 @@
 
 import argparse
 import os
-from h5features.reader import Reader
-from h5features.writer import Writer
+from .reader import Reader
+from .writer import Writer
 
 def converter(filein, fileout, version='1.1', groupname='features',verb=False):
     reader = Reader(filein, 'features')

@@ -34,11 +34,11 @@ class Items(Dataset):
         if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
-        super().__init__(data, name)
+        super(Items, self).__init__(data, name)
 
 
     def __eq__(self, other):
-        return super().__eq__(other)
+        return super(Items, self).__eq__(other)
 
     def create_dataset(self, group, chunk_size):
         """Creates an items subgroup in the given group.
@@ -49,7 +49,7 @@ class Items(Dataset):
         - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
 
         """
-        super().create_dataset(group, special_dtype(vlen=str), 1, chunk_size)
+        super(Items, self).create_dataset(group, special_dtype(vlen=str), 1, chunk_size)
 
 
     def is_appendable_to(self, group):

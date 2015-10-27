@@ -12,3 +12,7 @@ the format, give examples.
 # TODO introduce support for empty internal files ?
 
 """
+
+from .h5features import read
+from .h5features import write
+from .h5features import simple_write

@@ -60,12 +60,12 @@ class Times(Dataset):
     """This class manages times related operations for h5features files."""
 
     def __init__(self, data, name='times'):
-        super().__init__(data, name)
+        super(Times, self).__init__(data, name)
         self.tformat = 1
 
     def __eq__(self, other):
         try:
-            return super().__eq__(other) and self.tformat == other.tformat
+            return super(Times, self).__eq__(other) and self.tformat == other.tformat
         except AttributeError:
             return False
 
@@ -100,7 +100,7 @@ class Times2D(Times):
         if not all([d.ndim == 2 for d in data]):
             raise IOError('data must be 2D.')
 
-        super().__init__(data, name)
+        super(Times2D, self).__init__(data, name)
         # must be after super() because overloaded from Times
         self.tformat = 2
 

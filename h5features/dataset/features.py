@@ -92,16 +92,19 @@ class Features(Dataset):
         self.dformat = 'dense'
         self.dtype = parse_dtype(data)
         self.dim = parse_dim(data)
-        super().__init__(data, name)
+        super(Features, self).__init__(data, name)
 
     def __eq__(self, other):
         try:
             return (other.dformat == self.dformat and
                     other.dtype == self.dtype and
                     other.dim == self.dim and
-                    super().__eq__(other))
+                    super(Features, self).__eq__(other))
         except AttributeError:
             return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)    
 
     def is_appendable_to(self, group):
         """Return True if features are appendable to a HDF5 group."""
@@ -118,7 +121,7 @@ class Features(Dataset):
     def create_dataset(self, group, chunk_size):
         """Initialize the features subgoup."""
         group.attrs['format'] = self.dformat
-        super().create_dataset(group, self.dtype, self.dim, chunk_size)
+        super(Features, self).create_dataset(group, self.dtype, self.dim, chunk_size)
 
         # attribute declared outside init is not safe. Used because
         # Times.create_dataset need it
@@ -143,7 +146,7 @@ class SparseFeatures(Features):
     """This class is specialized for managing sparse matrices as features."""
 
     def __init__(self, data, sparsity, name='features'):
-        super().__init__(data, name)
+        super(SparseFeatures, self).__init__(data, name)
         self.dformat = 'sparse'
         self.sparsity = sparsity
 
