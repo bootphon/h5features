@@ -2,8 +2,8 @@
 h5features
 ==========
 
-.. image:: https://travis-ci.org/mmmaat/h5features.svg?branch=master
-    :target: https://travis-ci.org/mmmaat/h5features
+.. image:: https://travis-ci.org/mmmaat/h5features2.svg?branch=master
+    :target: https://travis-ci.org/mmmaat/h5features2
 
 This package provide functions to read and write in the h5features file format.
 
