@@ -3,7 +3,7 @@ TODO list
 =========
 
 For 1.1.0 release
-===============
+=================
 
 - self.dim an dself.dtype in Dataset
 - uniformize index stuff in Writer and Reader
@@ -12,8 +12,8 @@ For 1.1.0 release
 - profile and compare with 1.0, stress test on big data
 - rename write as push and document it's behavior
 
-For a further release
-=====================
+For a future release
+====================
 
 - Have a h5features.File class cloned on h5py
 
