@@ -2,7 +2,7 @@
 h5features
 ==========
 
-.. image:: badge-license
+.. image:: https://img.shields.io/badge/license-GPLv3-blue.svg
     :target: http://www.gnu.org/licenses/gpl-3.0.txt
 
 .. image:: https://travis-ci.org/mmmaat/h5features2.svg?branch=master

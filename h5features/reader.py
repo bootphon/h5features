@@ -1,3 +1,19 @@
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 """Provides the Reader class to the h5features package."""
 
 import h5py
@@ -85,24 +101,19 @@ class Reader(object):
         from_item, to_item = self._get_items(from_item, to_item)
 
         # index coordinates associated with the begin/end of from/to_item
-        # TODO put that in Index ?
-        index_group = self.index['index']
-        item1_start = 0 if from_item == 0 else index_group[from_item - 1] + 1
-        item1_end = index_group[from_item]
+        from_item_bound = self._get_item_boundaries(from_item)
+        to_item_bound = self._get_item_boundaries(to_item)
 
-        item2_start = 0 if to_item == 0 else index_group[to_item - 1] + 1
-        item2_end = index_group[to_item]
-
-        # TODO Factorize those two methods
-        i1 = self._get_from_time(from_time, from_item, item1_start, item1_end)
-        i2 = self._get_to_time(to_time, to_item, item2_start, item2_end)
+        i1, i2 = self._get_times(from_time, to_time,
+                                 from_item, to_item,
+                                 from_item_bound, to_item_bound)
 
         # Step 2: access actual data
-        features_group = self.group['features']
         if self.index['format'] == 'sparse':
             # TODO implement this. will be different for v1.0 and legacy
             raise NotImplementedError('Reading sparse features not implemented')
         else:
+            features_group = self.group['features']
             # i2 included
             features = (features_group[:, i1:i2 + 1].T if self.version == '0.1'
                         else features_group[i1:i2 + 1, :])
@@ -112,9 +123,9 @@ class Reader(object):
         if to_item == from_item:
             features = [features]
             times = [times]
-        # Several items case
-        else:
-            item_ends = index_group[from_item:to_item] - item1_start
+        else: # Several items case
+            item_ends = (self.index['index'][from_item:to_item]
+                         - from_item_bound[0])
             # TODO changed axis from 1 to 0, but need to check that
             # this doesn't break compatibility with matlab generated
             # files
@@ -148,6 +159,20 @@ class Reader(object):
                           .format(res[0], res[1], self.filename))
 
         return res[0], res[1]
+
+    def _get_item_boundaries(self, item):
+        index_group = self.index['index']
+        start = 0 if item == 0 else index_group[item - 1] + 1
+        end = index_group[item]
+        return start, end
+
+    def _get_times(self, from_time, to_time, from_item, to_item,
+                   from_item_bound, to_item_bound):
+        i1 = self._get_from_time(from_time, from_item,
+                                 from_item_bound[0], from_item_bound[1])
+        i2 = self._get_to_time(to_time, to_item,
+                                 to_item_bound[0], to_item_bound[1])
+        return i1, i2
 
     def _get_from_time(self, from_time, from_item, item_start, item_end):
         times_group = self.index['times']
