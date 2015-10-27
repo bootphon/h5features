@@ -1,11 +1,23 @@
-"""Provides the Index class to the h5features module.
-
-TODO
-
-"""
+"""Provides the Index class to the h5features module."""
 
 import numpy as np
+from .version import is_supported_version
 from .dataset.dataset import _nb_per_chunk
+
+def init_index(version):
+    """Initializes an h5features index according to a file *version*."""
+    if not is_supported_version(version):
+        raise IOError('version {} is not supported'.format(version))
+
+    if version == '0.1':
+        index_class = IndexV0_1()
+    elif version == '1.0':
+        index_class = IndexV1_0()
+    else:
+        index_class = Index()
+
+    return index_class
+
 
 class Index(object):
     """Index class for version 1.1 (current version)"""

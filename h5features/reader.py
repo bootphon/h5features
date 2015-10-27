@@ -3,7 +3,7 @@
 import h5py
 import numpy as np
 
-from .index import Index, IndexV0_1, IndexV1_0
+from .index import init_index
 from .version import read_version
 from .dataset.items import Items
 from .dataset.features import Features
@@ -17,17 +17,15 @@ class Reader(object):
     load its index.
 
     Parameters
-    ----------
 
-    *filename* : str --- hdf5 file potentially serving as a
+    *filename* : str --- HDF5 file potentially serving as a
         container for many small files.
 
-    *groupname* : str --- h5 group to read the data from.
+    *groupname* : str --- HDF5 group to read the data from.
 
     *index* : int, optional -- for faster access.
 
     Raise
-    -----
 
     IOError if *filename* is not an existing HDF5 file.
     IOError if *groupname* is not a valid group in *filename*.
@@ -59,15 +57,7 @@ class Reader(object):
 
         # read the index from group if not provided
         if index is None:
-            # Choose the good index according to file version
-            if self.version == '0.1':
-                index_class = IndexV0_1()
-            elif self.version == '1.0':
-                index_class = IndexV1_0()
-            else:
-                index_class = Index()
-
-            self.index = index_class.read(self.group)
+            self.index = init_index(self.version).read(self.group)
         else:
             self.index = index
 
@@ -76,7 +66,6 @@ class Reader(object):
         """Retrieve requested datasets coordinates from the h5features index.
 
         Parameters
-        ----------
 
         from_item : str, optional --- Read the data starting from this
             item. (defaults to the first stored item)
@@ -112,7 +101,7 @@ class Reader(object):
         features_group = self.group['features']
         if self.index['format'] == 'sparse':
             # TODO implement this. will be different for v1.0 and legacy
-            raise IOError('reading sparse features not yet implemented')
+            raise NotImplementedError('Reading sparse features not implemented')
         else:
             # i2 included
             features = (features_group[:, i1:i2 + 1].T if self.version == '0.1'
@@ -126,8 +115,9 @@ class Reader(object):
         # Several items case
         else:
             item_ends = index_group[from_item:to_item] - item1_start
-            # TODO change axis from 1 to 0, but need to check that this doesn't
-            # break compatibility with matlab generated files
+            # TODO changed axis from 1 to 0, but need to check that
+            # this doesn't break compatibility with matlab generated
+            # files
             features = np.split(features, item_ends + 1, axis=0)
             times = np.split(times, item_ends + 1)
 
