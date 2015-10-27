@@ -2,8 +2,6 @@
 
 TODO
 
-@author Mathieu Bernard <mmathieubernardd@gmail.com>
-
 """
 
 import numpy as np

@@ -5,8 +5,7 @@
 """
 
 import numpy as np
-
-from h5features.dataset.dataset import Dataset
+from .dataset import Dataset
 
 def parse_times(times):
     """Return the times vectors dimension from raw times arrays.
@@ -41,11 +40,6 @@ def parse_times(times):
         arrays respectively.
 
     """
-
-    if not times:
-        raise IOError('empty times data!')
-
-    # TODO check that the times are increasing for each item
     dim = times[0].ndim
 
     if dim > 2:

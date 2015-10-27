@@ -31,14 +31,15 @@ setup(name='h5features',
       version=version,
       description='h5features format file handler',
       long_description=open('README.rst').read(),
-      classifiers=[ # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[
+          # See from http://pypi.python.org/pypi?%3Aaction=list_classifiers
           'Development Status :: 1 - Planning',
           'Programming Language :: Python'
       ],
       keywords='HDF5 h5py features',
       author='Thomas Schatz, Roland Thiolliere, Mathieu Bernard',
       author_email='mmathieubernardd@gmail.com',
-      url='https://github.com/bootphon/h5features',
+      url='https://github.com/mmmaat/h5features',
       license='GPLv3',
       packages=find_packages(exclude=['test']),
       include_package_data=True,

@@ -18,4 +18,6 @@ Installation
 Usage
 -----
 
-Check the `documentation <http://h5features.readthedocs.org/en/latest/h5features.html>`_
+Check the `documentation_`.
+
+.. _documentation: http://h5features.readthedocs.org/en/latest/h5features.html

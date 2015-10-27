@@ -9,7 +9,7 @@ TODO Describe the structure of features.
 import numpy as np
 import scipy.sparse as sp
 
-from h5features.dataset.dataset import Dataset, _nb_per_chunk
+from .dataset import Dataset, _nb_per_chunk
 
 
 def contains_empty(features):

@@ -5,7 +5,7 @@
 """
 
 from h5py import special_dtype
-from h5features.dataset.dataset import Dataset
+from .dataset import Dataset
 
 class Items(Dataset):
     """This class manages items in h5features files."""

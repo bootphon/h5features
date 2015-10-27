@@ -11,8 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   h5features
-   h5features.dataset
+   setup
+   modules
 
 Indices and tables
 ==================

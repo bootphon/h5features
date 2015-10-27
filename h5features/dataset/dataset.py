@@ -32,6 +32,9 @@ class Dataset(object):
         return not self.__eq__(other)
 
     def create_dataset(self, group, chunk_size):
+        """Create an empty dataset in an HDF5 *group*.
+
+        TODO comment that method"""
         shape = (0,) if self.dim == 1 else (0, self.dim)
         maxshape = (None,) if self.dim == 1 else (None, self.dim)
 

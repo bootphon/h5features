@@ -4,31 +4,33 @@ import h5py
 import numpy as np
 
 from .index import Index, IndexV0_1, IndexV1_0
-from .utils import is_supported_version
+from .version import read_version
 from .dataset.items import Items
 from .dataset.features import Features
 from .dataset.times import Times
 
+
 class Reader(object):
     """This class enables reading from h5features files.
 
-        The **Reader** constructor open an HDF5 file for reading and
-        load its index.
+    The **Reader** constructor open an HDF5 file for reading and
+    load its index.
 
-        Parameters
+    Parameters
+    ----------
 
-        *filename* : str --- hdf5 file potentially serving as a
+    *filename* : str --- hdf5 file potentially serving as a
         container for many small files.
 
-        *groupname* : str --- h5 group to read the data from.
+    *groupname* : str --- h5 group to read the data from.
 
-        *index* : int, optional -- for faster access.
+    *index* : int, optional -- for faster access.
 
-        Raise
-        -----
+    Raise
+    -----
 
-        IOError if *filename* is not an existing HDF5 file.
-        IOError if *groupname* is not a valid group in *filename*.
+    IOError if *filename* is not an existing HDF5 file.
+    IOError if *groupname* is not a valid group in *filename*.
 
     .. note:: **The functions are not concurrent nor thread-safe**
         because the HDF5 library is not concurrent and not always
@@ -38,19 +40,14 @@ class Reader(object):
         operations should be enforced externally when necessary.
 
     """
-    # TODO Check the group contains a valid h5features structure.
     def __init__(self, filename, groupname, index=None):
-        """Initializes a h5features reader to read a group in a HDF5 file."""
-
-        # check filename
+        # check filename is a valid HDF5 file and open it for reading
         if not h5py.is_hdf5(filename):
             raise IOError('{} is not a HDF5 file'.format(filename))
         self.filename = filename
-
-        # open the HDF5 file for reading
         self.h5file = h5py.File(self.filename, 'r')
 
-        # access to the requested group
+        # access to the requested group in the file
         if not groupname in self.h5file:
             raise IOError('{} is not a valid group in {}'
                           .format(groupname, self.filename))
@@ -58,7 +55,7 @@ class Reader(object):
         self.group = self.h5file[groupname]
 
         # Get the version of the readed file
-        self.version = self._read_version()
+        self.version = read_version(self.group)
 
         # read the index from group if not provided
         if index is None:
@@ -73,24 +70,6 @@ class Reader(object):
             self.index = index_class.read(self.group)
         else:
             self.index = index
-
-    def _read_version(self):
-        """Return the h5features version of the readed file.
-
-        This method raise IOError if version is not either 0.1, 1.0 or 1.1
-
-        """
-        version = ('0.1' if not 'version' in self.group.attrs
-                   else self.group.attrs['version'])
-
-        # decode from bytes to str
-        if type(version) == bytes:
-            version = version.decode()
-
-        if not is_supported_version(version):
-            raise IOError('version {} is not supported'.format(version))
-
-        return version
 
     def read(self, from_item=None, to_item=None,
              from_time=None, to_time=None):
@@ -114,7 +93,6 @@ class Reader(object):
             to_item) the specified times are included in the output.
 
         """
-
         from_item, to_item = self._get_items(from_item, to_item)
 
         # index coordinates associated with the begin/end of from/to_item

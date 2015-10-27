@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../h5features'))
 
 # -- General configuration ------------------------------------------------
 
@@ -49,14 +49,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'h5features'
-copyright = u'2015, Mathieu Bernard'
+copyright = u'2014-2015, Thomas Schatz, Mathieu Bernard, Roland Thiolliere'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '1.1.0'
+version = '1.1'
 # The full version, including alpha/beta/rc tags.
 release = '1.1.0'
 
@@ -66,7 +66,7 @@ release = '1.1.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
-#today = ''
+today = False
 # Else, today_fmt is used as the format for a strftime call.
 #today_fmt = '%B %d, %Y'
 
@@ -103,7 +103,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

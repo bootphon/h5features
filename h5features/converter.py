@@ -7,8 +7,12 @@ from .reader import Reader
 from .writer import Writer
 
 def converter(filein, fileout, version='1.1', groupname='features',verb=False):
-    reader = Reader(filein, 'features')
-    reed = reader.read()
+    """Convert a h5features file from a version to another.
+
+    This function is a simple wrapper to a *Reader* and a *Writer*.
+    """
+    reader = Reader(filein, groupname)
+    read = reader.read()
     if verb:
         print('version readed =', reader.version)
         print('index keys are', list(reader.index.keys()))
@@ -17,15 +21,12 @@ def converter(filein, fileout, version='1.1', groupname='features',verb=False):
         os.remove(fileout)
 
     writer = Writer(fileout, version=version)
-    writer.write({'items':reed[0], 'times':reed[1], 'features':reed[2]},
+    writer.write({'items':read[0], 'times':read[1], 'features':read[2]},
                  groupname=groupname, append=False)
     if verb:
         print('version writed =', writer.version)
         print('index keys are', list(writer.index.keys()))
 
-        # TODO check compatibility
-        # for stuf in zip(reed, wrote):
-        #     assert stuff[0] == stuff[1]
 
 def main():
     """Run a h5features converter from parsed arguments."""
@@ -43,6 +44,7 @@ def main():
 
     args = parser.parse_args()
     converter(args.input, args.output, args.version, args.group)
+
 
 if __name__ == '__main__':
     main()
