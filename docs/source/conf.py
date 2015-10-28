@@ -66,13 +66,13 @@ release = '1.1.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
-today = False
+# today = ''
 # Else, today_fmt is used as the format for a strftime call.
 #today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['setup']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

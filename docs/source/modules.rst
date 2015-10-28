@@ -1,8 +1,8 @@
-h5features2
-===========
+h5features API
+==============
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    h5features
    h5features.dataset

@@ -1,22 +1,46 @@
-.. h5features documentation master file, created by
-   sphinx-quickstart on Tue Oct 27 11:22:18 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+==========================
+h5features's documentation
+==========================
 
-Welcome to h5features's documentation!
-======================================
+The h5features package allows efficient read and write of features
+extracted from a large amount of numerical data (e.g. a speech
+corpus). It is a wrapper on `h5py`_ and the `HDF5`_ binary format.
 
-Contents:
+.. _h5py: http://docs.h5py.org
+.. _HDF5: http://hdfgroup.org
+
+Getting started
+===============
 
 .. toctree::
    :maxdepth: 2
 
-   setup
-   modules
+   build
 
-Indices and tables
-==================
+API reference
+=============
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+These document the python API of h5features.
+
+.. toctree::
+   :maxdepth: 2
+
+   h5features
+   h5features.dataset
+
+Meta-info about h5features
+==========================
+
+.. toctree::
+   :maxdepth: 2
+
+   whatsnew
+   license
+
+..
+   Indices and tables
+   ==================
+
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

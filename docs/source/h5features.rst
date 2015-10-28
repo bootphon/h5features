@@ -54,7 +54,7 @@ h5features.reader module
 h5features.utils module
 -----------------------
 
-.. automodule:: h5features.utils
+.. automodule:: h5features.version
     :members:
     :undoc-members:
     :show-inheritance:
