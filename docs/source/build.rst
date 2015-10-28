@@ -68,8 +68,7 @@ The documentation is builded with *sphinx*::
 Then to build the project documentation (the one you are currently
 reading), run::
 
-  $ cd docs
-  $ make html
+  $ python setup.py build_sphinx
 
 The main HTML page is generated to *docs/build/html/index.html*
 

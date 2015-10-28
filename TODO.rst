@@ -1,4 +1,4 @@
-These document the planned and future changes to the h5features package.
+These document the scheduled and/or requested changes to the h5features package.
 
 For 1.1.0 release
 -----------------

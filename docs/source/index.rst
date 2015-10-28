@@ -37,10 +37,8 @@ Meta-info about h5features
    whatsnew
    license
 
-..
-   Indices and tables
-   ==================
+Indices and tables
+==================
 
-   * :ref:`genindex`
-   * :ref:`modindex`
-   * :ref:`search`
+* :ref:`genindex`
+* :ref:`modindex`

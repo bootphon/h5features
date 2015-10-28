@@ -79,7 +79,7 @@ class Index(object):
 class IndexV1_0(Index):
     """Index class for version 1.0"""
     def __init__(self, name='file_index'):
-        Index.__init__(self, name)
+        super(IndexV1_0, self).__init__(name)
 
     def read(self, group):
         """Read and return a stored index in an HDF5 group."""
