@@ -6,10 +6,9 @@ python:
 notifications:
   email: false
 
+# from http://conda.pydata.org/docs/faq.html#using-conda-with-travis-ci
+# We are using miniconda for easy support of scipy
 install:
-  - sudo apt-get update
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
     else
@@ -19,11 +18,8 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION h5py numpy scipy pytest numpydoc
+  - conda update -q conda  
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION h5py numpy scipy pytest
   - source activate test-environment
   - python setup.py install
 
