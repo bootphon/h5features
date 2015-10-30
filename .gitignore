@@ -9,4 +9,3 @@ h5features2.egg-info*
 /.pytest.restart
 /test/.pytest.restart
 docs/build
-/docs/_build/
