@@ -1,14 +1,46 @@
-"""Provides the Writer class to the h5features module.
-
-@author Mathieu Bernard <mmathieubernardd@gmail.com>
-
-"""
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+"""Provides the Writer class to the h5features module."""
 
 import h5py
 import os
 
-from h5features2.utils import is_supported_version
-from h5features2.index import Index
+from .version import is_supported_version, is_same_version
+from .index import Index
+
+# TODO Where is the index ?
+def is_same_datasets(group, data):
+    """Return True if each dataset in *data* is present in *group*.
+
+    This function is used internally by the Witer.
+
+    Parameters:
+
+    *data* : dict --- A dictionary as specified in Writer.write
+    *group* : HDF5 group --- The group to check dataset on.
+
+    """
+    datasets = [data['items'].name,
+                data['times'].name,
+                data['features'].name]
+    if data['features'].dformat == 'sparse':
+        datasets += ['frames', 'coordinates']
+    return all([d in group for d in datasets])
+
 
 class Writer(object):
     """This class provides an interface for writing h5features to HDF5 files."""
@@ -54,7 +86,10 @@ class Writer(object):
         Parameters
         ----------
 
-        - data : dict --- TODO document this!
+        - data : dict(str -> Dataset) --- A dictionary of h5features
+          Datasets. The dict must contain 'items', 'times' and
+          'features' keys pointing to Items, Times and Features
+          instances respectively.
 
         - groupname : str, optional --- The name of the group in which
              to write the data.
@@ -66,7 +101,7 @@ class Writer(object):
              writing.
 
         """
-        # shortcut from parameters
+        # shortcut for data access
         items = data['items']
         times = data['times']
         featu = data['features']
@@ -86,7 +121,6 @@ class Writer(object):
                                   .format(groupname, self.filename))
 
                 # want to overwrite, delete the existing group
-                # TODO test that
                 if not append:
                     del group
             else:
@@ -101,31 +135,14 @@ class Writer(object):
                 # chunking the times depends on features chunks
                 times.create_dataset(group, featu.nb_per_chunk)
 
-            # writing data TODO assert no side effects here,
-            # e.g. writting features concat them in place...
+            # writing data
             index.write(group, data['items'], data['features'])
             for dataset in ['items', 'times', 'features']:
                 data[dataset].write(group)
 
     def is_appendable_to(self, group, data):
-        """Return True if the data is appendable to the group."""
-        return (self.is_same_version(group) and
-                self.is_same_datasets(group, data) and
+        """Return True if the *data* is appendable to the *group*."""
+        return (is_same_version(self.version, group) and
+                is_same_datasets(group, data) and
                 all([data[k].is_appendable_to(group)
                      for k in ('features', 'items', 'times')]))
-
-    def is_same_version(self, group):
-        """Return True if self and group versions are the same."""
-        try:
-            return group.attrs['version'] == self.version
-        except IndexError: # version '0.1' doesn't have a version attribute
-            return False
-
-    # TODO bad design: self or data ? And the index ?
-    def is_same_datasets(self, group, data):
-        datasets = [data['items'].name,
-                    data['times'].name,
-                    data['features'].name]
-        if data['features'].dformat == 'sparse':
-            datasets += ['frames', 'coordinates']
-        return all([d in group for d in datasets])

@@ -1,4 +1,4 @@
-"""Test of read/write facilities of the h5features2 module.
+"""Test of read/write facilities of the h5features module.
 
 @author: Mathieu Bernard
 """
@@ -8,7 +8,7 @@ import numpy as np
 import h5py
 import pytest
 
-import h5features2.h5features2 as h5f
+import h5features.h5features as h5f
 import generate
 from utils import remove, assert_raise
 

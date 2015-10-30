@@ -2,10 +2,10 @@ test/__pycache__
 *.pyc
 build/*
 dist/*
-h5features2.egg-info*
-/v1.h5
-/v2.h5
+h5features.egg-info*
 *.h5
 /.pytest.restart
 /test/.pytest.restart
 docs/build
+docs/legacy
+*.egg-info/*

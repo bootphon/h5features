@@ -1,8 +1,24 @@
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 """Provides the read() and write() wrapper functions."""
 
-from h5features2.reader import Reader
-from h5features2.writer import Writer
-from h5features2 import dataset
+from .reader import Reader
+from .writer import Writer
+from . import dataset
 
 
 def read(filename, groupname, from_item=None, to_item=None,
@@ -126,9 +142,7 @@ def write(filename, groupname, items_data, times_data, features_data,
     items = dataset.items.Items(items_data)
 
     # Prepare the times according to format, raise on error
-    times = (dataset.times.Times2D(times_data)
-             if dataset.times.parse_times(times_data) == 2
-             else dataset.times.Times(times_data))
+    times = dataset.times.Times(times_data)
 
     # Prepare the features according to format, raise on error
     features = (dataset.features.SparseFeatures(features_data, sparsity)

@@ -1,12 +1,23 @@
-"""Provides the Items class to the h5features module.
-
-@author Mathieu Bernard <mmathieubernardd@gmail.com>
-
-"""
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+"""Provides the Items class to the h5features module."""
 
 from h5py import special_dtype
-#from h5features2.utils import nb_per_chunk
-from h5features2.dataset.dataset import Dataset
+from .dataset import Dataset
 
 class Items(Dataset):
     """This class manages items in h5features files."""
@@ -35,22 +46,22 @@ class Items(Dataset):
         if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
-        super().__init__(data, name)
+        super(Items, self).__init__(data, name, 1, special_dtype(vlen=str))
 
 
-    def __eq__(self, other):
-        return super().__eq__(other)
+    # def __eq__(self, other):
+    #     return super(Items, self).__eq__(other)
 
-    def create_dataset(self, group, chunk_size):
-        """Creates an items subgroup in the given group.
+    # def create_dataset(self, group, chunk_size):
+    #     """Creates an items subgroup in the given group.
 
-        Parameters:
+    #     Parameters:
 
-        - group : HDF5 Group --- The group where to create the 'files' subgroup.
-        - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
+    #     - group : HDF5 Group --- The group where to create the 'files' subgroup.
+    #     - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
 
-        """
-        super().create_dataset(group, special_dtype(vlen=str), 1, chunk_size)
+    #     """
+    #     super(Items, self).create_dataset(group, chunk_size)
 
 
     def is_appendable_to(self, group):
@@ -89,7 +100,6 @@ class Items(Dataset):
             self.data = self.data[1:]
             return True
         else:
-            # print(items_in_group, '\n'*3, self.data)
             raise IOError('groups cannot have more than one shared items.')
 
     def write(self, group):

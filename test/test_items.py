@@ -1,4 +1,4 @@
-"""Test of the h5features2.items module.
+"""Test of the h5features.items module.
 
 @author: Mathieu Bernard <mmathieubernardd@gmail.com>
 """
@@ -8,7 +8,7 @@ import pytest
 
 import generate
 from utils import assert_raise, remove
-from h5features2.dataset.items import Items
+from h5features.dataset.items import Items
 
 
 class TestItemsInit:
@@ -50,7 +50,6 @@ class TestCreate:
         self.group.create_dataset(self.items.name, (0,))
         with pytest.raises(RuntimeError) as err:
             self.items.create_dataset(self.group, 10)
-        assert 'Name already exists' in str(err.value)
 
 
 def wrapper_is_compat(l1, l2):
@@ -79,7 +78,7 @@ class TestIsAppendableTo:
     def test_on_empty_group(self):
         group = self.h5file.create_group('group')
         assert_raise(self.items.is_appendable_to, group,
-                     "'items' doesn't exist", KeyError)
+                     "open object", KeyError)
 
         # Create an empty items group
         self.items.create_dataset(group, 10)
@@ -159,3 +158,19 @@ class TestWrite:
         del self.group[self.items.name]
         self.items.create_dataset(self.group, 10)
         assert len(self.group[self.items.name][...]) == 0
+
+
+class TestChunk:
+    def setup(self):
+        self.filename = 'chunk.h5'
+        self.h5file = h5py.File(self.filename, 'w')
+        self.group = self.h5file.create_group('group')
+
+    def teardown(self):
+        self.h5file.close()
+        remove(self.filename)
+
+    def test_items(self):
+        items = Items(generate.items(10))
+        items.create_dataset(self.group, 0.1)
+        assert self.group[items.name].chunks == (5000,)

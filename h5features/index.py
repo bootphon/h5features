@@ -1,13 +1,39 @@
-"""Provides the Index class to the h5features module.
-
-TODO
-
-@author Mathieu Bernard <mmathieubernardd@gmail.com>
-
-"""
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+"""Provides the Index class to the h5features module."""
 
 import numpy as np
-from h5features2.dataset.dataset import _nb_per_chunk
+from .version import is_supported_version
+from .dataset.dataset import _nb_per_chunk
+
+def init_index(version):
+    """Initializes an h5features index according to a file *version*."""
+    if not is_supported_version(version):
+        raise IOError('version {} is not supported'.format(version))
+
+    if version == '0.1':
+        index_class = IndexV0_1()
+    elif version == '1.0':
+        index_class = IndexV1_0()
+    else:
+        index_class = Index()
+
+    return index_class
+
 
 class Index(object):
     """Index class for version 1.1 (current version)"""
@@ -53,7 +79,7 @@ class Index(object):
 class IndexV1_0(Index):
     """Index class for version 1.0"""
     def __init__(self, name='file_index'):
-        Index.__init__(self, name)
+        super(IndexV1_0, self).__init__(name)
 
     def read(self, group):
         """Read and return a stored index in an HDF5 group."""

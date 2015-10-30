@@ -1,4 +1,4 @@
-"""Test the times module of h5features2 package.
+"""Test the times module of h5features package.
 
 @author: Mathieu Bernard
 
@@ -10,8 +10,8 @@ import pytest
 
 import generate
 from utils import assert_raise, remove
-from h5features2.h5features2 import write, read
-from h5features2.dataset.times import *
+from h5features.h5features import write, read
+from h5features.dataset.times import *
 
 
 class TestParseTimes:
@@ -44,7 +44,7 @@ class TestParseTimes:
 
 
 class TestTimes1D:
-    """Test the Times class."""
+    """Test the Times class for 1D times vectors."""
     def setup(self):
         items, self.data, feats = generate.full(10,tformat=1)
         self.filename = 'test.h5'
@@ -63,12 +63,12 @@ class TestTimes1D:
         assert t.is_appendable_to(self.group)
 
         t = Times(generate.times(10, 1, tformat=2))
-        assert t.is_appendable_to(self.group)
-
-        t = Times2D(generate.times(5, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
-        t = Times2D(generate.times(10, 1, tformat=2))
+        t = Times(generate.times(5, 1, tformat=2))
+        assert not t.is_appendable_to(self.group)
+
+        t = Times(generate.times(10, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
     def test_create(self):
@@ -80,9 +80,9 @@ class TestTimes1D:
         # we can't create an existing group
         with pytest.raises(RuntimeError) as err:
             t1.create_dataset(self.group, 10)
-        assert 'Name already exists' in str(err.value)
+        assert 'create' in str(err.value)
 
-        t2 = Times([], name='toto')
+        t2 = Times(self.data, name='toto')
         t2.create_dataset(self.group, 10)
         assert t2.name in self.group
         assert len(self.group[t2.name]) == 0
@@ -94,7 +94,7 @@ class TestTimes1D:
         assert t == t2
 
 class TestTimes2D:
-    """Test of the Times2D class"""
+    """Test of the Times class for 2D times vectors."""
     def setup(self):
         self.filename = 'test.h5'
         self.group = h5py.File(self.filename).create_group('group')
@@ -104,16 +104,14 @@ class TestTimes2D:
         remove(self.filename)
 
     def test_init(self):
-        assert_raise(Times2D, generate.times(10), 'must be 2D')
-        assert Times2D(self.data).tformat == 2
+        assert Times(self.data).dim == 2
 
     def test_side_effect(self):
-        t = Times2D(self.data)
-        t2 = Times2D(self.data)
+        t = Times(self.data)
+        t2 = Times(self.data)
         t.create_dataset(self.group, per_chunk=100)
         t.write(self.group)
         assert t == t2
-
 
 
 class TestReadWriteLevel:

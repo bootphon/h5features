@@ -5,8 +5,8 @@ import os
 
 from utils import remove, h5cmp
 import generate
-import h5features as h5f_1_0
-import h5features2.h5features2 as h5f_1_1
+import h5features_v1_0 as h5f_1_0
+import h5features.h5features as h5f_1_1
 
 class TestReadWriteCompatibility:
     """Test that v1.0 and v1.1 behave equally."""
