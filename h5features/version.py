@@ -14,33 +14,44 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
-"""Provides functions related to h5features versions."""
+"""Provides versioning facilities to the h5features package.
 
-SUPPORTED_VERSIONS = ['0.1', '1.0', '1.1']
-"""The different versions supported by the h5features module """
+This module manages the h5features **file format versions**, specified
+as strings in the format 'major.minor'. File format versions are
+independant of the h5feature package version (but actually follow the
+same numerotation scheme).
 
+The module provides functions to list supported versions, read a
+version from a h5features file or check a specific version is
+supported.
+
+"""
+
+def supported_versions():
+    """Return the list of the file format versions supported by `h5features`."""
+    return ['0.1', '1.0', '1.1']
 
 def is_supported_version(version):
-    """Return True if the version is supported by h5features."""
-    return version in SUPPORTED_VERSIONS
-
+    """Return True if the `version` is supported by h5features."""
+    return version in supported_versions()
 
 def is_same_version(version, group):
-    """Return True if *version* and *group* versions are equals."""
+    """Return True if `version` and `read_version(group)` are equals."""
     return version == read_version(group)
 
-
 def read_version(group):
-    """Return the h5features version of a given HDF5 *group*.
+    """Return the h5features version of a given HDF5 `group`.
 
-    This method raise IOError if version is not supported.
+    Look for a 'version' attribute in the `group` and return its
+    value. Return '0.1' if the version is not found. Raises an IOError
+    if it is not supported.
 
     """
     version = ('0.1' if not 'version' in group.attrs
                else group.attrs['version'])
 
     # decode from bytes to str if needed
-    if type(version) == bytes:
+    if isinstance(version, bytes):
         version = version.decode()
 
     if not is_supported_version(version):

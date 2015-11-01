@@ -25,7 +25,7 @@ import h5features_v1_0 as h5f_10
 from utils import remove
 
 # generate artificial data
-nitems, dim, max_frames = 10000, 20, 500
+nitems, dim, max_frames = 100000, 20, 10
 class data: pass
 data.items, data.times, data.features = generate.full(nitems, dim, max_frames)
 data.filename = 'test.h5'
@@ -50,10 +50,10 @@ h5f.write(data.filename, data.groupname, data.items, data.times, data.features)
 read = "h5f.read(data.filename, data.groupname)"
 
 if __name__ == '__main__':
-    number = 1
-    repeat = 10
+    number = 10
+    repeat = 5
 
-    print('On writing')
+    print('On writing {} {} {}'.format(nitems, dim, max_frames))
     print('timeit v1.0: ', min(timeit.repeat(
         write, setup=v10_setup, number=number, repeat=repeat)))
     print('timeit v1.1: ', min(timeit.repeat(

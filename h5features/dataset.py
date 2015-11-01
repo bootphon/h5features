@@ -18,6 +18,53 @@
 
 import numpy as np
 
+from .version import is_same_version
+
+def is_same_dataset(data, group):
+    """Check that dataset names are consistent between `data` and a `group`.
+
+    This function is used internally by the `Writer`. Only the names
+    of the datasets are accessed, not their content.
+
+    :param dict data: A dictionary as specified in `Writer.write()`
+    :param group: The group to compare the dataset with
+    :type group: HDF5 group
+
+    :return: True if each dataset in `data` is present in the
+      `group`. False else.
+
+    """
+    names = [data['items'].name,
+             data['times'].name,
+             data['features'].name]
+
+    if data['features'].is_sparse():
+        names += ['frames', 'coordinates']
+
+    return all([name in group for name in names])
+
+
+def is_appendable_to(data, group, version='1.1'):
+    """Check if `data`` can be appended in a h5features `group`.
+
+    A dataset is apendable in a group if both names and shapes are
+    consistent.
+
+    :param dict data: A dictionary of h5features datasets. See
+    `Writer.write()`
+
+    :param group: A group in an opened HDF5 file.
+    :type group: HDF5 group
+
+    :return: True if `data` is appendable to the `group`.
+
+    """
+    return (is_same_version(version, group) and
+            is_same_dataset(data, group) and
+            all([data[k].is_appendable_to(group)
+                 for k in ('features', 'items', 'times')]))
+
+
 class Dataset(object):
     """The Dataset class is an **abstract base class** of h5features data.
 

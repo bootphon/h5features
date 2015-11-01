@@ -14,192 +14,162 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+
 """Provides the Reader class to the h5features package."""
 
 import h5py
+import os
 import numpy as np
 
-from .index import init_index
+from .features import Features
+from .items import Items, read_items
+from .times import Times
+from .index import read_index
 from .version import read_version
-from .dataset.items import Items
-from .dataset.features import Features
-from .dataset.times import Times
-
 
 class Reader(object):
-    """This class enables reading from h5features files.
+    """This class provides an interface for reading from h5features files.
 
-    The **Reader** constructor open an HDF5 file for reading and
-    load its index.
+    A `Reader` object wrap a h5features file. When created it loads
+    items, times and index from file. The read() method allows
+    fast access to features data.
 
-    Parameters
+    :param str filename: Path to the HDF5 file to read from.
 
-    *filename* : str --- HDF5 file potentially serving as a
-        container for many small files.
+    :param str groupname: Name of the group to read from in the file.
 
-    *groupname* : str --- HDF5 group to read the data from.
-
-    *index* : int, optional -- for faster access.
-
-    Raise
-
-    IOError if *filename* is not an existing HDF5 file.
-    IOError if *groupname* is not a valid group in *filename*.
-
-    .. note:: **The functions are not concurrent nor thread-safe**
-        because the HDF5 library is not concurrent and not always
-        thread-safe. Moreover, they aren't even atomic for independent
-        process (because there are several independent calls to the
-        file system), so that thread-safety and atomicity of
-        operations should be enforced externally when necessary.
+    :raise IOError: if `filename` is not an existing HDF5 file or
+        if `groupname` is not a valid group in `filename`.
 
     """
-    def __init__(self, filename, groupname, index=None):
-        # check filename is a valid HDF5 file and open it for reading
-        if not h5py.is_hdf5(filename):
+    def __init__(self, filename, groupname):
+        # open the file for reading
+        if not os.path.exists(filename) or not h5py.is_hdf5(filename):
             raise IOError('{} is not a HDF5 file'.format(filename))
-        self.filename = filename
-        self.h5file = h5py.File(self.filename, 'r')
+        self.h5file = h5py.File(filename, 'r')
 
-        # access to the requested group in the file
+        # open the requested group in the file
         if not groupname in self.h5file:
             raise IOError('{} is not a valid group in {}'
-                          .format(groupname, self.filename))
-        self.groupname = groupname
+                          .format(groupname, filename))
         self.group = self.h5file[groupname]
 
-        # Get the version of the readed file
+        # load h5features attributes and datasets
         self.version = read_version(self.group)
+        self.index = read_index(self.group, self.version)
+        self.items = read_items(self.group, self.version)
 
-        # read the index from group if not provided
-        if index is None:
-            self.index = init_index(self.version).read(self.group)
-        else:
-            self.index = index
+        self.dformat = self.group.attrs['format']
+        if self.dformat == 'sparse':
+            self.dim = self.group.attrs['dim']
+            self.frames = (self.group['lines'] if self.version == '0.1'
+                           else self.group['frames'])[...]
+
+    # def __del__(self):
+    #     self.h5file.close()
+
+    def index_read(self, index):
+        """Read data from its indexed coordinate"""
+        raise NotImplementedError
 
     def read(self, from_item=None, to_item=None,
              from_time=None, to_time=None):
-        """Retrieve requested datasets coordinates from the h5features index.
+        """Retrieve requested data coordinates from the h5features index.
 
-        Parameters
+        :param str from_item: Optional. Read the data starting from
+            this item. (defaults to the first stored item)
 
-        from_item : str, optional --- Read the data starting from this
-            item. (defaults to the first stored item)
-
-        to_item : str, optional --- Read the data until reaching the
+        :param str to_item: Optional. Read the data until reaching the
             item. (defaults to from_item if it was specified and to
             the last stored item otherwise).
 
-        from_time : float, optional --- (defaults to the beginning
-            time in from_item) the specified times are included in the
+        :param float from_time: Optional. (defaults to the beginning
+            time in from_item) The specified times are included in the
             output.
 
-        to_time : float, optional --- (defaults to the ending time in
-            to_item) the specified times are included in the output.
+        :param float to_time: Optional. (defaults to the ending time
+            in to_item) the specified times are included in the
+            output.
+
+        :return: A dictionary where keys are 'items', 'times, and
+            'features' and the values are instances of Items, Times, and
+            Features repectively.
 
         """
-        from_item, to_item = self._get_items(from_item, to_item)
+        # handling default arguments
+        if to_item is None:
+            to_item = self.items.data[-1] if from_item is None else from_item
+        if from_item is None:
+            from_item = self.items.data[0]
 
-        # index coordinates associated with the begin/end of from/to_item
-        from_item_bound = self._get_item_boundaries(from_item)
-        to_item_bound = self._get_item_boundaries(to_item)
+        # index coordinates of from/to_item. TODO optimize because we
+        # have 4 accesses to list.index() where 2 are enougth.
+        if not self.items.is_valid_interval(from_item, to_item):
+            raise IOError('cannot read items: not a valid items interval')
+        from_idx = self.items.data.index(from_item)
+        to_idx = self.items.data.index(to_item)
 
-        i1, i2 = self._get_times(from_time, to_time,
-                                 from_item, to_item,
-                                 from_item_bound, to_item_bound)
+        from_pos = self._get_item_position(from_idx)
+        to_pos = self._get_item_position(to_idx)
+
+        lower = self._get_from_time(from_time, from_pos)
+        upper = self._get_to_time(to_time, to_pos)
 
         # Step 2: access actual data
-        if self.index['format'] == 'sparse':
+        if self.dformat == 'sparse':
             # TODO implement this. will be different for v1.0 and legacy
             raise NotImplementedError('Reading sparse features not implemented')
         else:
-            features_group = self.group['features']
             # i2 included
-            features = (features_group[:, i1:i2 + 1].T if self.version == '0.1'
-                        else features_group[i1:i2 + 1, :])
-            times = self.group['times'][i1:i2 + 1]
+            features = (self.group['features'][:, lower:upper + 1].T
+                        if self.version == '0.1'
+                        else self.group['features'][lower:upper + 1, :])
+            times = self.group['times'][lower:upper + 1]
 
         # If we read a single item
-        if to_item == from_item:
+        if to_idx == from_idx:
             features = [features]
             times = [times]
         else: # Several items case
-            item_ends = (self.index['index'][from_item:to_item]
-                         - from_item_bound[0])
-            # TODO changed axis from 1 to 0, but need to check that
-            # this doesn't break compatibility with matlab generated
-            # files
-            features = np.split(features, item_ends + 1, axis=0)
-            times = np.split(times, item_ends + 1)
+            item_ends = self.index[from_idx:to_idx] - from_pos[0] + 1
+            features = np.split(features, item_ends, axis=0)
+            times = np.split(times, item_ends, axis=0)
 
-        items = self.index['items'][from_item:to_item + 1]
+        items = self.items.data[from_idx:to_idx + 1]
         return (Items(items),
                 Times(times),
                 Features(features))
 
-    def _get_items(self, from_item, to_item):
-        """Look for the given items in the indexed items list."""
-        items_group = self.index['items']
-
-        if to_item is None:
-            to_item = items_group[-1] if from_item is None else from_item
-        if from_item is None:
-            from_item = items_group[0]
-
-        res = []
-        for item in [from_item, to_item]:
-            try:
-                res.append(items_group.index(item))
-            except ValueError:
-                raise IOError('No entry for item {} in the group {} in {}'
-                              .format(item, self.groupname, self.filename))
-
-        if not res[1] >= res[0]:
-            raise IOError('from_item {} is located after to_item {} in file {}'
-                          .format(res[0], res[1], self.filename))
-
-        return res[0], res[1]
-
-    def _get_item_boundaries(self, item):
-        index_group = self.index['index']
-        start = 0 if item == 0 else index_group[item - 1] + 1
-        end = index_group[item]
+    def _get_item_position(self, idx):
+        """Return a tuple of (start, end) indices of an item given its index."""
+        start = 0 if idx == 0 else self.index[idx - 1] + 1
+        end = self.index[idx]
         return start, end
 
-    def _get_times(self, from_time, to_time, from_item, to_item,
-                   from_item_bound, to_item_bound):
-        i1 = self._get_from_time(from_time, from_item,
-                                 from_item_bound[0], from_item_bound[1])
-        i2 = self._get_to_time(to_time, to_item,
-                                 to_item_bound[0], to_item_bound[1])
-        return i1, i2
-
-    def _get_from_time(self, from_time, from_item, item_start, item_end):
-        times_group = self.index['times']
-        if from_time is None:
-            i1 = item_start
+    def _get_from_time(self, time, pos):
+        group = self.group['times']
+        if time is None:
+            i1 = pos[0]
         else:
             # the end is included...
-            times = times_group[item_start:item_end + 1]
+            times = group[pos[0]:pos[1] + 1]
             try:
                 # smallest time larger or equal to from_time
-                i1 = item_start + np.where(times >= from_time)[0][0]
+                i1 = pos[0] + np.where(times >= time)[0][0]
             except IndexError:
-                raise IOError('from_time {} is larger than the biggest time in '
-                              'from_item {}'.format(from_time, from_item))
+                raise IOError('time {} is too large'.format(time))
         return i1
 
-    def _get_to_time(self, to_time, to_item, item_start, item_end):
-        times_group = self.index['times']
-        if to_time is None:
-            i2 = item_end
+    def _get_to_time(self, time, pos):
+        group = self.group['times']
+        if time is None:
+            i2 = pos[1]
         else:
             # the end is included...
-            times = times_group[item_start:item_end + 1]
+            times = group[pos[0]:pos[1] + 1]
             try:
                 # smallest time larger or equal to from_time
-                i2 = item_start + np.where(times <= to_time)[0][-1]
+                i2 = pos[0] + np.where(times <= time)[0][-1]
             except IndexError:
-                raise IOError('to_time {} is smaller than the smallest time in '
-                              'to_item {}'.format(to_time, to_item))
+                raise IOError('time {} is too small'.format(time))
         return i2

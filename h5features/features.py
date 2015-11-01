@@ -14,6 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+
 """Provides Features class to the h5features module.
 
 TODO Describe the structure of features.
@@ -27,18 +28,21 @@ from .dataset import Dataset, _nb_per_chunk
 
 
 def contains_empty(features):
-    """Return True if one of the features is empty, False else."""
-    # Is features empty ?
+    """Check features data are not empty.
+
+    :param features: The features data to check.
+    :type features: list of numpy arrays.
+
+    :return: True if one of the array is empty, False else.
+
+    """
     if not features:
         return True
 
-    # Are features sub-arrays empty ?
-    sizes = [x.shape[0] for x in features]
-    for s in sizes:
-        if s == 0:
+    for feature in features:
+        if feature.shape[0] == 0:
             return True
 
-    # Nothing empty
     return False
 
 
@@ -85,22 +89,18 @@ def parse_dim(features):
 
 
 class Features(Dataset):
-    """This class manages features in h5features files."""
+    """This class manages features in h5features files.
 
+    :param data: Features should have time along the lines and
+        features along the columns (accomodating row-major storage
+        in hdf5 files).
+
+    :type data: list of 2D numpy array like
+
+    :raise IOError: if features are badly formatted.
+
+    """
     def __init__(self, data, name='features'):
-        """Initializes Features with data.
-
-        Parameters:
-
-        data : list of 2D numpy array like -- Features should have
-            time along the lines and features along the columns
-            (accomodating row-major storage in hdf5 files).
-
-        Raise:
-
-        IOError if features are badly formatted.
-
-        """
         if contains_empty(data):
             raise IOError('all features must be non-empty')
 
@@ -116,6 +116,10 @@ class Features(Dataset):
         except AttributeError:
             return False
 
+    def is_sparse(self):
+        """Return True if features are sparse matrices."""
+        return self.dformat == 'sparse'
+
     def is_appendable_to(self, group):
         """Return True if features are appendable to a HDF5 group."""
         return (group.attrs['format'] == self.dformat and
@@ -127,7 +131,6 @@ class Features(Dataset):
         """Return the dimension of features stored in a HDF5 group."""
         return group[self.name].shape[1]
 
-    # TODO Document create_dataset order : Features before Times
     def create_dataset(self, group, chunk_size):
         """Initialize the features subgoup."""
         group.attrs['format'] = self.dformat
@@ -138,18 +141,18 @@ class Features(Dataset):
         self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
                                           self.dim, chunk_size)
 
-    def write(self, group):
+    def write(self, group, sparsetodense=False):
         """Write stored features to a given group."""
-        data = [x.todense() if sp.issparse(x)
-                     else x for x in self.data]
-        data = np.concatenate(data, axis=0)
+        if sparsetodense:
+            self.data = [x.todense() if sp.issparse(x) else x
+                         for x in self.data]
 
-        nb_group, dim = group[self.name].shape
-        nb_data = data.shape[0]
-        new_size = nb_group + nb_data
+        nb_data = sum([d.shape[0] for d in self.data])
+        group_feat = group[self.name]
+        nb_group, dim = group_feat.shape
 
-        group[self.name].resize((new_size, dim))
-        group[self.name][nb_group:, :] = data
+        group_feat.resize((nb_group + nb_data, dim))
+        group_feat[nb_group:, :] = np.concatenate(self.data, axis=0)
 
 
 class SparseFeatures(Features):
@@ -164,7 +167,8 @@ class SparseFeatures(Features):
 
     def __eq__(self, other):
         try:
-            return self.sparsity == other.sparsity and super().__eq__(other)
+            return (self.sparsity == other.sparsity and
+                    super(SparseFeatures, self).__eq__(other))
         except AttributeError:
             return False
 
@@ -193,9 +197,8 @@ class SparseFeatures(Features):
                              chunks=chunks, maxshape=(None,))
 
         # Needed by Times.create_dataset
-        self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
-                                          int(round(self.sparsity*self.dim)),
-                                          chunk_size)
+        self.nb_per_chunk = _nb_per_chunk(
+            self.dtype.itemsize, int(round(self.sparsity*self.dim)), chunk_size)
 
     def write(self, group):
         pass

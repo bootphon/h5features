@@ -14,32 +14,40 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+
 """Provides the Items class to the h5features module."""
 
 from h5py import special_dtype
 from .dataset import Dataset
 
+def read_items(group, version):
+    """Return an Item instance initialized from a h5features group. """
+    if version == '0.1':
+        # parse unicode to strings
+        return ''.join(
+            [unichr(int(c)) for c in group['files'][...]]
+        ).replace('/-', '/').split('/\\')
+    elif version == '1.0':
+        return Items(list(group['files'][...]))
+    else:
+        return Items(list(group['items'][...]))
+
+
 class Items(Dataset):
-    """This class manages items in h5features files."""
+    """This class manages items in h5features files.
 
-    def __init__(self, data, name='items'):
-        """Initializes an Items dataset from raw data.
+    :param data: A list of item names (e.g. files from which the
+        features where extracted). Each name of the list must be
+        unique.
+    :type data: list of str
 
-        Parameters:
+    :param str name: Optional. The name of this items dataset.
 
-        - data : list of str --- A list of item names (e.g. files from
-            which the features where extracted). Each name of the list
-            must be unique.
-
-        - name : str --- The name of this items dataset. Default is
-            'items'.
-
-        Raise:
-
-        IOError if data is empty or if one or more names are not
+    :raise IOError: if data is empty or if one or more names are not
         unique in the list.
 
-        """
+    """
+    def __init__(self, data, name='items'):
         if not data:
             raise IOError('data is empty')
 
@@ -47,22 +55,6 @@ class Items(Dataset):
             raise IOError('all items must have different names.')
 
         super(Items, self).__init__(data, name, 1, special_dtype(vlen=str))
-
-
-    # def __eq__(self, other):
-    #     return super(Items, self).__eq__(other)
-
-    # def create_dataset(self, group, chunk_size):
-    #     """Creates an items subgroup in the given group.
-
-    #     Parameters:
-
-    #     - group : HDF5 Group --- The group where to create the 'files' subgroup.
-    #     - chunk_size : float --- Size of a chunk in the *group* (in MBytes)
-
-    #     """
-    #     super(Items, self).create_dataset(group, chunk_size)
-
 
     def is_appendable_to(self, group):
         return (not set(group[self.name][...]).intersection(self.data) or
@@ -74,13 +66,13 @@ class Items(Dataset):
         This method compares the shared items between the given group
         and self. Given these shared items, three cases can occur:
 
-        - No shared items: return False
+        * No shared items: return False
 
-        - There is only one shared item. It is first in self and last
-        in group : return True. In that case the first item in self is
-        erased.
+        * There is only one shared item. It is first in self and last
+          in group : return True. In that case the first item in self is
+          erased.
 
-        - Otherwise raise IOError.
+        * Otherwise raise IOError.
 
         """
         items_in_group = group[self.name][...]
@@ -114,3 +106,13 @@ class Items(Dataset):
         nitems = items_group.shape[0]
         items_group.resize((nitems + len(self.data),))
         items_group[nitems:] = self.data
+
+    def is_valid_interval(self, lower, upper):
+        """Return False if [lower:upper] is not a valid subitems interval. If
+        it is, then returns a tuple of (lower index, upper index)"""
+        try:
+            lower_idx = self.data.index(lower)
+            upper_idx = self.data.index(upper)
+            return (lower_idx, upper_idx) if lower_idx <= upper_idx else False
+        except ValueError:
+            return False

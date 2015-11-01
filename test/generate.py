@@ -18,7 +18,6 @@
 
 import numpy as np
 
-
 def _times_value(nframes, tformat):
     """Generate a new random value for times"""
     if tformat == 1:
@@ -76,3 +75,15 @@ def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
         feat.append(np.random.randn(nframes, dim))
         times.append(_times_value(nframes, tformat))
     return items(nitems, items_root), times, feat
+
+
+def full_dict(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
+    """Return a data dictionary as requested by Writer.write()"""
+    from h5features.items import Items
+    from h5features.times import Times
+    from h5features.features import Features
+
+    data = full(nitems, dim, max_frames, tformat, items_root)
+    return {'items':Items(data[0]),
+            'times':Times(data[1]),
+            'features':Features(data[2])}

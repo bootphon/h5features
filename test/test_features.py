@@ -9,7 +9,7 @@ import pytest
 
 import generate
 from utils import remove, assert_raise
-from h5features.dataset.features import *
+from h5features.features import *
 
 
 def test_contains_empty_good():
@@ -173,7 +173,7 @@ class TestEq:
 class TestFeatures:
     def setup(self):
         self.filename = 'test.h5'
-        self.group = h5py.File(self.filename, 'w').create_group('group')
+        self.group = h5py.File(self.filename).create_group('group')
         self.data = generate.features(10,5,100)
         self.feat = Features(self.data)
 
@@ -182,6 +182,14 @@ class TestFeatures:
 
     def test_side_effect(self):
         feat2 = Features(self.feat.data)
-        self.feat.create_dataset(self.group, 10)
+        self.feat.create_dataset(self.group, 0.1)
         self.feat.write(self.group)
         assert self.feat == feat2
+
+    def test_write(self):
+        self.feat.create_dataset(self.group, 0.1)
+        self.feat.write(self.group)
+
+        assert 'features' in self.group
+        f = self.group['features'][...]
+        assert len(f) == sum([d.shape[0] for d in self.data])
