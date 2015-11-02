@@ -9,19 +9,18 @@
 h5features
 ==========
 
-This package provide functions to read and write in the h5features file format.
+This package defines a **h5features file format** for storing features
+computed for large numerical datasets (typically a speech
+database). It also provides functions to read and write in this
+format.
 
-Installation
-------------
-
-::
+* **Installation**::
 
    $ python setup.py build && python setup.py install
 
-Usage
------
+* **Usage**
 
-See the documentation `online <http://h5features2.readthedocs.org>`_ or
-build it with::
+  See the documentation `online <http://h5features2.readthedocs.org>`_ or
+  build it with::
 
-  $ python setup.py sphinx_build
+    $ python setup.py sphinx_build
