@@ -42,7 +42,7 @@ sys.modules.update((module, Mock()) for module in MOCK_MODULES)
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
     'numpydoc'
 ]
 
