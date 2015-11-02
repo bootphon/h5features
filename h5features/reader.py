@@ -113,18 +113,18 @@ class Reader(object):
         to_pos = self._get_item_position(to_idx)
 
         lower = self._get_from_time(from_time, from_pos)
-        upper = self._get_to_time(to_time, to_pos)
+        # upper included with +1
+        upper = 1 + self._get_to_time(to_time, to_pos)
 
         # Step 2: access actual data
         if self.dformat == 'sparse':
-            # TODO implement this. will be different for v1.0 and legacy
             raise NotImplementedError('Reading sparse features not implemented')
         else:
-            # i2 included
-            features = (self.group['features'][:, lower:upper + 1].T
+
+            features = (self.group['features'][:, lower:upper].T
                         if self.version == '0.1'
-                        else self.group['features'][lower:upper + 1, :])
-            times = self.group['times'][lower:upper + 1]
+                        else self.group['features'][lower:upper, :])
+            times = self.group['times'][lower:upper]
 
         # If we read a single item
         if to_idx == from_idx:
@@ -147,29 +147,22 @@ class Reader(object):
         return start, end
 
     def _get_from_time(self, time, pos):
-        group = self.group['times']
         if time is None:
-            i1 = pos[0]
+            return pos[0]
         else:
-            # the end is included...
-            times = group[pos[0]:pos[1] + 1]
+            times = self.group['times'][pos[0]:pos[1] + 1]
             try:
                 # smallest time larger or equal to from_time
-                i1 = pos[0] + np.where(times >= time)[0][0]
+                return pos[0] + np.where(times >= time)[0][0]
             except IndexError:
                 raise IOError('time {} is too large'.format(time))
-        return i1
 
     def _get_to_time(self, time, pos):
-        group = self.group['times']
         if time is None:
-            i2 = pos[1]
+            return pos[1]
         else:
-            # the end is included...
-            times = group[pos[0]:pos[1] + 1]
+            times = self.group['times'][pos[0]:pos[1] + 1]
             try:
-                # smallest time larger or equal to from_time
-                i2 = pos[0] + np.where(times <= time)[0][-1]
+                return pos[0] + np.where(times <= time)[0][-1]
             except IndexError:
                 raise IOError('time {} is too small'.format(time))
-        return i2
