@@ -23,20 +23,20 @@ modules and docstrings.
 """
 import sys
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
+#from setuptools.command.test import test as TestCommand
 
 # This is a plug-in for setuptools that will invoke py.test
 # when you run python setup.py test
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
+# class PyTest(TestCommand):
+#     def finalize_options(self):
+#         TestCommand.finalize_options(self)
+#         #self.test_args = ['-x']
+#         self.test_suite = True
 
-    def run_tests(self):
-        # import here, because outside the required eggs aren't loaded yet
-        import pytest
-        sys.exit(pytest.main(self.test_args))
+#     def run_tests(self):
+#         # import here, because outside the required eggs aren't loaded yet
+#         import pytest
+#         sys.exit(pytest.main(self.test_args))
 
 version = "1.1.0"
 
@@ -52,18 +52,18 @@ setup(name='h5features',
       keywords='HDF5 h5py features',
       author='Thomas Schatz, Mathieu Bernard, Roland Thiolliere',
       author_email='mmathieubernardd@gmail.com',
-      url='https://github.com/mmmaat/h5features',
+      url='https://github.com/mmmaat/h5features2',
       license='GPLv3',
       packages=find_packages(exclude=['test']),
       include_package_data=True,
       zip_safe=False,
       tests_require=['pytest'],
-      cmdclass={'test': PyTest},
+      #cmdclass={'test': PyTest},
       install_requires=[
-        #'python >= 2.7',
-        'h5py >= 2.3.0',
-        'numpy >= 1.8.0',
-        'scipy >= 0.13.0',
-        'numpydoc'
+          #'python >= 2.7',
+          'h5py >= 2.3.0',
+          'numpy >= 1.8.0',
+          'scipy >= 0.13.0',
+          #'numpydoc'
       ],
   )

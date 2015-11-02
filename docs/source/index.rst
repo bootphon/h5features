@@ -19,7 +19,6 @@ Table of contents
    h5features
    whatsnew
    license
-   index
 
 * :ref:`genindex`
 * :ref:`modindex`
