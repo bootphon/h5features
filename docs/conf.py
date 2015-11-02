@@ -25,8 +25,9 @@ import shlex
 import os
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
-    sys.path.insert(0, os.path.abspath('h5features'))
-    print(sys.path)
+    sys.path.insert(0, os.path.abspath('../h5features'))
+    for p in sys.path:
+        print(p)
 
 # -- General configuration ------------------------------------------------
 
