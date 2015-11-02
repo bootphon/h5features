@@ -28,20 +28,17 @@ def converter(filein, fileout, version='1.1', groupname='features',verb=False):
     This function is a simple wrapper to a *Reader* and a *Writer*.
     """
     reader = Reader(filein, groupname)
-    read = reader.read()
+    data = reader.read()
     if verb:
         print('version readed =', reader.version)
-        print('index keys are', list(reader.index.keys()))
 
     if os.path.exists(fileout):
         os.remove(fileout)
 
     writer = Writer(fileout, version=version)
-    writer.write({'items':read[0], 'times':read[1], 'features':read[2]},
-                 groupname=groupname, append=False)
+    writer.write(data, groupname, append=False)
     if verb:
         print('version writed =', writer.version)
-        print('index keys are', list(writer.index.keys()))
 
 
 def main():
