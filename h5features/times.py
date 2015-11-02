@@ -22,34 +22,23 @@ from .dataset import Dataset
 def parse_times(times):
     """Return the times vectors dimension from raw times arrays.
 
-    Parameters
-    ----------
+    :param times: Each element of the list contains the timestamps of
+        an h5features item. For all t in times, we must have t.ndim to
+        be either 1 or 2.
 
-    times : a list of numpy arrays
+        * 1D arrays contain the center timestamps of each frame of the
+          related item.
 
-        Each element of the list contains the timestamps of an
-        h5features item. For all t in times, we must have t.ndim to be
-        either 1 or 2.
+        * 2D arrays contain the begin and end timestamps of each
+          items's frame, thus having t.ndim == 2 and t.shape[1] == 2.
 
-        - 1D arrays contain the center timestamps of each frame of
-          the related item.
+    :type times: list of numpy arrays
 
-        - 2D arrays contain the begin and end timestamps of each
-          items's frame, thus having t.ndim == 2 and t.shape[1] == 2
+    :raise IOError: if the time format is not 1 or 2, or if times
+        arrays have different dimensions.
 
-    Raise
-    -----
-
-    IOError if the time format is not 1 or 2, or if times arrays have
-    different dimensions.
-
-    Return
-    ------
-
-    dim : int
-
-        The parsed times dimension is either 1 or 2 for 1D or 2D times
-        arrays respectively.
+    :return: The parsed times dimension is either 1 or 2 for 1D or 2D
+        times arrays respectively.
 
     """
     dim = times[0].ndim
@@ -77,6 +66,7 @@ class Times(Dataset):
         """Return True if times data can be appended to the given group."""
         return group[self.name][...].ndim == self.dim
 
+    # TODO Document create_dataset order : Features before Times
     def create_dataset(self, group, per_chunk):
         """Creates an empty times dataset in the given group."""
         shape = (0,) if self.dim == 1 else (0, self.dim)

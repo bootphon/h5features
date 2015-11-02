@@ -7,6 +7,7 @@ import os
 import numpy as np
 import h5py
 import pytest
+from shutil import copyfile
 
 import h5features.h5features as h5f
 import generate
@@ -43,8 +44,9 @@ class TestH5FeaturesWrite:
         with open(self.filename, 'w') as f:
             f.write('This is not a HDF5 file')
 
+        data = generate.full(1)
         with pytest.raises(IOError) as ioerror:
-            h5f.write(self.filename, 'group', [], [], [])
+            h5f.write(self.filename, 'group', data[0], data[1], data[2])
         msg = str(ioerror.value)
         assert self.filename in msg
         assert 'not a HDF5 file' in msg
@@ -137,27 +139,31 @@ class TestH5FeaturesReadWrite:
 
     # def test_concat(self):
     #     """Concatenate new data to an existing item in an existing file."""
-    #     i, t, f = generate.full(1, self.dim, 4, items_root='File')
-    #     h5f.write(self.filename, 'group', i, t, f)
-    #     assert ['File_0'] == i
 
-    #     # concatenate new item to an existing one
-    #     features_added = np.zeros(shape=(2, self.dim))
-    #     times_added = np.linspace(0, 2, 2)
-    #     h5f.write(self.filename, 'group', ['File_0'],
-    #               [times_added], [features_added])
+    #     # write a single item named 'item_0'
+    #     data1 = generate.full(1, self.dim, 10, items_root='item')
+    #     h5f.write(self.filename, 'group1', data1[0], data1[1], data1[2])
+    #     h5f.write(self.filename, 'group3', data1[0], data1[1], data1[2])
 
-    #     # read it
-    #     times_r, features_r = h5f.read(self.filename, 'group')
-    #     assert list(times_r.keys()) == i == ['File_0']
-    #     assert list(features_r.keys()) == i == ['File_0']
+    #     # concatenate new data to 'item_0'
+    #     data2 = generate.full(1, self.dim, 20, items_root='item')
+    #     h5f.write(self.filename, 'group2', data2[0], data2[1], data2[2])
+    #     h5f.write(self.filename, 'group3', data2[0], data2[1], data2[2])
 
-    #     for ii, ff in enumerate(i):
-    #         assert all(times_r[ff] == t[ii])
-    #         assert (features_r[ff] == f[ii]).all()
+    #     remove('toto.h5')
+    #     copyfile(self.filename, 'toto.h5')
 
-    #     print(times_r['File_0'], '\n'*2, t[-1], '\n'*2, times_added)
-    #     assert times_r['File_0'] == np.concatenate([t[-1], times_added])
-    #     assert (features_r['File_0'] == np.concatenate([f[-1],
-    #                                                     features_added],
-    #                                                    axis=0) ).all()
+    #     r_t, r_f = h5f.read(self.filename, 'group')
+    #     items = list(r_f.keys())
+    #     times = list(r_t.values())
+    #     features = list(r_f.values())
+    #     assert items == data1[0]
+    #     assert times == np.concatenate([data1[1][-1], data2[1]], axis=0)
+    #     #assert all([(t == d).all() for t, d in zip(features, new_data[2])])
+    #     #assert (features[item] == data[2][index]).all()
+
+    #     # print(times_r['File_0'], '\n'*2, t[-1], '\n'*2, times_added)
+    #     # assert times_r['File_0'] == np.concatenate([t[-1], times_added])
+    #     # assert (features_r['File_0'] == np.concatenate([f[-1],
+    #     #                                                 features_added],
+    #     #                                                axis=0) ).all()

@@ -8,7 +8,7 @@ import pytest
 
 import generate
 from utils import assert_raise, remove
-from h5features.dataset.items import Items
+from h5features.items import Items
 
 
 class TestItemsInit:

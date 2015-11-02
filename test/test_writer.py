@@ -1,7 +1,4 @@
-"""Test of the h5features.writer module.
-
-@author: Mathieu Bernard
-"""
+"""Test of the h5features.writer module."""
 
 import h5py
 import pytest
@@ -10,9 +7,10 @@ import generate
 from utils import remove, assert_raise
 from h5features.h5features import write
 from h5features.writer import Writer
-from h5features.dataset.features import Features
-from h5features.dataset.times import Times
-from h5features.dataset.items import Items
+from h5features.features import Features
+from h5features.times import Times
+from h5features.items import Items
+from h5features.dataset import is_appendable_to
 
 class TestInit:
     """Test of Writer.__init__"""
@@ -22,7 +20,7 @@ class TestInit:
     def teardown(self):
         remove(self.filename)
 
-    def test_nto_hdf5_file(self):
+    def test_not_hdf5_file(self):
         with open(self.filename, 'w') as temp:
             temp.write('This is not a HDF5 file')
         assert_raise(Writer, self.filename, 'not a HDF5 file')
@@ -71,9 +69,9 @@ class TestWriteAppendable:
 
     def test_basic_works(self):
         w = Writer(self.filename)
-        w.is_appendable_to(self.g, {'features':self.features,
-                                 'items':self.items2,
-                                 'times':self.times})
+        is_appendable_to({'features':self.features,
+                          'items':self.items2,
+                          'times':self.times}, self.g)
 
     def test_version(self):
         assert self.g.attrs['version'] == Writer(self.filename).version

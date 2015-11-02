@@ -6,8 +6,9 @@ h5features.egg-info*
 *.h5
 /.pytest.restart
 /test/.pytest.restart
-/docs/build
-/docs/_build/
-/.eggs/*
-.cache
+docs/build
+docs/legacy
+*.egg-info/*
 /test/stats
+.cache/*
+.eggs/*

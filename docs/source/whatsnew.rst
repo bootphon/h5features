@@ -4,7 +4,7 @@
 What's new ?
 ============
 
-These document the changes between versions of h5features. A *TODO*
+These document the changes between versions of h5features. A **TODO**
 list for future releases is also provided.
 
 
@@ -25,12 +25,12 @@ API.
 
     With *group* as the h5features root in a HDF5 file, the structure
     evolved from *group/[files, times, features, file_index]* to
-    *group/[items, times, features, index]*. These change was done for
-    clarity and consistency with the code.
+    *group/[items, times, features, index]*. These changes are done
+    for clarity and consistency with the code.
 
 * **Test suite**
 
-    The project is now endowed with a suite of more than 50 unit
+    The project is now endowed with a `pytest`_ suite of more than 50 unit
     tests.
 
 * **Improved documentation**
@@ -46,7 +46,9 @@ the underlying HDF5 file structure, add a *version* attribute and
 improve the index facilities.
 
 
-*TODO* list
-===========
+**TODO** list
+=============
 
 .. include:: ../../TODO.rst
+
+.. _pytest: http://www.pytest.org

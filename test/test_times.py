@@ -11,7 +11,7 @@ import pytest
 import generate
 from utils import assert_raise, remove
 from h5features.h5features import write, read
-from h5features.dataset.times import *
+from h5features.times import *
 
 
 class TestParseTimes:
