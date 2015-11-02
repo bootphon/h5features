@@ -1,0 +1,95 @@
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Comparing execution times of h5features 1.0 and 1.1 versions."""
+
+import argparse
+import os
+import timeit
+
+import generate
+import h5features_v1_0 as h5f
+from utils import remove
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--nitems',
+                        help='number of items to generate',
+                        default=10000, type=int)
+
+    parser.add_argument('-d', '--dimension',
+                        help='features dimension',
+                        default=20, type=int)
+
+    parser.add_argument('-f', '--max_frames',
+                        help='maximal number of frames per items',
+                        default=10, type=int)
+
+    parser.add_argument('-n', '--ntimes',
+                        help='number of times each operation is timed',
+                        default=10, type=int)
+
+    parser.add_argument('-r', '--repeat',
+                        help='number of repetitions (lowest time is resulted)',
+                        default=3, type=int)
+
+    return parser.parse_args()
+
+def timeme(cmd, setup, args):
+    return min(timeit.repeat(
+        cmd, setup=setup, number=args.ntimes, repeat=args.repeat))
+
+if __name__ == '__main__':
+    args = parse_args()
+    print('Parameters are i={}, d={}, f={}, n={}, r={}'
+          .format(args.nitems, args.dimension, args.max_frames,
+                  args.ntimes, args.repeat))
+
+    data = generate.full_dict(args.nitems, args.dimension, args.max_frames)
+    data['filename'] = 'test.h5'
+    data['groupname'] = 'group'
+
+    v10_setup = """\
+import h5features_v1_0 as h5f
+from utils import remove
+from __main__ import data
+    """
+
+    v11_setup = """\
+import h5features as h5f
+from utils import remove
+from __main__ import data
+    """
+
+    write = """\
+remove(data['filename'])
+h5f.write(data['filename'], data['groupname'],
+ data['items'].data, data['times'].data, data['features'].data)
+    """
+    read = "h5f.read(data['filename'], data['groupname'])"
+
+    print('Writing:')
+    print('  1.0: ', timeme(write, v10_setup, args))
+    print('  1.1: ', timeme(write, v11_setup, args))
+
+    remove(data['filename'])
+    h5f.write(data['filename'], data['groupname'],
+              data['items'].data, data['times'].data, data['features'].data)
+
+    print('Reading:')
+    print('  1.0: ', timeme(read, v10_setup, args))
+    print('  1.1: ', timeme(read, v11_setup, args))
