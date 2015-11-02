@@ -46,7 +46,7 @@ def is_same_dataset(data, group):
 
 
 def is_appendable_to(data, group, version='1.1'):
-    """Check if `data`` can be appended in a h5features `group`.
+    """Check if `data` can be appended in a h5features `group`.
 
     A dataset is apendable in a group if both names and shapes are
     consistent.
@@ -55,7 +55,10 @@ def is_appendable_to(data, group, version='1.1'):
         `Writer.write()`
 
     :param group: A group in an opened HDF5 file.
+
     :type group: HDF5 group
+
+    :param str version: The h5features version of the `group`.
 
     :return: True if `data` is appendable to the `group`.
 
