@@ -15,6 +15,11 @@
 import sys
 import os
 
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+sys.path.insert(0, os.path.abspath('../h5features'))
+
 # mocking for ReadTheDoc
 from mock import Mock as MagicMock
 
@@ -24,13 +29,7 @@ class Mock(MagicMock):
             return Mock()
 
 MOCK_MODULES = ['argparse', 'scipy', 'numpy', 'pandas', 'h5py']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../h5features'))
+sys.modules.update((module, Mock()) for module in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
 
@@ -43,8 +42,8 @@ sys.path.insert(0, os.path.abspath('../h5features'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
+    'sphinx.ext.viewcode'
+    'numpydoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -258,9 +257,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'h5features', u'h5features Documentation',
-   u'Mathieu Bernard', 'h5features', 'One line description of project.',
-   'Miscellaneous'),
-]
+   u'Mathieu Bernard', 'h5features', 'Read/write features from large datasets.',
+   ''), ]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
