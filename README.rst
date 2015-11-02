@@ -24,7 +24,8 @@ Installation
 Usage
 -----
 
-See the documentation `online <http://h5features2.readthedocs.org>`_ or
+See the documentation `online
+<http://h5features2.readthedocs.org/en/latest/?badge=latest>`_ or
 build it with::
 
   $ python setup.py sphinx_build

@@ -19,17 +19,18 @@ import os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../h5features'))
+#sys.path.insert(0, os.path.abspath('./h5features'))
 
 # mocking for ReadTheDoc
-from mock import Mock as MagicMock
+# from mock import Mock as MagicMock
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
+# class Mock(MagicMock):
+#     @classmethod
+#     def __getattr__(cls, name):
+#             return Mock()
 
-MOCK_MODULES = ['argparse', 'scipy', 'numpy', 'pandas', 'h5py', 'numpydoc']
-sys.modules.update((module, Mock()) for module in MOCK_MODULES)
+# MOCK_MODULES = ['argparse', 'scipy', 'numpy', 'h5py']
+# sys.modules.update((module, Mock()) for module in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
 
@@ -83,7 +84,7 @@ release = '1.1.0'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['setup']
+exclude_patterns = ['build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
