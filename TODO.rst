@@ -13,6 +13,7 @@ For a future release
 --------------------
 
   - Have a h5features.File class inspired by h5py.File
+  - Implement sparse features
 
 General TODOs
 -------------

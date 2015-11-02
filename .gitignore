@@ -10,3 +10,4 @@ h5features.egg-info*
 /docs/_build/
 /.eggs/*
 .cache
+/test/stats

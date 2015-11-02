@@ -138,10 +138,14 @@ class Features(Dataset):
         self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
                                           self.dim, chunk_size)
 
-    def write(self, group):
-        """Write stored features to a given group."""
-        data = [x.todense() if sp.issparse(x)
-                     else x for x in self.data]
+    def write(self, group, sparsetodense=False):
+        """Write features to an h5features  group."""
+        if sparsetodense:
+            data = [x.todense() if sp.issparse(x)
+                    else x for x in self.data]
+        else:
+            data = self.data
+
         data = np.concatenate(data, axis=0)
 
         nb_group, dim = group[self.name].shape
