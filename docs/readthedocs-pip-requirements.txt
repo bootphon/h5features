@@ -1,4 +1,0 @@
-Sphinx>=1.3
-numpydoc>=0.4
-numpy>=1.6
-mock>=1.0
