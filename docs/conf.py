@@ -24,19 +24,16 @@ import shlex
 
 # mocking for ReadTheDoc
 from mock import Mock as MagicMock
-
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
             return Mock()
-
-MOCK_MODULES = ['scipy', 'numpy', 'h5py']
+MOCK_MODULES = ['scipy', 'numpy', 'h5py', 'scipy.sparse']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-# import os
 # on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # if on_rtd:
-#     sys.path.insert(0, os.path.abspath('../h5features'))
+#     sys.path.insert(0, os.path.abspath('h5features'))
 #     for p in sys.path:
 #         print(p)
 
