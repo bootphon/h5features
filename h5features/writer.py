@@ -57,7 +57,7 @@ class Writer(object):
         self.chunk_size = chunk_size
 
 
-    def write(self, data, groupname='h5features', append=True):
+    def write(self, data, groupname='h5features', append=False):
         """Write h5features data in a specified group of the file.
 
         :param dict data: A dictionary of h5features datasets. It must
@@ -105,8 +105,7 @@ class Writer(object):
         :param str groupname: The name of the group to initialize in
           the file
 
-        :param dict data: A dictionary of h5features datasets. See
-          `Writer.write()`
+        :param dict data: A data dictionary as documented in `Writer.write()`
 
         :return: The created group.
         """

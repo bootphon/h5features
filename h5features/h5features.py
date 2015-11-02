@@ -23,7 +23,7 @@ from .times import Times
 from .features import Features, SparseFeatures, parse_dformat
 
 def read(filename, groupname, from_item=None, to_item=None,
-         from_time=None, to_time=None):#, index=None):
+         from_time=None, to_time=None, index=None):
     """Reads in a h5features file.
 
     :param str filename: Path to a hdf5 file potentially serving as a
@@ -44,7 +44,8 @@ def read(filename, groupname, from_item=None, to_item=None,
     :param float to_time: Optional. (defaults to the ending time in
         to_item) the specified times are included in the output
 
-    #:param int index: Optional. For faster access.
+    :param int index: Optional. For faster access. TODO Document and
+        test this.
 
     :return: A tuple (times, features) such as:
 
@@ -61,11 +62,11 @@ def read(filename, groupname, from_item=None, to_item=None,
 
     """
 
-    reader = Reader(filename, groupname)#, index)
-    items, times, features = reader.read(from_item, to_item,
-                                         from_time, to_time)
-    return (dict(zip(items.data, times.data)),
-            dict(zip(items.data, features.data)))
+    reader = Reader(filename, groupname)
+    data = (reader.read(from_item, to_item, from_time, to_time)
+            if index is None else reader.index_read(index))
+    return (dict(zip(data['items'].data, data['times'].data)),
+            dict(zip(data['items'].data, data['features'].data)))
 
 
 def write(filename, groupname, items_data, times_data, features_data,
@@ -127,7 +128,7 @@ def write(filename, groupname, items_data, times_data, features_data,
                         else Features(features_data))
 
     # Write all that stuff in the HDF5 file's specified group
-    Writer(filename, chunk_size).write(data, groupname)
+    Writer(filename, chunk_size).write(data, groupname, append=True)
 
 
 def simple_write(filename, group, times, features, item='item'):

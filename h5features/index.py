@@ -19,7 +19,7 @@
 
 import numpy as np
 
-from .dataset import _nb_per_chunk
+from .dataset import nb_per_chunk
 
 def cumindex(features):
     """Return the index computed from features."""
@@ -28,7 +28,7 @@ def cumindex(features):
 def create_index(group, chunk_size):
     """Create an empty index dataset in the given group."""
     dtype = np.int64
-    chunks = (_nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
+    chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
     group.create_dataset('index', (0,), dtype=dtype,
                          chunks=chunks, maxshape=(None,))
 
@@ -68,7 +68,7 @@ def write_index(group, items, features, append):
         group['index'][nidx:] = index
     else:
         group['index'].resize((index.shape[0],))
-        group['index'][nidx:] = index
+        group['index'][...] = index
 
 def read_index(group, version='1.1'):
     """Return the index stored in a h5features group.

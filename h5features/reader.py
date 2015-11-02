@@ -31,8 +31,8 @@ class Reader(object):
     """This class provides an interface for reading from h5features files.
 
     A `Reader` object wrap a h5features file. When created it loads
-    items, times and index from file. The read() method allows
-    fast access to features data.
+    items and index from file. The read() method then allows fast
+    access to features and times data.
 
     :param str filename: Path to the HDF5 file to read from.
 
@@ -120,7 +120,6 @@ class Reader(object):
         if self.dformat == 'sparse':
             raise NotImplementedError('Reading sparse features not implemented')
         else:
-
             features = (self.group['features'][:, lower:upper].T
                         if self.version == '0.1'
                         else self.group['features'][lower:upper, :])
@@ -136,9 +135,9 @@ class Reader(object):
             times = np.split(times, item_ends, axis=0)
 
         items = self.items.data[from_idx:to_idx + 1]
-        return (Items(items),
-                Times(times),
-                Features(features))
+        return {'items':Items(items),
+                'times':Times(times),
+                'features':Features(features)}
 
     def _get_item_position(self, idx):
         """Return a tuple of (start, end) indices of an item given its index."""

@@ -24,7 +24,7 @@ TODO Describe the structure of features.
 import numpy as np
 import scipy.sparse as sp
 
-from .dataset import Dataset, _nb_per_chunk
+from .dataset import Dataset, nb_per_chunk
 
 
 def contains_empty(features):
@@ -87,7 +87,6 @@ def parse_dim(features):
     return dim
 
 
-
 class Features(Dataset):
     """This class manages features in h5features files.
 
@@ -138,7 +137,7 @@ class Features(Dataset):
 
         # attribute declared outside init is not safe. Used because
         # Times.create_dataset need it
-        self.nb_per_chunk = _nb_per_chunk(self.dtype.itemsize,
+        self.nb_per_chunk = nb_per_chunk(self.dtype.itemsize,
                                           self.dim, chunk_size)
 
     def write(self, group, sparsetodense=False):
@@ -183,7 +182,7 @@ class SparseFeatures(Features):
 
         # for storing sparse data we don't use the self.nb_per_chunk,
         # which is only used by the Writer to determine times chunking.
-        per_chunk = _nb_per_chunk(self.dtype.itemsize, 1, chunk_size)
+        per_chunk = nb_per_chunk(self.dtype.itemsize, 1, chunk_size)
 
         group.create_dataset('coordinates', (0, 2), dtype=np.float64,
                              chunks=(per_chunk, 2), maxshape=(None, 2))
@@ -192,12 +191,12 @@ class SparseFeatures(Features):
                              chunks=(per_chunk,), maxshape=(None,))
 
         dtype = np.int64
-        chunks = (_nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
+        chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
         group.create_dataset('frames', (0,), dtype=dtype,
                              chunks=chunks, maxshape=(None,))
 
         # Needed by Times.create_dataset
-        self.nb_per_chunk = _nb_per_chunk(
+        self.nb_per_chunk = nb_per_chunk(
             self.dtype.itemsize, int(round(self.sparsity*self.dim)), chunk_size)
 
     def write(self, group):
