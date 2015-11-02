@@ -12,3 +12,4 @@ docs/legacy
 /test/stats
 .cache/*
 .eggs/*
+docs/_build

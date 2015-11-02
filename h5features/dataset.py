@@ -52,7 +52,7 @@ def is_appendable_to(data, group, version='1.1'):
     consistent.
 
     :param dict data: A dictionary of h5features datasets. See
-    `Writer.write()`
+        `Writer.write()`
 
     :param group: A group in an opened HDF5 file.
     :type group: HDF5 group

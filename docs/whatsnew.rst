@@ -49,6 +49,6 @@ improve the index facilities.
 **TODO** list
 =============
 
-.. include:: ../../TODO.rst
+.. include:: ../TODO.rst
 
 .. _pytest: http://www.pytest.org
