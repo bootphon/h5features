@@ -14,12 +14,11 @@
 # serve to show the default.
 
 import sys
-import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('../h5features'))
+#sys.path.insert(0, os.path.abspath('.'))
 
 # mocking for ReadTheDoc
 from mock import Mock as MagicMock
@@ -29,12 +28,6 @@ class Mock(MagicMock):
             return Mock()
 MOCK_MODULES = ['scipy', 'numpy', 'h5py', 'scipy.sparse']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
-# on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-# if on_rtd:
-#     sys.path.insert(0, os.path.abspath('h5features'))
-#     for p in sys.path:
-#         print(p)
 
 # -- General configuration ------------------------------------------------
 
@@ -92,7 +85,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', '../setup.py']
+exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

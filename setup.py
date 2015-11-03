@@ -17,9 +17,17 @@
 
 """Setup script for the h5features package"""
 
+import os
 from setuptools import setup, find_packages
 
 VERSION = '1.1.0'
+
+ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+REQUIREMENTS = [] if ON_RTD else[
+    'h5py >= 2.3.0',
+    'numpy >= 1.8.0',
+    'scipy >= 0.13.0',
+]
 
 setup(
     name='h5features',
@@ -36,9 +44,5 @@ setup(
     zip_safe=False,
     #tests_require=['pytest'],
     #cmdclass={'test': PyTest},
-    install_requires=[
-        'h5py >= 2.3.0',
-        'numpy >= 1.8.0',
-        'scipy >= 0.13.0',
-    ],
+    install_requires=REQUIREMENTS,
 )
