@@ -7,8 +7,8 @@ python:
 notifications:
   email: false
 
-# from http://conda.pydata.org/docs/faq.html#using-conda-with-travis-ci
 # We are using miniconda for easy support of scipy
+# See http://conda.pydata.org/docs/faq.html#using-conda-with-travis-ci
 install:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -26,3 +26,4 @@ install:
 
 script:
   - py.test test
+  # python setup.py test
