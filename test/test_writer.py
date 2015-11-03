@@ -1,6 +1,7 @@
 """Test of the h5features.writer module."""
 
 import h5py
+import os
 import pytest
 
 import generate
@@ -11,6 +12,13 @@ from h5features.features import Features
 from h5features.times import Times
 from h5features.items import Items
 from h5features.dataset import is_appendable_to
+
+def test_create_a_file():
+    name = 'azecqgxqsdqxws.eztcqezxf'
+    assert not os.path.exists(name)
+    Writer(name)
+    assert os.path.exists(name)
+    remove(name)
 
 class TestInit:
     """Test of Writer.__init__"""
@@ -76,6 +84,7 @@ class TestWriteAppendable:
 
     def test_version(self):
         assert self.g.attrs['version'] == Writer('toto').version
+        remove('toto')
 
     # def test_group(self):
     #     with pytest.raises(IOError):
