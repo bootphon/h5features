@@ -65,8 +65,6 @@ class Reader(object):
             self.frames = (self.group['lines'] if self.version == '0.1'
                            else self.group['frames'])[...]
 
-    # def __del__(self):
-    #     self.h5file.close()
 
     def index_read(self, index):
         """Read data from its indexed coordinate"""

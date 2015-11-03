@@ -7,41 +7,32 @@ API reference
     :undoc-members:
     :show-inheritance:
 
+Reading and writing data
+========================
 
-Writing to h5features files
-===========================
-
-The write() function
---------------------
-
-.. autofunction:: h5features.h5features.write
-
-
-The writer module
------------------
-
-.. automodule:: h5features.writer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Reading from h5features files
-=============================
-
-The read() function
---------------------
-
-.. autofunction:: h5features.h5features.read
-
-The reader module
------------------
+h5features.reader module
+------------------------
 
 .. automodule:: h5features.reader
     :members:
     :undoc-members:
     :show-inheritance:
 
+h5features.writer module
+------------------------
+
+.. automodule:: h5features.writer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.h5features module
+----------------------------
+
+.. automodule:: h5features.h5features
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Converting h5features files
 ===========================

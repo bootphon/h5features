@@ -29,8 +29,8 @@ class Writer(object):
     """This class provides an interface for writing to h5features files.
 
     :param str filename: The name of the HDF5 file to write on. For
-        clarity you should use a '\*.h5' extension but this is not
-        required.
+        clarity you should use a '.h5' or '.h5f' extension but this is
+        not required by the package.
 
     :param float chunk_size: Optional. The size in Mo of a chunk in
         the file. Default is 0.1 Mo. A chunk size below 8 Ko is not
@@ -38,8 +38,11 @@ class Writer(object):
 
     :param str version: Optional. The file format version to write.
 
-    :raise IOError: if the file exists but is not HDF5.
+    :raise IOError: if the file exists but is not HDF5 or if the file
+        can be opened.
+
     :raise IOError: if the chunk size is below 8 Ko.
+
     :raise IOError: if the requested version is not supported.
 
     """
@@ -56,6 +59,20 @@ class Writer(object):
             raise IOError('chunk size is below 8 Ko')
         self.chunk_size = chunk_size
 
+        try:
+            self.h5file = h5py.File(self.filename, mode='a')
+        except OSError as err:
+            raise IOError(err.strerror)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
+    def close(self):
+        """Close the HDF5 file."""
+        self.h5file.close()
 
     def write(self, data, groupname='h5features', append=False):
         """Write h5features data in a specified group of the file.
@@ -75,32 +92,28 @@ class Writer(object):
         :raise IOError: if append requested but not possible.
 
         """
-        # Open the HDF5 file for writing/appending in the group.
-        with h5py.File(self.filename, mode='a') as h5file:
-            if append and groupname in h5file:
-                group = h5file[groupname]
+        if append and groupname in self.h5file:
+            group = self.h5file[groupname]
 
-                # want to append data, raise if we cannot
-                if not is_appendable_to(data, group):
-                    raise IOError('data is not appendable to the group '
-                                  '{} in {}'.format(groupname, self.filename))
+            # want to append data, raise if we cannot
+            if not is_appendable_to(data, group):
+                raise IOError('data is not appendable to the group '
+                              '{} in {}'.format(groupname, self.filename))
 
-            else:
-                # erase the group if it exists
-                if groupname in h5file:
-                    del h5file[groupname]
+        else:
+            # erase the group if it exists
+            if groupname in self.h5file:
+                del self.h5file[groupname]
 
-                group = self.create_group(h5file, groupname, data)
+            group = self.create_group(groupname, data)
 
-            # Finally write index and data
-            write_index(group, data['items'], data['features'], append)
-            for dset in ['items', 'times', 'features']:
-                data[dset].write(group)
+        # Finally write index and data
+        write_index(group, data['items'], data['features'], append)
+        for dset in ['items', 'times', 'features']:
+            data[dset].write(group)
 
-    def create_group(self, h5file, groupname, data):
+    def create_group(self, groupname, data):
         """Initialize a HDF5 group for writing h5features.
-
-        :param h5py.File h5file: An opened HDF5 file
 
         :param str groupname: The name of the group to initialize in
           the file
@@ -109,7 +122,7 @@ class Writer(object):
 
         :return: The created group.
         """
-        group = h5file.create_group(groupname)
+        group = self.h5file.create_group(groupname)
         group.attrs['version'] = self.version
 
         # create empty datasets

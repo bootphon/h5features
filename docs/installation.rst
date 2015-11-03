@@ -22,41 +22,28 @@ https://github.com/mmmaat/h5features2 ::
 Installing
 ==========
 
-`h5features` relies on external dependencies you need to install
-first:
-
-* h5py 2.3.0 or newer
-* NumPy 1.8.0 or newer
-* scipy 0.13.0 or newer
-* numpydoc
-* pytest
-* sphinx
-
-The simplest way to do this is using *pip*::
-
-    $ [sudo] pip install -r requirements.txt
-
-Then to install the package itself, you can use either *pip* or
-*setuptools*.
-
-* Using *pip*::
-
-    $ [sudo] pip install .
-
-* Using *setuptools*::
+To install the package, run::
 
     $ python setup.py build
     $ [sudo] python setup.py install
 
+`h5features` relies on external dependencies. The setup script should
+install it automatically, but you may want to install it manually. The
+required packages are:
+
+* h5py 2.3.0 or newer
+* NumPy 1.8.0 or newer
+* scipy 0.13.0 or newer
+* pytest
+* sphinx
 
 Testing
 =======
 
-You can follow the build status of the package at
-https://travis-ci.org/mmmaat/h5features2 .
-
-The h5features test suite is runned by `pytest`_. Simply run it from
-the root directory::
+This package is continuously integrated with travis. You can follow
+the build status `here <https://travis-ci.org/mmmaat/h5features2>`_.
+For testing it on your local machine, simply run from the root
+directory::
 
   $ py.test
 

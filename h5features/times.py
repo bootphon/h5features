@@ -63,12 +63,9 @@ class Times(Dataset):
         super(Times, self).__init__(data, name, dim, np.float64)
 
     def is_appendable_to(self, group):
-        """Return True if times data can be appended to the given group."""
         return group[self.name][...].ndim == self.dim
 
-    # TODO Document create_dataset order : Features before Times
     def create_dataset(self, group, per_chunk):
-        """Creates an empty times dataset in the given group."""
         shape = (0,) if self.dim == 1 else (0, self.dim)
         maxshape = (None,) if self.dim == 1 else (None, self.dim)
         chunks = (per_chunk,) if self.dim == 1 else (per_chunk, self.dim)
@@ -77,7 +74,6 @@ class Times(Dataset):
                              chunks=chunks, maxshape=maxshape)
 
     def write(self, group):
-        """Write times data to the group."""
         nb_data = sum([d.shape[0] for d in self.data])
         nb_group = group[self.name].shape[0]
         new_size = nb_group + nb_data

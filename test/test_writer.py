@@ -50,6 +50,7 @@ class TestWriteAppendable:
         # init default parameters
         self.filename = 'test.h5'
         self.group = 'features'
+        remove(self.filename)
 
         # create a simple feature file
         items, times, feat = generate.full(10)
@@ -68,13 +69,13 @@ class TestWriteAppendable:
         remove(self.filename)
 
     def test_basic_works(self):
-        w = Writer(self.filename)
+        #w = Writer(self.filename)
         is_appendable_to({'features':self.features,
                           'items':self.items2,
                           'times':self.times}, self.g)
 
     def test_version(self):
-        assert self.g.attrs['version'] == Writer(self.filename).version
+        assert self.g.attrs['version'] == Writer('toto').version
 
     # def test_group(self):
     #     with pytest.raises(IOError):

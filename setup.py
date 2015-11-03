@@ -59,11 +59,11 @@ setup(name='h5features',
       zip_safe=False,
       tests_require=['pytest'],
       #cmdclass={'test': PyTest},
-      # install_requires=[
-      #     #'python >= 2.7',
-      #     'h5py >= 2.3.0',
-      #     'numpy >= 1.8.0',
-      #     'scipy >= 0.13.0',
-      #     #'numpydoc'
-      # ],
+      install_requires=[
+          #'python >= 2.7',
+          'h5py >= 2.3.0',
+          'numpy >= 1.8.0',
+          'scipy >= 0.13.0',
+          #'numpydoc'
+      ],
   )

@@ -1,5 +1,5 @@
 .. image:: https://readthedocs.org/projects/h5features2/badge/?version=latest
-   :target: http://h5features2.readthedocs.org/en/latest/?badge=latest
+   :target: http://h5features2.readthedocs.org/en/latest
    :alt: Documentation Status
 
 .. image:: https://travis-ci.org/mmmaat/h5features2.svg?branch=master

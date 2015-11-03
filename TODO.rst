@@ -1,5 +1,12 @@
 These document the scheduled and/or requested changes to the h5features package.
 
+For 1.1 release
+---------------
+
+* docs/usage.rst
+* fix a bug in Features.__eq__ and Times.__eq__
+
+
 For a future release
 --------------------
 
