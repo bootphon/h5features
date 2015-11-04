@@ -128,13 +128,14 @@ def write(filename, groupname, items_data, times_data, features_data,
     :raise NotImplementedError: if features_format == 'sparse'
 
     """
+
     # Prepare the data, raise on error
     data = {}
     data['items'] = Items(items_data)
     data['times'] = Times(times_data)
     data['features'] = (SparseFeatures(features_data, sparsity)
                         if parse_dformat(dformat) == 'sparse'
-                        else Features(features_data))
+                        else Features(features_data, sparsetodense=True))
 
     # Write all that stuff in the HDF5 file's specified group
     Writer(filename, chunk_size).write(data, groupname, append=True)

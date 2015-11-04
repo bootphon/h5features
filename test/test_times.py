@@ -1,8 +1,4 @@
-"""Test the times module of h5features package.
-
-@author: Mathieu Bernard
-
-"""
+"""Test the times module of h5features package."""
 
 import h5py
 from numpy.random import randn
@@ -72,20 +68,11 @@ class TestTimes1D:
         assert not t.is_appendable_to(self.group)
 
     def test_create(self):
-        t1 = Times(self.data, name='try1')
-        t1.create_dataset(self.group, 10)
-        assert t1.name in self.group
-        assert len(self.group[t1.name]) == 0
-
+        t1 = Times(self.data)
         # we can't create an existing group
         with pytest.raises(RuntimeError) as err:
             t1.create_dataset(self.group, 10)
         assert 'create' in str(err.value)
-
-        t2 = Times(self.data, name='toto')
-        t2.create_dataset(self.group, 10)
-        assert t2.name in self.group
-        assert len(self.group[t2.name]) == 0
 
     def test_side_effect(self):
         t = Times(self.data)

@@ -47,14 +47,14 @@ class Items(Dataset):
         unique in the list.
 
     """
-    def __init__(self, data, name='items'):
+    def __init__(self, data):
         if not data:
             raise IOError('data is empty')
 
         if not len(set(data)) == len(data):
             raise IOError('all items must have different names.')
 
-        super(Items, self).__init__(data, name, 1, special_dtype(vlen=str))
+        super(Items, self).__init__(data, 'items', 1, special_dtype(vlen=str))
 
     def is_appendable_to(self, group):
         return (not set(group[self.name][...]).intersection(self.data) or

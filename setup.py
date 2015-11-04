@@ -22,8 +22,9 @@ from setuptools import setup, find_packages
 
 VERSION = '1.1.0'
 
+# On Reads The Docs we don't install any package
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
-REQUIREMENTS = [] if ON_RTD else[
+REQUIREMENTS = [] if ON_RTD else [
     'h5py >= 2.3.0',
     'numpy >= 1.8.0',
     'scipy >= 0.13.0',
@@ -42,7 +43,5 @@ setup(
     packages=find_packages(exclude=['test']),
     include_package_data=True,
     zip_safe=False,
-    #tests_require=['pytest'],
-    #cmdclass={'test': PyTest},
     install_requires=REQUIREMENTS,
 )

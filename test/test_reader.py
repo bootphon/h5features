@@ -45,12 +45,15 @@ class TestReader:
             Reader(self.filename, self.groupname + 'spam')
         assert 'not a valid group' in str(err.value)
 
-    def test_load_index(self):
-        group = h5py.File(self.filename, 'r')[self.groupname]
-        print(list(group.keys()))
+    def test_read_basic(self):
+        Reader(self.filename, self.groupname).read()
+
+    # def test_load_index(self):
+    #     group = h5py.File(self.filename, 'r')[self.groupname]
+    #     print(list(group.keys()))
 
     # def test_init_basic(self):
-    #     reader = Reader(self.filename, self.groupname)
+    #     reader = Reader(self.filename, self.groupe)
     #     assert reader.version == '1.1'
     #     assert reader.dformat == 'dense'
     #     assert len(reader.items) == self.nitems

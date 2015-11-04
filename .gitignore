@@ -10,3 +10,4 @@ test/__pycache__
 test/stats
 *.h5
 *.pytest.restart
+/stats*

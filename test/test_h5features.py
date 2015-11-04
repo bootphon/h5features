@@ -1,17 +1,15 @@
-"""Test of read/write facilities of the h5features module.
-
-@author: Mathieu Bernard
-"""
+"""Test of read/write facilities of the h5features module."""
 
 import os
 import numpy as np
 import h5py
 import pytest
-from shutil import copyfile
 
 import h5features.h5features as h5f
 import generate
 from utils import remove, assert_raise
+
+
 
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)

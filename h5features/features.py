@@ -15,11 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Provides Features class to the h5features module.
-
-TODO Describe the structure of features.
-
-"""
+"""Provides Features class to the h5features module."""
 
 import numpy as np
 import scipy.sparse as sp
@@ -96,21 +92,28 @@ class Features(Dataset):
 
     :type data: list of 2D numpy array like
 
+    :param bool sparsetodense: If True convert sparse matrices to
+        dense when writing. Used for compatibility with 1.0.
+
     :raise IOError: if features are badly formatted.
 
     """
-    def __init__(self, data, name='features'):
+    def __init__(self, data, sparsetodense=False):
         if contains_empty(data):
             raise IOError('all features must be non-empty')
 
-        self.dformat = 'dense'
+        # raise on error
         dtype = parse_dtype(data)
         dim = parse_dim(data)
-        super(Features, self).__init__(data, name, dim, dtype)
+
+        self.dformat = 'dense'
+        self.sparsetodense = sparsetodense
+        super(Features, self).__init__(data, 'features', dim, dtype)
 
     def __eq__(self, other):
         try:
             return (other.dformat == self.dformat and
+                    other.sparsetodense == self.sparsetodense and
                     super(Features, self).__eq__(other))
         except AttributeError:
             return False
@@ -135,23 +138,28 @@ class Features(Dataset):
         group.attrs['format'] = self.dformat
         super(Features, self).create_dataset(group, chunk_size)
 
-        # attribute declared outside init is not safe. Used because
-        # Times.create_dataset need it
+        # attribute declared outside __init__ is not safe. Used because
+        # Times.create_dataset need it.
         self.nb_per_chunk = nb_per_chunk(self.dtype.itemsize,
                                           self.dim, chunk_size)
 
-    def write(self, group, sparsetodense=False):
+    def write(self, group, append=False):
         """Write stored features to a given group."""
-        if sparsetodense:
+        if self.sparsetodense:
             self.data = [x.todense() if sp.issparse(x) else x
                          for x in self.data]
 
-        nb_data = sum([d.shape[0] for d in self.data])
+        # the total number of frames to write
+        nframes = sum([d.shape[0] for d in self.data])
         group_feat = group[self.name]
         nb_group, dim = group_feat.shape
 
-        group_feat.resize((nb_group + nb_data, dim))
-        group_feat[nb_group:, :] = np.concatenate(self.data, axis=0)
+        if append:
+            group_feat.resize((nb_group + nframes, dim))
+            group_feat[nb_group:, :] = np.concatenate(self.data, axis=0)
+        else:
+            group_feat.resize((nb_group + nframes, dim))
+            group_feat[...] = np.concatenate(self.data, axis=0)
 
 
 class SparseFeatures(Features):

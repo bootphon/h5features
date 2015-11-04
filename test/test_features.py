@@ -164,11 +164,15 @@ class TestEq:
         assert not self.feat == None
 
     def test_polymorph(self):
-        feat = Features(self.feat.data, self.feat.name)
+        feat = Features(self.feat.data)
+        assert feat == self.feat
         assert not feat.__ne__(self.feat)
         assert feat.__eq__(self.feat)
-        assert feat == self.feat
         assert not feat != self.feat
+
+    def test_s2d(self):
+        feat = Features(self.feat.data, sparsetodense=True)
+        assert not feat == self.feat
 
 class TestFeatures:
     def setup(self):
@@ -188,7 +192,7 @@ class TestFeatures:
 
     def test_write(self):
         self.feat.create_dataset(self.group, 0.1)
-        self.feat.write(self.group)
+        self.feat.write(self.group, append=True)
 
         assert 'features' in self.group
         f = self.group['features'][...]

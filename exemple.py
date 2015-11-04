@@ -1,25 +1,3 @@
-#!/usr/bin/env python
-
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
-#
-# This file is part of h5features.
-#
-# h5features is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# h5features is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
-
-"""A running exemple of the h5features package functionalities."""
-
-import numpy as np
 import h5features as h5f
 
 ########################
@@ -36,6 +14,8 @@ def generate_data(nitem, nfeat=2, dim=10, base='item'):
     :return: A h5features data dictionary with keys 'items', 'times'
         and 'features'.
     """
+    import numpy as np
+
     # A list of strings
     items = [base + '_' + str(i) for i in range(nitem)]
 
@@ -55,31 +35,39 @@ def generate_data(nitem, nfeat=2, dim=10, base='item'):
 # Generate some data for 100 items
 data = generate_data(100)
 
-# Initialize a writer and write data in a 'exemple' group
+# Initialize a writer, write the data in a group called 'group1' and
+# close the file
 writer = h5f.Writer('exemple.h5')
-writer.write(data, 'exemple')
+writer.write(data, 'group1')
 writer.close()
 
-# You can also use the with statement and forgot the call to close()
+# More pythonic, the with statement
 with h5f.Writer('exemple.h5') as writer:
-    # Here we write the same data to another group
-    writer.write(data, 'exemple_2')
+    # Write the same data to a second group
+    writer.write(data, 'group2')
 
-    # more intersting, you can also append new data to an existing
-    # group if no items are shared. Here we generate 10 more items
-    # with different names and append them to the first group.
+    # You can append new data to an existing group if all items have
+    # different names. Here we generate 10 more items and append them
+    # to the group 2, which now stores 110 items.
     data2 = generate_data(10,  base='item2')
-    writer.write(data2, 'exemple', append=True)
+    writer.write(data2, 'group2', append=True)
 
-    # do it agin. Note that when append is not True, this erases any
-    # existing data in the group
+    # If append is not True, existing data in the group is overwrited.
     data3 = generate_data(10, base='item3')
-    writer.write(data3, 'exemple', append=True)
+    writer.write(data3, 'group2', append=True)  # 120 items
+    writer.write(data3, 'group2')               # 10 items
 
 
 ##########################
 # Reading data from a file
 ##########################
 
-# Initialize a reader and read all data in the group 'example_2'
-rdata = h5f.Reader('exemple.h5', 'exemple_2').read()
+
+# Initialize a reader and load the entire group. A notable difference
+# with the Writer is that a Reader is attached to a specific group of
+# a file. This allows optimized read operations.
+rdata = h5f.Reader('exemple.h5', 'group1').read()
+
+# Hopefully h5features conserves data
+# TODO make this pass
+# assert rdata == data

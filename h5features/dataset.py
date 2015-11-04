@@ -104,6 +104,9 @@ class Dataset(object):
         self.data = data
 
     def __eq__(self, other):
+        if self is other:
+            return True
+
         try:
             return (self.name == other.name and
                     self.dim == other.dim and

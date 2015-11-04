@@ -58,9 +58,9 @@ def parse_times(times):
 class Times(Dataset):
     """This class manages times related operations for h5features files."""
 
-    def __init__(self, data, name='times'):
+    def __init__(self, data):
         dim = parse_times(data)
-        super(Times, self).__init__(data, name, dim, np.float64)
+        super(Times, self).__init__(data, 'times', dim, np.float64)
 
     def is_appendable_to(self, group):
         return group[self.name][...].ndim == self.dim

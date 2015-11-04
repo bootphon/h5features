@@ -18,6 +18,7 @@
 """Comparing execution times of h5features 1.0 and 1.1 versions."""
 
 import argparse
+import cProfile
 import os
 import timeit
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
                   args.ntimes, args.repeat))
 
     data = generate.full_dict(args.nitems, args.dimension, args.max_frames)
-    data['filename'] = 'test.h5'
+    data['filename'] = '/tmp/test.h5'
     data['groupname'] = 'group'
 
     v10_setup = """\
@@ -69,27 +70,38 @@ from utils import remove
 from __main__ import data
     """
 
+    v10_write = """\
+remove(data['filename'])
+h5f.write(data['filename'], data['groupname'],
+ data['items'].data, data['times'].data, data['features'].data)
+    """
+
     v11_setup = """\
 import h5features as h5f
 from utils import remove
 from __main__ import data
     """
 
-    write = """\
+    v11_write = """\
 remove(data['filename'])
-h5f.write(data['filename'], data['groupname'],
- data['items'].data, data['times'].data, data['features'].data)
+h5f.Writer(data['filename']).write(data, data['groupname'])
     """
+
     read = "h5f.read(data['filename'], data['groupname'])"
 
     print('Writing:')
-    print('  1.0: ', timeme(write, v10_setup, args))
-    print('  1.1: ', timeme(write, v11_setup, args))
+    print('  1.0: ', timeme(v10_write, v10_setup, args))
+    print('  1.1: ', timeme(v11_write, v11_setup, args))
 
+    print('Reading:')
     remove(data['filename'])
     h5f.write(data['filename'], data['groupname'],
               data['items'].data, data['times'].data, data['features'].data)
-
-    print('Reading:')
     print('  1.0: ', timeme(read, v10_setup, args))
     print('  1.1: ', timeme(read, v11_setup, args))
+
+    # cProfile.run(v10_setup + '\n' + v10_write, 'stats0')
+    # remove(data['filename'])
+
+    # cProfile.run(v11_setup + '\n' + v11_write, 'stats1')
+    # remove(data['filename'])

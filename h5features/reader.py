@@ -65,6 +65,14 @@ class Reader(object):
             self.frames = (self.group['lines'] if self.version == '0.1'
                            else self.group['frames'])[...]
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
+    def close(self):
+        self.h5file.close()
 
     def index_read(self, index):
         """Read data from its indexed coordinate"""
@@ -127,12 +135,15 @@ class Reader(object):
         if to_idx == from_idx:
             features = [features]
             times = [times]
-        else: # Several items case
+        else: # Several items case: unindex data
             item_ends = self.index[from_idx:to_idx] - from_pos[0] + 1
             features = np.split(features, item_ends, axis=0)
             times = np.split(times, item_ends, axis=0)
 
         items = self.items.data[from_idx:to_idx + 1]
+
+        # print([f.shape for f in features])
+
         return {'items':Items(items),
                 'times':Times(times),
                 'features':Features(features)}

@@ -37,7 +37,7 @@ class TestReadWriteCompatibility:
         g2 = h5py.File(self.file_v2, 'r')['features']
         for k1, k2 in zip('times file_index files features'.split(),
                           'times index items features'.split()):
-            print(k1, '/', k2)
+            # print(k1, '/', k2)
             chunk1 = g1[k1].chunks
             chunk2 = g2[k2].chunks
             assert chunk1 == chunk2

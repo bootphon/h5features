@@ -109,8 +109,9 @@ class Writer(object):
 
         # Finally write index and data
         write_index(group, data['items'], data['features'], append)
-        for dset in ['items', 'times', 'features']:
-            data[dset].write(group)
+        data['features'].write(group, append)
+        data['items'].write(group)
+        data['times'].write(group)
 
     def create_group(self, groupname, data):
         """Initialize a HDF5 group for writing h5features.
