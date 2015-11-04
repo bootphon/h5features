@@ -9,8 +9,9 @@
 h5features
 ==========
 
-The h5features **python package** provides **efficient reading and
-writing of features data** to/from the `HDF5`_ binary file format.
+The h5features **python package** provides **easy and efficient
+reading and writing of features data** to/from the HDF5 binary file
+format.
 
 Install it with::
 
