@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Provides the Items class to the h5features module."""
+"""Provides the Items class to the h5features package."""
 
 from h5py import special_dtype
 from .dataset import Dataset
