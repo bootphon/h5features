@@ -61,7 +61,7 @@ if __name__ == '__main__':
                   args.ntimes, args.repeat))
 
     data = generate.full_dict(args.nitems, args.dimension, args.max_frames)
-    data['filename'] = '/tmp/test.h5'
+    data['filename'] = 'test.h5'
     data['groupname'] = 'group'
 
     v10_setup = """\

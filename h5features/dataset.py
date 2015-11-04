@@ -111,6 +111,7 @@ class Dataset(object):
             return (self.name == other.name and
                     self.dim == other.dim and
                     self.dtype == other.dtype and
+                    len(self.data) == len(other.data) and
                     self.data == other.data)
         except AttributeError:
             return False

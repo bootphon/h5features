@@ -62,6 +62,24 @@ class Times(Dataset):
         dim = parse_times(data)
         super(Times, self).__init__(data, 'times', dim, np.float64)
 
+    def __eq__(self, other):
+        if self is other:
+            return True
+        try:
+            # check the little attributes
+            if not (self.name == other.name and
+                    self.dim == other.dim and
+                    self.dtype == other.dtype and
+                    len(self.data) == len(other.data)):
+                return False
+            # check big data
+            for i in range(len(self.data)):
+                if not (self.data[i] == other.data[i]).all():
+                    return False
+            return True
+        except AttributeError:
+            return False
+
     def is_appendable_to(self, group):
         return group[self.name][...].ndim == self.dim
 

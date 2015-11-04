@@ -4,26 +4,37 @@ import h5features as h5f
 # Prelude to the exemple
 ########################
 
-def generate_data(nitem, nfeat=2, dim=10, base='item'):
+def generate_data(nitem, nfeat=2, dim=10, tdim=1, base='item'):
     """generate random h5features data.
 
-    :param int nitem: The number of items to generate
-    :param int nfeat: The number of features to generate for each item
-    :param int dim: The dimension of the generated feature vectors
-    :param str base: The base of items names
+    :param int nitem: The number of items to generate.
+    :param int nfeat: The number of features to generate for each item.
+    :param int dim: The dimension of the Features vectors.
+    :param str base: The base of items names.
+    :param int tdim: The dimension of the Times vectors. If greater
+        than 1, generates 2D numpy arrays.
     :return: A h5features data dictionary with keys 'items', 'times'
         and 'features'.
+
     """
     import numpy as np
 
-    # A list of strings
+    # A list of item names
     items = [base + '_' + str(i) for i in range(nitem)]
 
-    # lists of numpy arrays
+    # A list of features arrays
     features = [np.random.randn(nfeat, dim) for _ in range(nitem)]
-    times = [np.linspace(0, 1, nfeat) for _ in range(nitem)]
 
-    # Format data as a dictionary, as required by the writer
+    # A list on 1D or 2D times arrays
+    if tdim == 1:
+        times = [np.linspace(0, 1, nfeat)] * nitem
+    else:
+        t = np.linspace(0, 1, nfeat)
+        times = [np.array([t+i for i in range(tdim)])] * nitem
+
+    # Format data as required by the writer
+    # TODO I want that
+    #return h5f.Data(items, times, features, check=True)
     return {'items':h5f.Items(items),
             'features':h5f.Features(features),
             'times':h5f.Times(times)}
@@ -62,12 +73,36 @@ with h5f.Writer('exemple.h5') as writer:
 # Reading data from a file
 ##########################
 
-
 # Initialize a reader and load the entire group. A notable difference
 # with the Writer is that a Reader is attached to a specific group of
 # a file. This allows optimized read operations.
 rdata = h5f.Reader('exemple.h5', 'group1').read()
 
-# Hopefully h5features conserves data
-# TODO make this pass
-# assert rdata == data
+# Hopefully we read the same data we just writed
+assert rdata == data
+
+# Some more advance reading facilities
+with h5f.Reader('exemple.h5', 'group1') as reader:
+    # read the first item stored on the group.
+    first_item = reader.items.data[0]
+    first_data = reader.read(first_item)
+
+    # TODO read selected times
+
+
+###################
+# Times data format
+###################
+
+# Previous exemples shown writing and reading features associated to
+# 1D times information (each feature vector correspond to a single
+# timestamp, e.g. the center of a time window). In more advanced
+# processing you may want to store 2D times information (e.g. begin
+# and end of a time window)
+
+# TODO make this pass with tdim>2
+data = generate_data(100, tdim=2)
+h5f.Writer('exemple.h5').write(data, 'group3')
+
+rdata = h5f.Reader('exemple.h5', 'group3').read()
+assert data == rdata

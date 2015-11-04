@@ -56,8 +56,8 @@ class Reader(object):
 
         # load h5features attributes and datasets
         self.version = read_version(self.group)
-        self.index = read_index(self.group, self.version)
         self.items = read_items(self.group, self.version)
+        self._index = read_index(self.group, self.version)
 
         self.dformat = self.group.attrs['format']
         if self.dformat == 'sparse':
@@ -136,13 +136,11 @@ class Reader(object):
             features = [features]
             times = [times]
         else: # Several items case: unindex data
-            item_ends = self.index[from_idx:to_idx] - from_pos[0] + 1
+            item_ends = self._index[from_idx:to_idx] - from_pos[0] + 1
             features = np.split(features, item_ends, axis=0)
             times = np.split(times, item_ends, axis=0)
 
         items = self.items.data[from_idx:to_idx + 1]
-
-        # print([f.shape for f in features])
 
         return {'items':Items(items),
                 'times':Times(times),
@@ -150,8 +148,8 @@ class Reader(object):
 
     def _get_item_position(self, idx):
         """Return a tuple of (start, end) indices of an item given its index."""
-        start = 0 if idx == 0 else self.index[idx - 1] + 1
-        end = self.index[idx]
+        start = 0 if idx == 0 else self._index[idx - 1] + 1
+        end = self._index[idx]
         return start, end
 
     def _get_from_time(self, time, pos):
@@ -160,7 +158,6 @@ class Reader(object):
         else:
             times = self.group['times'][pos[0]:pos[1] + 1]
             try:
-                # smallest time larger or equal to from_time
                 return pos[0] + np.where(times >= time)[0][0]
             except IndexError:
                 raise IOError('time {} is too large'.format(time))

@@ -46,6 +46,7 @@ class Writer(object):
     :raise IOError: if the requested version is not supported.
 
     """
+    # TODO add a mode attribute to safely overwrite existing file
     def __init__(self, filename, chunk_size=0.1, version='1.1'):
         if not is_supported_version(version):
             raise IOError('version {} is not supported'.format(version))
@@ -117,11 +118,11 @@ class Writer(object):
         """Initialize a HDF5 group for writing h5features.
 
         :param str groupname: The name of the group to initialize in
-          the file
+            the file
 
         :param dict data: A data dictionary as documented in `Writer.write()`
 
-        :return: The created group.
+        :return: The created group
         """
         group = self.h5file.create_group(groupname)
         group.attrs['version'] = self.version

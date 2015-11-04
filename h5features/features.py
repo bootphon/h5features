@@ -111,10 +111,22 @@ class Features(Dataset):
         super(Features, self).__init__(data, 'features', dim, dtype)
 
     def __eq__(self, other):
+        if self is other:
+            return True
         try:
-            return (other.dformat == self.dformat and
-                    other.sparsetodense == self.sparsetodense and
-                    super(Features, self).__eq__(other))
+            # check the little attributes
+            if not (self.dformat == other.dformat and
+                    self.sparsetodense == other.sparsetodense and
+                    self.name == other.name and
+                    self.dim == other.dim and
+                    self.dtype == other.dtype and
+                    len(self.data) == len(other.data)):
+                return False
+            # check big data
+            for i in range(len(self.data)):
+                if not (self.data[i] == other.data[i]).all():
+                    return False
+            return True
         except AttributeError:
             return False
 

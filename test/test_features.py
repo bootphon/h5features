@@ -13,33 +13,24 @@ from h5features.features import *
 
 
 def test_contains_empty_good():
-    """Test the contains_empty function."""
     assert not contains_empty(generate.features(10))
 
-
 def test_contains_empty_none():
-    """Test the contains_empty function."""
     for arg in [None, False, 0]:
         assert contains_empty(arg)
 
-
 def test_contains_empty_bad():
-    """Test the contains_empty function."""
     bad = generate.features(10) + [np.array([])]
     assert contains_empty(bad)
 
     bad += generate.features(2, 3)
     assert contains_empty(bad)
 
-
 def test_parse_dformat_good():
-    """Test the parse_dformat function."""
     for arg in ['dense', 'sparse']:
         assert arg == parse_dformat(arg)
 
-
 def test_parse_dformat_bad():
-    """Test the parse_dformat function."""
     msg = 'is a bad features format, please choose'
     for arg in ['danse', 'spark', 1, 'spam']:
         assert_raise(parse_dformat, arg, msg)
@@ -177,6 +168,7 @@ class TestEq:
 class TestFeatures:
     def setup(self):
         self.filename = 'test.h5'
+        remove(self.filename)
         self.group = h5py.File(self.filename).create_group('group')
         self.data = generate.features(10,5,100)
         self.feat = Features(self.data)

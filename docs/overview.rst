@@ -2,9 +2,9 @@
 Package overview
 ================
 
-The h5features package provides **efficient reading and writing of
-features data** to/from the `HDF5`_ binary file format.  It is a
-wrapper on `h5py`_ and and is used for exemple in the `ABXpy`_
+The h5features package provides **easy, safe and efficient reading and
+writing of features data** to/from the `HDF5`_ binary file format.  It
+is a wrapper on `h5py`_ and and is used for exemple in the `ABXpy`_
 package.
 
 It is designed with the following objectives in mind:
