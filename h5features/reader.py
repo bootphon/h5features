@@ -110,7 +110,7 @@ class Reader(object):
         # index coordinates of from/to_item. TODO optimize because we
         # have 4 accesses to list.index() where 2 are enougth.
         if not self.items.is_valid_interval(from_item, to_item):
-            raise IOError('cannot read items: not a valid items interval')
+            raise IOError('cannot read items: not a valid interval')
         from_idx = self.items.data.index(from_item)
         to_idx = self.items.data.index(to_item)
 

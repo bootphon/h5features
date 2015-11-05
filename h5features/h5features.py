@@ -25,7 +25,7 @@
 
 """
 
-from .data import Data, SparseData
+from .data import Data
 from .reader import Reader
 from .writer import Writer
 
@@ -128,15 +128,12 @@ def write(filename, groupname, items, times, features,
     :raise NotImplementedError: if dformat == 'sparse'
 
     """
-
     # Prepare the data, raise on error
-    data = (SparseData(items, times, features, sparsity=sparsity, check=True)
-            if dformat == 'sparse' else
-            Data(items, times, features, check=True))
+    sparsity = sparsity if dformat == 'sparse' else None
+    data = Data(items, times, features, sparsity=sparsity, check=True)
 
     # Write all that stuff in the HDF5 file's specified group
     Writer(filename, chunk_size).write(data, groupname, append=True)
-
 
 def simple_write(filename, group, times, features, item='item'):
     """Simplified version of `write()` when there is only one item."""

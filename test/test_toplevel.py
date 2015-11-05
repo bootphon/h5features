@@ -2,18 +2,18 @@
 
 import h5features as h5f
 import generate
-from utils import remove, assert_raise
-
+from utils import remove
 
 def test_from_exemple():
     filename = '/tmp/exemple.h5'
     remove(filename)
-    data = generate.full_dict(100)
+    a1, a2, a3 = generate.full(100)
+    data = h5f.Data(a1, a2, a3)
 
     with h5f.Writer(filename) as w:
         w.write(data, 'group')
 
     with h5f.Reader(filename, 'group') as r:
         rdata = r.read()
-        assert len(rdata['items'].data) == 100
+        assert len(rdata.entries['items'].data) == 100
         assert data == rdata

@@ -12,41 +12,41 @@ import tempfile
 
 import generate
 from utils import remove
-from h5features.writer import Writer
-from h5features.reader import Reader
+import h5features as h5f
 
 class TestReader:
     def setup(self):
         self.filename = 'test.h5'
         self.groupname = 'group'
         self.nitems = 10
-        self.data = generate.full_dict(self.nitems)
+        d = generate.full(self.nitems)
+        self.data = h5f.Data(d[0], d[1], d[2])
 
-        Writer(self.filename).write(self.data, self.groupname)
+        h5f.Writer(self.filename).write(self.data, self.groupname)
 
     def teardown(self):
         remove(self.filename)
 
     def test_init_not_file(self):
         with pytest.raises(IOError) as err:
-            Reader(self.filename + 'spam', self.groupname)
+            h5f.Reader(self.filename + 'spam', self.groupname)
         assert 'not a HDF5 file' in str(err.value)
 
     def test_init_not_hdf(self):
         with tempfile.NamedTemporaryFile(delete=False) as temp:
             temp.write(b'This is not a HDF5 file')
         with pytest.raises(IOError) as err:
-            Reader(temp.name, self.groupname)
+            h5f.Reader(temp.name, self.groupname)
         assert 'not a HDF5 file' in str(err.value)
         remove(temp.name)
 
     def test_init_not_group(self):
         with pytest.raises(IOError) as err:
-            Reader(self.filename, self.groupname + 'spam')
+            h5f.Reader(self.filename, self.groupname + 'spam')
         assert 'not a valid group' in str(err.value)
 
     def test_read_basic(self):
-        Reader(self.filename, self.groupname).read()
+        h5f.Reader(self.filename, self.groupname).read()
 
     # def test_load_index(self):
     #     group = h5py.File(self.filename, 'r')[self.groupname]

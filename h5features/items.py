@@ -20,7 +20,7 @@
 from h5py import special_dtype
 from .dataentry import DataEntry
 
-def read_items(group, version):
+def read_items(group, version, check=False):
     """Return an Item instance initialized from a h5features group. """
     if version == '0.1':
         # parse unicode to strings
@@ -28,9 +28,9 @@ def read_items(group, version):
             [unichr(int(c)) for c in group['files'][...]]
         ).replace('/-', '/').split('/\\')
     elif version == '1.0':
-        return Items(list(group['files'][...]))
+        return Items(list(group['files'][...]), check)
     else:
-        return Items(list(group['items'][...]))
+        return Items(list(group['items'][...]), check)
 
 
 class Items(DataEntry):
@@ -97,7 +97,7 @@ class Items(DataEntry):
         else:
             raise IOError('groups cannot have more than one shared items.')
 
-    def write(self, group):
+    def write_to(self, group):
         """Write stored items to the given HDF5 group.
 
         We assume that self.create() has been called.

@@ -78,7 +78,7 @@ def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
 
 
 def full_dict(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
-    """Return a data dictionary as requested by Writer.write()"""
+    """Return a data dictionary"""
     from h5features.items import Items
     from h5features.times import Times
     from h5features.features import Features
@@ -87,3 +87,9 @@ def full_dict(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
     return {'items':Items(data[0]),
             'times':Times(data[1]),
             'features':Features(data[2])}
+
+def full_data(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
+    """Return a h5features.Data instance"""
+    from h5features.data import Data
+    data = full(nitems, dim, max_frames, tformat, items_root)
+    return Data(data[0], data[1], data[2])

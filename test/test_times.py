@@ -20,9 +20,9 @@ class TestParseTimes:
         pass
 
     def test_good(self):
-        assert parse_times(self.t1) == 1
-        assert parse_times(self.t1*2) == 1
-        assert parse_times(self.t2) == 2
+        assert parse_times(self.t1, True) == 1
+        assert parse_times(self.t1*2, True) == 1
+        assert parse_times(self.t2, True) == 2
 
     def test_bad_format(self):
         # 3D
@@ -77,7 +77,7 @@ class TestTimes1D:
     def test_side_effect(self):
         t = Times(self.data)
         t2 = Times(self.data)
-        t.write(self.group)
+        t.write_to(self.group)
         assert t == t2
 
 class TestTimes2D:
@@ -97,7 +97,7 @@ class TestTimes2D:
         t = Times(self.data)
         t2 = Times(self.data)
         t.create_dataset(self.group, per_chunk=100)
-        t.write(self.group)
+        t.write_to(self.group)
         assert t == t2
 
 

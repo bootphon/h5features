@@ -24,21 +24,21 @@ from .index import write_index
 from .version import is_supported_version, is_same_version
 
 
-def is_same_entries(data, group):
-    """Check if `data` entries are consistent with a `group`.
+# def is_same_entries(data, group):
+#     """Check if `data` entries are consistent with a `group`.
 
-    This function is used internally by the `Writer`. Only the names
-    of the datasets are accessed, not their content.
+#     This function is used internally by the `Writer`. Only the names
+#     of the datasets are accessed, not their content.
 
-    :param h5features.Data data:
-    :param group: The group to compare the dataset with
-    :type group: HDF5 group
+#     :param h5features.Data data:
+#     :param group: The group to compare the dataset with
+#     :type group: HDF5 group
 
-    :return: True if each dataset in `data` is present in the
-      `group`. False else.
+#     :return: True if each dataset in `data` is present in the
+#       `group`. False else.
 
-    """
-    return
+#     """
+#     return
 
 
 class Writer(object):
@@ -79,7 +79,7 @@ class Writer(object):
         try:
             self.h5file = h5py.File(self.filename, mode='a')
         except OSError as err:
-            raise IOError(err.strerror)
+            raise IOError('file {} cannot be opened'.format(self.filename))
 
     def __enter__(self):
         return self
@@ -110,37 +110,19 @@ class Writer(object):
         if append and groupname in self.h5file:
             # append data to the group, raise if we cannot
             group = self.h5file[groupname]
-            self._append(data, group)
+            if not(is_same_version(self.version, group)
+                   and data.is_appendable_to(group)):
+                raise IOError('data is not appendable to the group {}'
+                              .format(group.name))
         else: # overwrite any existing data in group
-            self._overwrite(data, groupname)
+            group = self._prepare(data, groupname)
+        data.write_to(group, append)
 
-    def _append(self, data, group):
-        if not self._is_appendable(data, group):
-            raise IOError('data is not appendable to the group {}'
-                          .format(group.name))
-
-    def _overwrite(self, data, groupname):
+    def _prepare(self, data, groupname):
+        """Clear the group if existing and initialize empty datasets."""
         if groupname in self.h5file:
             del self.h5file[groupname]
-        group = self._create_group(groupname, data)
-
-    def _create_group(self, groupname, data):
-        """Return an empty group for writing h5features."""
         group = self.h5file.create_group(groupname)
         group.attrs['version'] = self.version
         data.create_group(group, self.chunk_size)
-
         return group
-
-    def _is_appendable(self, data, group,):
-        """Check if `data` can be appended in a h5features `group`
-
-        :param h5features.Data data: The data we want to append
-        :param h5py.Group group: The group where to append
-        :param str version: The h5features version of the `group`
-        :return: True if `data` is appendable to the `group`
-
-        """
-        return (is_same_version(self.version, group) and
-                all([name in group for name in data.entries.keys()]) and
-                data.is_appendable_to(group))

@@ -15,10 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Provides indexing facilities to the h5features package."""
+"""Provides indexing facilities to the h5features package.
+
+This index typically allows a faster read access in large datasets and
+is transparent to the user.
+
+Because the h5features package is designed to handle large datasets,
+features and times data is internally stored in a compact *indexed*
+representation.
+
+"""
 
 import numpy as np
-
 from .dataentry import nb_per_chunk
 
 def cumindex(features):
@@ -32,36 +40,25 @@ def create_index(group, chunk_size):
     group.create_dataset('index', (0,), dtype=dtype,
                          chunks=chunks, maxshape=(None,))
 
-def write_index(group, items, features, append):
+def write_index(data, group, append):
     """Write the data index to the given group.
 
-    This index typically allows a faster read access in large datasets
-    and is transparent to the user.
-
-    Because the h5features package is designed to handle large
-    datasets, features and times data is internally stored in a
-    compact *indexed* representation.
-
-    :param h5py.Group group: A HDF5 group open in write mode.
-
-    :param Items items: The items being writed.
-
-    :param Features features: The features being writed.
-
+    :param h5features.Data data: The that is being indexed.
+    :param h5py.Group group: The group where to write the index.
     :param bool append: If True, append the created index to the
         existing one in the `group`. Delete any existing data in index
         if False.
 
     """
     # build the index from data
-    nitems = group[items.name].shape[0]
+    nitems = group['items'].shape[0] if 'items' in group else 0
     last_index = group['index'][-1] if nitems > 0 else -1
-    index = last_index + cumindex(features)
+    index = last_index + cumindex(data.entries['features'])
 
     if append:
         nidx = group['index'].shape[0]
         # in case we append to the end of an existing item
-        if items.continue_last_item(group):
+        if data.entries['items'].continue_last_item(group):
             nidx -= 1
 
         group['index'].resize((nidx + index.shape[0],))
@@ -73,10 +70,8 @@ def write_index(group, items, features, append):
 def read_index(group, version='1.1'):
     """Return the index stored in a h5features group.
 
-    :param h5py.Group group: TheHDF5 group to read the index from.
-
+    :param h5py.Group group: The group to read the index from.
     :param str version: The h5features version of the `group`.
-
     :return a 1D numpy array of features indices.
     """
     if version == '0.1':

@@ -19,7 +19,7 @@
 import numpy as np
 from .dataentry import DataEntry
 
-def parse_times(times, check):
+def parse_times(times, check=True):
     """Return the times vectors dimension from raw times arrays.
 
     :param times: Each element of the list contains the timestamps of
@@ -92,8 +92,8 @@ class Times(DataEntry):
         group.create_dataset('times', shape, dtype=self.dtype,
                              chunks=chunks, maxshape=maxshape)
 
-    def write(self, group):
-        name = 'items'
+    def write_to(self, group):
+        name = 'times'
         nb_data = sum([d.shape[0] for d in self.data])
         nb_group = group[name].shape[0]
         new_size = nb_group + nb_data

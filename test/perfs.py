@@ -60,43 +60,38 @@ if __name__ == '__main__':
           .format(args.nitems, args.dimension, args.max_frames,
                   args.ntimes, args.repeat))
 
-    data = generate.full_dict(args.nitems, args.dimension, args.max_frames)
-    data['filename'] = 'test.h5'
-    data['groupname'] = 'group'
+    data = generate.full_data(args.nitems, args.dimension, args.max_frames)
+    filename = 'test.h5'
+    groupname = 'group'
 
     v10_setup = """\
 import h5features_v1_0 as h5f
 from utils import remove
-from __main__ import data
+from __main__ import data, filename, groupname
     """
 
     v10_write = """\
-remove(data['filename'])
-h5f.write(data['filename'], data['groupname'],
- data['items'].data, data['times'].data, data['features'].data)
+remove(filename)
+h5f.write(filename, groupname, data.items(), data.times(), data.features())
     """
-
     v11_setup = """\
 import h5features as h5f
 from utils import remove
-from __main__ import data
+from __main__ import data, filename, groupname
     """
-
     v11_write = """\
-remove(data['filename'])
-h5f.Writer(data['filename']).write(data, data['groupname'])
+remove(filename)
+h5f.Writer(filename).write(data, groupname)
     """
-
-    read = "h5f.read(data['filename'], data['groupname'])"
+    read = "h5f.read(filename, groupname)"
 
     print('Writing:')
     print('  1.0: ', timeme(v10_write, v10_setup, args))
     print('  1.1: ', timeme(v11_write, v11_setup, args))
 
     print('Reading:')
-    remove(data['filename'])
-    h5f.write(data['filename'], data['groupname'],
-              data['items'].data, data['times'].data, data['features'].data)
+    remove(filename)
+    h5f.write(filename, groupname, data.items(), data.times(), data.features())
     print('  1.0: ', timeme(read, v10_setup, args))
     print('  1.1: ', timeme(read, v11_setup, args))
 

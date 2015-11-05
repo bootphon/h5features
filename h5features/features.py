@@ -153,7 +153,7 @@ class Features(DataEntry):
         self.nb_per_chunk = nb_per_chunk(self.dtype.itemsize,
                                           self.dim, chunk_size)
 
-    def write(self, group, append=False):
+    def write_to(self, group, append=False):
         """Write stored features to a given group."""
         if self.sparsetodense:
             self.data = [x.todense() if sp.issparse(x) else x
@@ -175,8 +175,8 @@ class Features(DataEntry):
 class SparseFeatures(Features):
     """This class is specialized for managing sparse matrices as features."""
 
-    def __init__(self, data, sparsity, name='features'):
-        super(SparseFeatures, self).__init__(data, name)
+    def __init__(self, data, sparsity, check=True):
+        super(SparseFeatures, self).__init__(data, check)
         self.dformat = 'sparse'
         self.sparsity = sparsity
 
@@ -217,7 +217,7 @@ class SparseFeatures(Features):
         self.nb_per_chunk = nb_per_chunk(
             self.dtype.itemsize, int(round(self.sparsity*self.dim)), chunk_size)
 
-    def write(self, group):
+    def write_to(self, group, append=False):
         pass
         # TODO implement this
         # 1- concatenation. put them in right format if they aren't already

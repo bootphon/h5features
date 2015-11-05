@@ -11,7 +11,7 @@ from h5features.writer import Writer
 from h5features.features import Features
 from h5features.times import Times
 from h5features.items import Items
-#from h5features.data import is_appendable_to
+from h5features.data import Data
 
 def test_create_a_file():
     name = 'azecqgxqsdqxws.eztcqezxf'
@@ -62,11 +62,12 @@ class TestWriteAppendable:
 
         # create a simple feature file
         items, times, feat = generate.full(10)
-        self.features = Features(feat)
-        self.times = Times(times)
-        self.items = Items(items)
-        self.items2 = Items([i+'2' for i in items])
-        write(self.filename, self.group, items, times, feat)
+        items2 = [i+'2' for i in items]
+        self.data = Data(items, times, feat)
+        self.data2 = Data(items2, times, feat)
+
+        self.writer = Writer(self.filename)
+        self.writer.write(self.data, self.group)
 
         # read it with h5py
         self.f = h5py.File(self.filename, 'r')
@@ -77,10 +78,7 @@ class TestWriteAppendable:
         remove(self.filename)
 
     def test_basic_works(self):
-        #w = Writer(self.filename)
-        is_appendable_to({'features':self.features,
-                          'items':self.items2,
-                          'times':self.times}, self.g)
+        self.data2.is_appendable_to(self.g)
 
     def test_version(self):
         assert self.g.attrs['version'] == Writer('toto').version

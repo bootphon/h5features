@@ -97,8 +97,8 @@ with h5f.Reader('exemple.h5', 'group1') as reader:
 # and end of a time window)
 
 # TODO make this pass with tdim>2
-data = generate_data(100, tdim=2)
-h5f.Writer('exemple.h5').write(data, 'group3')
+# data = generate_data(100, tdim=2)
+# h5f.Writer('exemple.h5').write(data, 'group3')
 
-rdata = h5f.Reader('exemple.h5', 'group3').read()
-assert data == rdata
+# rdata = h5f.Reader('exemple.h5', 'group3').read()
+# assert data == rdata

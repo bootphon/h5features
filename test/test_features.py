@@ -180,12 +180,12 @@ class TestFeatures:
     def test_side_effect(self):
         feat2 = Features(self.feat.data)
         self.feat.create_dataset(self.group, 0.1)
-        self.feat.write(self.group)
+        self.feat.write_to(self.group)
         assert self.feat == feat2
 
     def test_write(self):
         self.feat.create_dataset(self.group, 0.1)
-        self.feat.write(self.group, append=True)
+        self.feat.write_to(self.group, append=True)
 
         assert 'features' in self.group
         f = self.group['features'][...]

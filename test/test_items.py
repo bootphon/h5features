@@ -47,7 +47,7 @@ class TestCreate:
         assert group.dtype == type(str)
 
     def test_create_on_existing_group(self):
-        self.group.create_dataset(self.items.name, (0,))
+        self.group.create_dataset('items', (0,))
         with pytest.raises(RuntimeError) as err:
             self.items.create_dataset(self.group, 10)
 
@@ -60,7 +60,7 @@ def wrapper_is_compat(l1, l2):
     with h5py.File('test.h5.tmp') as h5file:
         g = h5file.create_group('deleteme')
         i2.create_dataset(g, 10)
-        i2.write(g)
+        i2.write_to(g)
         res = i1.is_appendable_to(g)
     remove('test.h5.tmp')
     return res
@@ -87,7 +87,7 @@ class TestIsAppendableTo:
     def test_same_items_twice(self):
         group = self.h5file.create_group('group')
         self.items.create_dataset(group, 10)
-        self.items.write(group)
+        self.items.write_to(group)
         assert_raise(self.items.is_appendable_to, group,
                      'more than one shared items')
 
@@ -109,7 +109,6 @@ class TestIsAppendableTo:
         with pytest.raises(IOError):
             wrapper_is_compat(l1, l1)
 
-
 class TestWrite:
     def setup(self):
         self.filename = 'test.h5'
@@ -121,8 +120,8 @@ class TestWrite:
 
     def test_write(self):
         self.items.create_dataset(self.group, 10)
-        self.items.write(self.group)
-        writed = self.group[self.items.name][...]
+        self.items.write_to(self.group)
+        writed = self.group['items'][...]
 
         assert len(writed) == 10
         assert self.items.data == list(writed)
@@ -137,27 +136,27 @@ class TestWrite:
     def test_side_effect(self):
         items2 = Items(self.items.data)
         self.items.create_dataset(self.group, 10)
-        self.items.write(self.group)
+        self.items.write_to(self.group)
         assert self.items == items2
 
     def test_append(self):
         self.items.create_dataset(self.group, 10)
-        writed = self.group[self.items.name]
+        writed = self.group['items']
         assert len(writed[...]) == 0
 
-        self.items.write(self.group)
+        self.items.write_to(self.group)
         assert len(writed[...]) == 10
 
-        self.items.write(self.group)
+        self.items.write_to(self.group)
         assert len(writed[...]) == 20
 
         items2 = Items(generate.items(5))
-        items2.write(self.group)
+        items2.write_to(self.group)
         assert len(writed[...]) == 25
 
-        del self.group[self.items.name]
+        del self.group['items']
         self.items.create_dataset(self.group, 10)
-        assert len(self.group[self.items.name][...]) == 0
+        assert len(self.group['items'][...]) == 0
 
 
 class TestChunk:
@@ -173,4 +172,4 @@ class TestChunk:
     def test_items(self):
         items = Items(generate.items(10))
         items.create_dataset(self.group, 0.1)
-        assert self.group[items.name].chunks == (5000,)
+        assert self.group['items'].chunks == (5000,)

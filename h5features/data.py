@@ -19,21 +19,38 @@
 
 from .items import Items
 from .times import Times
-from .features import Features
-from .index import create_index
+from .features import Features, SparseFeatures
+from .index import create_index, write_index
 #from .version import is_same_version
 
 class Data(object):
     """This class communicates data to/from Reader and Writer."""
 
-    def __init__(self, items, times, features, check=True):
+    def __init__(self, items, times, features, sparsity=None, check=True):
         self.entries = {}
         self.entries['items'] = Items(items, check)
         self.entries['times'] = Times(times, check)
-        self.entries['features'] = Features(features, check)
+        self.entries['features'] = (
+            Features(features, check) if sparsity is None else
+            SparseFeatures(features, sparsity, check))
+
+    def __eq__(self, other):
+        return self.entries == other.entries
+
+    def items(self):
+        return self._entry('items')
+
+    def times(self):
+        return self._entry('times')
+
+    def features(self):
+        return self._entry('features')
+
+    def _entry(self, key):
+        return self.entries[key].data
 
     def _dict_entry(self, entry):
-        return dict(zip(self.entries['items'].data, entry.data))
+        return dict(zip(self.items(), entry.data))
 
     def dict_features(self):
         return self._dict_entry(self.entries['features'])
@@ -54,12 +71,15 @@ class Data(object):
             group, self.entries['features'].nb_per_chunk)
 
     def is_appendable_to(self, group):
+        if not all([name in group for name in self.entries.keys()]):
+            return False
         for k in self.entries.keys():
             if not self.entries[k].is_appendable_to(group):
                 return False
         return True
 
-class SparseData(Data):
-    def __init__(self, items, times, features, sparsity, check=True):
-        self.sparsity = sparsity
-        super(SparseData, self).__init__(items, times, features, check)
+    def write_to(self, group, append=False):
+        write_index(self, group, append)
+        self.entries['items'].write_to(group)
+        self.entries['features'].write_to(group, append)
+        self.entries['times'].write_to(group)

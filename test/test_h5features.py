@@ -10,12 +10,12 @@ import generate
 from utils import remove, assert_raise
 
 
-
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)
     with pytest.raises(NotImplementedError) as ioerror:
         h5f.write('test.h5', 'group', a, b, c, dformat='sparse')
     assert 'sparse' in str(ioerror.value)
+
 
 class TestH5FeaturesWrite:
     """Test write methods."""
@@ -50,23 +50,23 @@ class TestH5FeaturesWrite:
         assert 'not a HDF5 file' in msg
 
     def test_simple_write(self):
-        self.features_0 = np.random.randn(300, 20)
-        self.times_0 = np.linspace(0, 2, 300)
+        self.features_0 = np.random.randn(30, 20)
+        self.times_0 = np.linspace(0, 2, 30)
 
         h5f.simple_write(self.filename, 'f',
                          self.times_0, self.features_0)
 
         with h5py.File(self.filename, 'r') as f:
-            assert ['f'] == list(f.keys ())
+            assert ['f'] == list(f.keys())
 
             g = f.get('f')
             assert list(g.keys()) == (
                 ['features', 'index', 'items', 'times'])
 
-            assert g['features'].shape == (300,20)
-            assert g['index'].shape == (1,)
+            assert g['features'].shape == (30,20)
             assert g['items'].shape == (1,)
-            assert g['times'].shape == (300,)
+            assert g['times'].shape == (30,)
+            assert g['index'].shape == (1,)
 
     def test_write(self):
         files, times, features = generate.full(30, 20, 10)
@@ -89,7 +89,6 @@ class TestH5FeaturesReadWrite:
     top-down compatibility of the module from current version to 1.0.
 
     """
-
     def setup(self):
         self.filename = 'test.h5'
         self.dim = 20 # Dimensions of the features
@@ -110,7 +109,6 @@ class TestH5FeaturesReadWrite:
         assert all(times_0_r['item'] == times_0)
         assert (features_0_r['item'] == features_0).all()
 
-
     def test_append(self):
         """Append a new item to an existing dataset."""
         i, t, f = generate.full(30, self.dim, 40, items_root='File')
@@ -126,7 +124,6 @@ class TestH5FeaturesReadWrite:
             h5f.write(self.filename, 'group', ['File_3'],
                       [times_added], [features_added])
         assert 'data can be added only at the end' in str(err.value)
-
 
         # read it
         times_r, features_r = h5f.read(self.filename, 'group')
