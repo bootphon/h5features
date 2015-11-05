@@ -1,14 +1,12 @@
 """Test of read/write facilities of the h5features module."""
 
-import os
 import numpy as np
 import h5py
 import pytest
 
 import h5features.h5features as h5f
 import generate
-from utils import remove, assert_raise
-
+from utils import remove
 
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)

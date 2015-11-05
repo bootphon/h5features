@@ -4,10 +4,9 @@ For 1.1 release
 ---------------
 
 * docs/usage.rst
-* write the h5f.Data class as front end for sending/receiving data
-  to/from the package.
-* improve the reader interface (do not check on reading)
 * implement read(index)
+* read/write bigger than RAM
+* rename times as labels, arbitrary homogoneous type
 
 For a future release
 --------------------

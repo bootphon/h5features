@@ -1,6 +1,11 @@
-================================
-h5features package documentation
-================================
+=========================
+h5features  documentation
+=========================
+
+.. note::
+
+   The source code is available at
+   `<http://www.github.com/mmmaat/h5features2>`_.
 
 **Table of contents**
 
