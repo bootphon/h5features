@@ -18,7 +18,7 @@
 """Provides the Items class to the h5features package."""
 
 from h5py import special_dtype
-from .dataset import Dataset
+from .dataentry import DataEntry
 
 def read_items(group, version):
     """Return an Item instance initialized from a h5features group. """
@@ -33,7 +33,7 @@ def read_items(group, version):
         return Items(list(group['items'][...]))
 
 
-class Items(Dataset):
+class Items(DataEntry):
     """This class manages items in h5features files.
 
     :param data: A list of item names (e.g. files from which the
@@ -47,17 +47,20 @@ class Items(Dataset):
         unique in the list.
 
     """
-    def __init__(self, data):
-        if not data:
-            raise IOError('data is empty')
+    def __init__(self, data, check=True):
+        if check:
+            if not data:
+                raise IOError('data is empty')
+            if not len(set(data)) == len(data):
+                raise IOError('all items must have different names.')
 
-        if not len(set(data)) == len(data):
-            raise IOError('all items must have different names.')
+        super(Items, self).__init__(data, 1, special_dtype(vlen=str), check)
 
-        super(Items, self).__init__(data, 'items', 1, special_dtype(vlen=str))
+    def create_dataset(self, group, chunk_size):
+        super(Items, self).create_dataset('items', group, chunk_size)
 
     def is_appendable_to(self, group):
-        return (not set(group[self.name][...]).intersection(self.data) or
+        return (not set(group['items'][...]).intersection(self.data) or
                 self.continue_last_item(group))
 
     def continue_last_item(self, group):
@@ -75,7 +78,7 @@ class Items(Dataset):
         * Otherwise raise IOError.
 
         """
-        items_in_group = group[self.name][...]
+        items_in_group = group['items'][...]
 
         # Shared items between self and the group
         # TODO Really usefull to compute the whole intersection ?
@@ -101,7 +104,7 @@ class Items(Dataset):
 
         """
         # The HDF5 group where to write data
-        items_group = group[self.name]
+        items_group = group['items']
 
         nitems = items_group.shape[0]
         items_group.resize((nitems + len(self.data),))

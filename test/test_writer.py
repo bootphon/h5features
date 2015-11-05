@@ -11,7 +11,7 @@ from h5features.writer import Writer
 from h5features.features import Features
 from h5features.times import Times
 from h5features.items import Items
-from h5features.dataset import is_appendable_to
+#from h5features.data import is_appendable_to
 
 def test_create_a_file():
     name = 'azecqgxqsdqxws.eztcqezxf'

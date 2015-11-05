@@ -25,11 +25,9 @@
 
 """
 
+from .data import Data, SparseData
 from .reader import Reader
 from .writer import Writer
-from .items import Items
-from .times import Times
-from .features import Features, SparseFeatures, parse_dformat
 
 def read(filename, groupname, from_item=None, to_item=None,
          from_time=None, to_time=None, index=None):
@@ -65,20 +63,22 @@ def read(filename, groupname, from_item=None, to_item=None,
           'time' dimension along the lines.
 
     .. note:: Note that all the files that are present on disk between
-        file1 and file2 will be loaded and returned. It's the
+        to_item and from_item will be loaded and returned. It's the
         responsibility of the user to make sure that it will fit into
         RAM memory.
 
     """
+    # TODO legacy read from index not implemented
+    if index is not None:
+        raise NotImplementedError
 
     reader = Reader(filename, groupname)
     data = (reader.read(from_item, to_item, from_time, to_time)
             if index is None else reader.index_read(index))
-    return (dict(zip(data['items'].data, data['times'].data)),
-            dict(zip(data['items'].data, data['features'].data)))
+    return data.dict_times(), data.dict_features()
 
 
-def write(filename, groupname, items_data, times_data, features_data,
+def write(filename, groupname, items, times, features,
           dformat='dense', chunk_size=0.1, sparsity=0.1):
     """Write h5features data in a HDF5 file.
 
@@ -96,21 +96,21 @@ def write(filename, groupname, items_data, times_data, features_data,
     :param str groupname: Name of the group to write the data in, or
         to append the data to if the group already exists in the file.
 
-    :param items_data: List of files from which the features where
+    :param items: List of files from which the features where
         extracted.
-    :type items_data: list of str
+    :type items: list of str
 
-    :param times_data: Time value for the features array. Elements of
+    :param times: Time value for the features array. Elements of
         a 1D array are considered as the center of the time window
         associated with the features. A 2D array must have 2 columns
         corresponding to the begin and end timestamps of the features
         time window.
-    :type times_data: list of  1D or 2D numpy arrays
+    :type times: list of  1D or 2D numpy arrays
 
-    :param features_data: Features should have
+    :param features: Features should have
         time along the lines and features along the columns
         (accomodating row-major storage in hdf5 files).
-    :type features_data: list of 2D numpy arrays
+    :type features: list of 2D numpy arrays
 
     :param str dformat: Optional. Which format to store the features
         into (sparse or dense). Default is dense.
@@ -125,17 +125,14 @@ def write(filename, groupname, items_data, times_data, features_data,
 
     :raise IOError: if the filename is not valid or parameters are inconsistent.
 
-    :raise NotImplementedError: if features_format == 'sparse'
+    :raise NotImplementedError: if dformat == 'sparse'
 
     """
 
     # Prepare the data, raise on error
-    data = {}
-    data['items'] = Items(items_data)
-    data['times'] = Times(times_data)
-    data['features'] = (SparseFeatures(features_data, sparsity)
-                        if parse_dformat(dformat) == 'sparse'
-                        else Features(features_data, sparsetodense=True))
+    data = (SparseData(items, times, features, sparsity=sparsity, check=True)
+            if dformat == 'sparse' else
+            Data(items, times, features, check=True))
 
     # Write all that stuff in the HDF5 file's specified group
     Writer(filename, chunk_size).write(data, groupname, append=True)

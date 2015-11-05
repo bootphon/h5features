@@ -33,11 +33,7 @@ def generate_data(nitem, nfeat=2, dim=10, tdim=1, base='item'):
         times = [np.array([t+i for i in range(tdim)])] * nitem
 
     # Format data as required by the writer
-    # TODO I want that
-    #return h5f.Data(items, times, features, check=True)
-    return {'items':h5f.Items(items),
-            'features':h5f.Features(features),
-            'times':h5f.Times(times)}
+    return h5f.Data(items, times, features, check=True)
 
 ########################
 # Writing data to a file

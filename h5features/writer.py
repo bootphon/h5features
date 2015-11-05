@@ -20,9 +20,25 @@
 import h5py
 import os
 
-from .dataset import is_appendable_to
-from .index import create_index, write_index
-from .version import is_supported_version
+from .index import write_index
+from .version import is_supported_version, is_same_version
+
+
+def is_same_entries(data, group):
+    """Check if `data` entries are consistent with a `group`.
+
+    This function is used internally by the `Writer`. Only the names
+    of the datasets are accessed, not their content.
+
+    :param h5features.Data data:
+    :param group: The group to compare the dataset with
+    :type group: HDF5 group
+
+    :return: True if each dataset in `data` is present in the
+      `group`. False else.
+
+    """
+    return
 
 
 class Writer(object):
@@ -78,12 +94,10 @@ class Writer(object):
     def write(self, data, groupname='h5features', append=False):
         """Write h5features data in a specified group of the file.
 
-        :param dict data: A dictionary of h5features datasets. It must
-          contains 'items', 'times' and 'features' keys pointing to
-          Items, Times and Features instances respectively.
+        :param dict data: A `h5features.Data` instance to be writed on disk.
 
         :param str groupname: Optional. The name of the group in which
-          to write the data.
+            to write the data.
 
         :param bool append: Optional. This parameter has no effect if
            the `groupname` is not an existing group in the file. If
@@ -94,44 +108,39 @@ class Writer(object):
 
         """
         if append and groupname in self.h5file:
+            # append data to the group, raise if we cannot
             group = self.h5file[groupname]
+            self._append(data, group)
+        else: # overwrite any existing data in group
+            self._overwrite(data, groupname)
 
-            # want to append data, raise if we cannot
-            if not is_appendable_to(data, group):
-                raise IOError('data is not appendable to the group '
-                              '{} in {}'.format(groupname, self.filename))
+    def _append(self, data, group):
+        if not self._is_appendable(data, group):
+            raise IOError('data is not appendable to the group {}'
+                          .format(group.name))
 
-        else:
-            # erase the group if it exists
-            if groupname in self.h5file:
-                del self.h5file[groupname]
+    def _overwrite(self, data, groupname):
+        if groupname in self.h5file:
+            del self.h5file[groupname]
+        group = self._create_group(groupname, data)
 
-            group = self.create_group(groupname, data)
-
-        # Finally write index and data
-        write_index(group, data['items'], data['features'], append)
-        data['features'].write(group, append)
-        data['items'].write(group)
-        data['times'].write(group)
-
-    def create_group(self, groupname, data):
-        """Initialize a HDF5 group for writing h5features.
-
-        :param str groupname: The name of the group to initialize in
-            the file
-
-        :param dict data: A data dictionary as documented in `Writer.write()`
-
-        :return: The created group
-        """
+    def _create_group(self, groupname, data):
+        """Return an empty group for writing h5features."""
         group = self.h5file.create_group(groupname)
         group.attrs['version'] = self.version
-
-        # create empty datasets
-        create_index(group, self.chunk_size)
-        data['features'].create_dataset(group, self.chunk_size)
-        data['items'].create_dataset(group, self.chunk_size)
-        # chunking the times depends on features chunks
-        data['times'].create_dataset(group, data['features'].nb_per_chunk)
+        data.create_group(group, self.chunk_size)
 
         return group
+
+    def _is_appendable(self, data, group,):
+        """Check if `data` can be appended in a h5features `group`
+
+        :param h5features.Data data: The data we want to append
+        :param h5py.Group group: The group where to append
+        :param str version: The h5features version of the `group`
+        :return: True if `data` is appendable to the `group`
+
+        """
+        return (is_same_version(self.version, group) and
+                all([name in group for name in data.entries.keys()]) and
+                data.is_appendable_to(group))

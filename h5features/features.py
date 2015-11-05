@@ -20,7 +20,8 @@
 import numpy as np
 import scipy.sparse as sp
 
-from .dataset import Dataset, nb_per_chunk
+from .dataentry import DataEntry
+from .dataentry import nb_per_chunk
 
 
 def contains_empty(features):
@@ -34,56 +35,52 @@ def contains_empty(features):
     """
     if not features:
         return True
-
     for feature in features:
         if feature.shape[0] == 0:
             return True
-
     return False
 
 
-def parse_dformat(dformat):
+def parse_dformat(dformat, check=True):
     """Return `dformat` or raise if it is not 'dense' or 'sparse'"""
-    if not dformat in ['dense', 'sparse']:
+    if check and not dformat in ['dense', 'sparse']:
         raise IOError(
             "{} is a bad features format, please choose 'dense' or 'sparse'"
             .format(dformat))
     return dformat
 
 
-def parse_dtype(features):
+def parse_dtype(features, check=True):
     """Return the features scalar type, raise if error.
 
     Raise IOError if all features have not the same data type.
     Return dtype, the features scalar type.
 
     """
-    types = [x.dtype for x in features]
-    dtype = types[0]
-    if not all([t == dtype for t in types]):
-        raise IOError('features must be homogeneous.')
+    dtype = features[0].dtype
+    if check:
+        types = [x.dtype for x in features]
+        if not all([t == dtype for t in types]):
+            raise IOError('features must be homogeneous.')
     return dtype
 
 
-def parse_dim(features):
+def parse_dim(features, check=True):
     """Return the features dimension, raise if error
 
     Raise IOError if features have not all the same positive
     dimension.  Return dim (int), the features dimension.
 
     """
-    dims = [x.shape[1] for x in features]
-    dim = dims[0]
-
-    if not dim > 0:
+    dim = features[0].shape[1]
+    if check and not dim > 0:
         raise IOError('features dimension must be strictly positive.')
-    if not all([d == dim for d in dims]):
+    if check and not all([d == dim for d in [x.shape[1] for x in features]]):
         raise IOError('all files must have the same feature dimension.')
-
     return dim
 
 
-class Features(Dataset):
+class Features(DataEntry):
     """This class manages features in h5features files.
 
     :param data: Features should have time along the lines and
@@ -98,32 +95,33 @@ class Features(Dataset):
     :raise IOError: if features are badly formatted.
 
     """
-    def __init__(self, data, sparsetodense=False):
-        if contains_empty(data):
-            raise IOError('all features must be non-empty')
+    def __init__(self, data, check=True, sparsetodense=False):
+        if check:
+            if contains_empty(data):
+                raise IOError('all features must be non-empty')
 
         # raise on error
-        dtype = parse_dtype(data)
-        dim = parse_dim(data)
+        dtype = parse_dtype(data, check)
+        dim = parse_dim(data, check)
 
         self.dformat = 'dense'
         self.sparsetodense = sparsetodense
-        super(Features, self).__init__(data, 'features', dim, dtype)
+        super(Features, self).__init__(data, dim, dtype)
 
     def __eq__(self, other):
         if self is other:
             return True
         try:
+            ndata = len(self.data)
             # check the little attributes
             if not (self.dformat == other.dformat and
                     self.sparsetodense == other.sparsetodense and
-                    self.name == other.name and
                     self.dim == other.dim and
                     self.dtype == other.dtype and
-                    len(self.data) == len(other.data)):
+                    ndata == len(other.data)):
                 return False
             # check big data
-            for i in range(len(self.data)):
+            for i in range(ndata):
                 if not (self.data[i] == other.data[i]).all():
                     return False
             return True
@@ -137,18 +135,18 @@ class Features(Dataset):
     def is_appendable_to(self, group):
         """Return True if features are appendable to a HDF5 group."""
         return (group.attrs['format'] == self.dformat and
-                group[self.name].dtype == self.dtype and
+                group['features'].dtype == self.dtype and
                 # We use a method because dim differs in dense and sparse.
                 self._group_dim(group) == self.dim)
 
     def _group_dim(self, group):
         """Return the dimension of features stored in a HDF5 group."""
-        return group[self.name].shape[1]
+        return group['features'].shape[1]
 
     def create_dataset(self, group, chunk_size):
         """Initialize the features subgoup."""
         group.attrs['format'] = self.dformat
-        super(Features, self).create_dataset(group, chunk_size)
+        super(Features, self).create_dataset('features', group, chunk_size)
 
         # attribute declared outside __init__ is not safe. Used because
         # Times.create_dataset need it.
@@ -163,7 +161,7 @@ class Features(Dataset):
 
         # the total number of frames to write
         nframes = sum([d.shape[0] for d in self.data])
-        group_feat = group[self.name]
+        group_feat = group['features']
         nb_group, dim = group_feat.shape
 
         if append:
@@ -207,7 +205,7 @@ class SparseFeatures(Features):
         group.create_dataset('coordinates', (0, 2), dtype=np.float64,
                              chunks=(per_chunk, 2), maxshape=(None, 2))
 
-        group.create_dataset(self.name, (0,), dtype=self.dtype,
+        group.create_dataset('features', (0,), dtype=self.dtype,
                              chunks=(per_chunk,), maxshape=(None,))
 
         dtype = np.int64

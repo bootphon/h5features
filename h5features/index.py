@@ -19,7 +19,7 @@
 
 import numpy as np
 
-from .dataset import nb_per_chunk
+from .dataentry import nb_per_chunk
 
 def cumindex(features):
     """Return the index computed from features."""

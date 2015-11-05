@@ -38,6 +38,7 @@ from .h5features import simple_write
 from .writer import Writer
 from .reader import Reader
 
-from .features import Features
-from .times import Times
-from .items import Items
+from .data import Data
+# from .features import Features
+# from .times import Times
+# from .items import Items

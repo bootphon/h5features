@@ -17,9 +17,49 @@
 
 """Provides the Data class to the h5features package."""
 
-# TODO I want data[item] be a (times, features) tuple
+from .items import Items
+from .times import Times
+from .features import Features
+from .index import create_index
+#from .version import is_same_version
 
 class Data(object):
-    """This class is the common way to read from or write to h5features."""
+    """This class communicates data to/from Reader and Writer."""
+
     def __init__(self, items, times, features, check=True):
+        self.entries = {}
+        self.entries['items'] = Items(items, check)
+        self.entries['times'] = Times(times, check)
+        self.entries['features'] = Features(features, check)
+
+    def _dict_entry(self, entry):
+        return dict(zip(self.entries['items'].data, entry.data))
+
+    def dict_features(self):
+        return self._dict_entry(self.entries['features'])
+
+    def dict_times(self):
+        return self._dict_entry(self.entries['times'])
+
+    def size(self):
+        """Return the data memory usage in Mo."""
         pass
+
+    def create_group(self, group, chunk_size):
+        create_index(group, chunk_size)
+        self.entries['features'].create_dataset(group, chunk_size)
+        self.entries['items'].create_dataset(group, chunk_size)
+        # chunking the times depends on features chunks
+        self.entries['times'].create_dataset(
+            group, self.entries['features'].nb_per_chunk)
+
+    def is_appendable_to(self, group):
+        for k in self.entries.keys():
+            if not self.entries[k].is_appendable_to(group):
+                return False
+        return True
+
+class SparseData(Data):
+    def __init__(self, items, times, features, sparsity, check=True):
+        self.sparsity = sparsity
+        super(SparseData, self).__init__(items, times, features, check)

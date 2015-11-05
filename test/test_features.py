@@ -28,12 +28,14 @@ def test_contains_empty_bad():
 
 def test_parse_dformat_good():
     for arg in ['dense', 'sparse']:
-        assert arg == parse_dformat(arg)
+        assert arg == parse_dformat(arg, True)
 
 def test_parse_dformat_bad():
     msg = 'is a bad features format, please choose'
     for arg in ['danse', 'spark', 1, 'spam']:
-        assert_raise(parse_dformat, arg, msg)
+        with pytest.raises(IOError) as error:
+            parse_dformat(arg, True)
+        assert msg in str(error.value)
 
 
 class TestParseDType:
@@ -55,7 +57,7 @@ class TestParseDType:
     def test_not_iterable(self):
         args = [self.data.append(np.array([])), 1]
         for arg in args:
-            assert_raise(parse_dtype, arg, 'not iterable', TypeError)
+            assert_raise(parse_dtype, arg, '', TypeError)
 
 
 class TestParseDim:
@@ -140,7 +142,7 @@ class TestEq:
         assert not feat == self.feat
 
         feat = Features(self.feat.data)
-        feat.name = 'spam a lot'
+        feat.dtype = np.int64
         assert not feat == self.feat
 
         feat = Features(self.feat.data)
@@ -149,7 +151,6 @@ class TestEq:
         assert not feat == self.feat
 
     def test_bad(self):
-        assert not self.feat == self.feat.name
         assert not self.feat == self.feat.data
         assert not self.feat == ''
         assert not self.feat == None

@@ -21,9 +21,8 @@ import h5py
 import os
 import numpy as np
 
-from .features import Features
-from .items import Items, read_items
-from .times import Times
+from .data import Data
+from .items import read_items
 from .index import read_index
 from .version import read_version
 
@@ -142,9 +141,7 @@ class Reader(object):
 
         items = self.items.data[from_idx:to_idx + 1]
 
-        return {'items':Items(items),
-                'times':Times(times),
-                'features':Features(features)}
+        return Data(items, times, features, check=False)
 
     def _get_item_position(self, idx):
         """Return a tuple of (start, end) indices of an item given its index."""
