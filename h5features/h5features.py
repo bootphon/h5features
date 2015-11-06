@@ -75,7 +75,7 @@ def read(filename, groupname, from_item=None, to_item=None,
     reader = Reader(filename, groupname)
     data = (reader.read(from_item, to_item, from_time, to_time)
             if index is None else reader.index_read(index))
-    return data.dict_times(), data.dict_features()
+    return data.dict_labels(), data.dict_features()
 
 
 def write(filename, groupname, items, times, features,
@@ -120,7 +120,7 @@ def write(filename, groupname, items, times, features,
         the file already exists.
 
     :param float sparsity: Optional. Tuning parameter corresponding to
-        the expected proportion of non-zeros elements on average in a
+        the expected proportion (in [0, 1]) of non-zeros elements on average in a
         single frame.
 
     :raise IOError: if the filename is not valid or parameters are inconsistent.

@@ -18,68 +18,95 @@
 """Provides the Data class to the h5features package."""
 
 from .items import Items
-from .times import Times
+from .labels import Labels
 from .features import Features, SparseFeatures
 from .index import create_index, write_index
-#from .version import is_same_version
 
 class Data(object):
-    """This class communicates data to/from Reader and Writer."""
+    """This class manages h5features data."""
+    def __init__(self, items, labels, features, sparsity=None, check=True):
+        if check and not (len(items) == len(labels) == len(features)):
+            raise ValueError('all entries must have the same length')
 
-    def __init__(self, items, times, features, sparsity=None, check=True):
-        self.entries = {}
-        self.entries['items'] = Items(items, check)
-        self.entries['times'] = Times(times, check)
-        self.entries['features'] = (
+        self._entries = {}
+        self._entries['items'] = Items(items, check)
+        self._entries['labels'] = Labels(labels, check)
+        self._entries['features'] = (
             Features(features, check) if sparsity is None else
             SparseFeatures(features, sparsity, check))
 
     def __eq__(self, other):
-        return self.entries == other.entries
+        return self._entries == other._entries
+
+    def _data(self, key):
+        return self._entries[key].data
+
+    def _dict_entry(self, key):
+        return dict(zip(self.items(), self._data(key)))
 
     def items(self):
-        return self._entry('items')
+        """Returns the stored items as a list of str."""
+        return self._data('items')
 
-    def times(self):
-        return self._entry('times')
+    def labels(self):
+        """Returns the stored labels as a list."""
+        return self._data('labels')
 
     def features(self):
-        return self._entry('features')
-
-    def _entry(self, key):
-        return self.entries[key].data
-
-    def _dict_entry(self, entry):
-        return dict(zip(self.items(), entry.data))
+        """Returns the stored features as a list of numpy arrays."""
+        return self._data('features')
 
     def dict_features(self):
-        return self._dict_entry(self.entries['features'])
+        """Returns a items/features dictionary."""
+        return self._dict_entry('features')
 
-    def dict_times(self):
-        return self._dict_entry(self.entries['times'])
+    def dict_labels(self):
+        """Returns a items/labels dictionary."""
+        return self._dict_entry('labels')
 
-    def size(self):
-        """Return the data memory usage in Mo."""
-        pass
+    def init_group(self, group, chunk_size):
+        """Initializes a HDF5 group compliant with the stored data.
 
-    def create_group(self, group, chunk_size):
+        This method creates the datasets 'items', 'labels', 'features'
+        and 'index' and leaves them empty.
+
+        :param h5py.Group group: The group to initializes.
+        :param float chunk_size: The size of a chunk in the file (in MB).
+
+        """
         create_index(group, chunk_size)
-        self.entries['features'].create_dataset(group, chunk_size)
-        self.entries['items'].create_dataset(group, chunk_size)
-        # chunking the times depends on features chunks
-        self.entries['times'].create_dataset(
-            group, self.entries['features'].nb_per_chunk)
+        self._entries['items'].create_dataset(group, chunk_size)
+        self._entries['features'].create_dataset(group, chunk_size)
+        # chunking the labels depends on features chunks
+        self._entries['labels'].create_dataset(
+            group, self._entries['features'].nb_per_chunk)
 
     def is_appendable_to(self, group):
-        if not all([name in group for name in self.entries.keys()]):
+        """Returns True if the data can be appended in a given group."""
+        # First check only the names
+        if not all([k in group for k in self._entries.keys()]):
             return False
-        for k in self.entries.keys():
-            if not self.entries[k].is_appendable_to(group):
+        # If names are matching, check the contents
+        for k in self._entries.keys():
+            if not self._entries[k].is_appendable_to(group):
                 return False
         return True
 
     def write_to(self, group, append=False):
+        """Write the data to the given group.
+
+        :param h5py.Group group: The group to write the data on. It is
+            assumed that the group is already existing or initialized
+            to store h5features data (i.e. the method
+            ``Data.init_group`` have been called.
+
+        :param bool append: If False, any existing data in the group
+            is overwrited. If True, the data is appended to the end of
+            the group and we assume ``Data.is_appendable_to`` is True
+            for this group.
+
+        """
         write_index(self, group, append)
-        self.entries['items'].write_to(group)
-        self.entries['features'].write_to(group, append)
-        self.entries['times'].write_to(group)
+        self._entries['items'].write_to(group)
+        self._entries['features'].write_to(group, append)
+        self._entries['labels'].write_to(group)

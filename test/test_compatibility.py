@@ -6,7 +6,7 @@ import os
 from utils import remove, h5cmp
 import generate
 import h5features_v1_0 as h5f_1_0
-import h5features.h5features as h5f_1_1
+import h5features      as h5f_1_1
 
 class TestReadWriteCompatibility:
     """Test that v1.0 and v1.1 behave equally."""
@@ -36,12 +36,11 @@ class TestReadWriteCompatibility:
         g1 = h5py.File(self.file_v1, 'r')['features']
         g2 = h5py.File(self.file_v2, 'r')['features']
         for k1, k2 in zip('times file_index files features'.split(),
-                          'times index items features'.split()):
+                          'labels index items features'.split()):
             # print(k1, '/', k2)
             chunk1 = g1[k1].chunks
             chunk2 = g2[k2].chunks
             assert chunk1 == chunk2
-
 
     def test_read_works(self):
         fname = self.file_v1

@@ -9,7 +9,7 @@ from utils import remove, assert_raise
 from h5features.h5features import write
 from h5features.writer import Writer
 from h5features.features import Features
-from h5features.times import Times
+from h5features.labels import Labels
 from h5features.items import Items
 from h5features.data import Data
 
@@ -95,3 +95,22 @@ class TestWriteAppendable:
     #             self.f, self.group, self.datasets, self.h5format,
     #             self.h5dim+1, self.h5type, self.version, self.times)
     #     assert 'mismatch' in str(ioerror.value)
+
+class TestWrite:
+    """test the Writer.write method"""
+    def setup(self):
+        self.data = generate.full_data(10)
+        self.filename = 'test.h5'
+        remove(self.filename)
+        self.group = 'group'
+        self.writer = Writer(self.filename)
+
+    def teardown(self):
+        remove(self.filename)
+
+    def test_no_append(self):
+        self.writer.write(self.data, self.group, append=False)
+        with h5py.File(self.filename, 'r') as f:
+            g = f[self.group]
+            assert len(g['items'][...]) == 10
+            assert not all([(l == 0).all() for l in g['features'][...]])

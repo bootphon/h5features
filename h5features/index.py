@@ -27,7 +27,7 @@ representation.
 """
 
 import numpy as np
-from .dataentry import nb_per_chunk
+from .entry import nb_per_chunk
 
 def cumindex(features):
     """Return the index computed from features."""
@@ -53,12 +53,12 @@ def write_index(data, group, append):
     # build the index from data
     nitems = group['items'].shape[0] if 'items' in group else 0
     last_index = group['index'][-1] if nitems > 0 else -1
-    index = last_index + cumindex(data.entries['features'])
+    index = last_index + cumindex(data._entries['features'])
 
     if append:
         nidx = group['index'].shape[0]
         # in case we append to the end of an existing item
-        if data.entries['items'].continue_last_item(group):
+        if data._entries['items'].continue_last_item(group):
             nidx -= 1
 
         group['index'].resize((nidx + index.shape[0],))

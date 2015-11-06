@@ -1,4 +1,4 @@
-"""Test the times module of h5features package."""
+"""Test the labels module of h5features package."""
 
 import h5py
 from numpy.random import randn
@@ -7,11 +7,11 @@ import pytest
 import generate
 from utils import assert_raise, remove
 from h5features.h5features import write, read
-from h5features.times import *
+from h5features.labels import *
 
 
-class TestParseTimes:
-    """Test of the parse_times function."""
+class TestParseLabels:
+    """Test of the parse_labels function."""
     def setup(self):
         self.t1 = generate.times(10, tformat=1)
         self.t2 = generate.times(10, tformat=2)
@@ -20,27 +20,27 @@ class TestParseTimes:
         pass
 
     def test_good(self):
-        assert parse_times(self.t1, True) == 1
-        assert parse_times(self.t1*2, True) == 1
-        assert parse_times(self.t2, True) == 2
+        assert parse_labels(self.t1, True) == 1
+        assert parse_labels(self.t1*2, True) == 1
+        assert parse_labels(self.t2, True) == 2
 
     def test_bad_format(self):
         # 3D
-        assert_raise(parse_times, [randn(2, 2, 2)], '1D or 2D numpy arrays')
+        assert_raise(parse_labels, [randn(2, 2, 2)], '1D or 2D numpy arrays')
         # 2D with shape[1] != 2
-        assert_raise(parse_times, [randn(10, 3)], 'must have 2 elements')
-        assert_raise(parse_times, [randn(5, 1)], 'must have 2 elements')
-        assert_raise(parse_times, [randn(2, 1)], 'must have 2 elements')
+        assert_raise(parse_labels, [randn(10, 3)], 'must have 2 elements')
+        assert_raise(parse_labels, [randn(5, 1)], 'must have 2 elements')
+        assert_raise(parse_labels, [randn(2, 1)], 'must have 2 elements')
 
     def test_bad_dims(self):
         for arg in [self.t1+self.t2,
                     self.t2+self.t1,
                     self.t2+[np.array([1, 2, 3])]]:
-            assert_raise(parse_times, arg, 'the same dimension')
+            assert_raise(parse_labels, arg, 'the same dimension')
 
 
-class TestTimes1D:
-    """Test the Times class for 1D times vectors."""
+class TestLabels1D:
+    """Test the Labels class for 1D labels vectors."""
     def setup(self):
         items, self.data, feats = generate.full(10,tformat=1)
         self.filename = 'test.h5'
@@ -52,36 +52,36 @@ class TestTimes1D:
         remove(self.filename)
 
     def test_appendable(self):
-        t = Times(generate.times(5, tformat=1))
+        t = Labels(generate.times(5, tformat=1))
         assert t.is_appendable_to(self.group)
 
-        t = Times(generate.times(5, 12, tformat=1))
+        t = Labels(generate.times(5, 12, tformat=1))
         assert t.is_appendable_to(self.group)
 
-        t = Times(generate.times(10, 1, tformat=2))
+        t = Labels(generate.times(10, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
-        t = Times(generate.times(5, 1, tformat=2))
+        t = Labels(generate.times(5, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
-        t = Times(generate.times(10, 1, tformat=2))
+        t = Labels(generate.times(10, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
     def test_create(self):
-        t1 = Times(self.data)
+        t1 = Labels(self.data)
         # we can't create an existing group
         with pytest.raises(RuntimeError) as err:
             t1.create_dataset(self.group, 10)
         assert 'create' in str(err.value)
 
     def test_side_effect(self):
-        t = Times(self.data)
-        t2 = Times(self.data)
+        t = Labels(self.data)
+        t2 = Labels(self.data)
         t.write_to(self.group)
         assert t == t2
 
-class TestTimes2D:
-    """Test of the Times class for 2D times vectors."""
+class TestLabels2D:
+    """Test of the Labels class for 2D labels vectors."""
     def setup(self):
         self.filename = 'test.h5'
         self.group = h5py.File(self.filename).create_group('group')
@@ -91,18 +91,18 @@ class TestTimes2D:
         remove(self.filename)
 
     def test_init(self):
-        assert Times(self.data).dim == 2
+        assert Labels(self.data).dim == 2
 
     def test_side_effect(self):
-        t = Times(self.data)
-        t2 = Times(self.data)
+        t = Labels(self.data)
+        t2 = Labels(self.data)
         t.create_dataset(self.group, per_chunk=100)
         t.write_to(self.group)
         assert t == t2
 
 
 class TestReadWriteLevel:
-    """Test top level consistency of read/write times"""
+    """Test top level consistency of read/write labels"""
     def setup(self):
         self.filename = 'test.h5'
         self.group = 'group'
@@ -120,7 +120,7 @@ class TestReadWriteLevel:
     # This function is prefixed by an underscore so that it is not
     # detected by pytest as a test function.
     def _test_wr(self, time_format):
-        """Test retrieving times and files after a write/read operation."""
+        """Test retrieving labels and files after a write/read operation."""
         items, t_gold, feat = generate.full(self.nbitems, tformat=time_format)
         write(self.filename, self.group, items, t_gold, feat)
         t, _ = read(self.filename, self.group)

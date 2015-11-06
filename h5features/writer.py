@@ -124,5 +124,5 @@ class Writer(object):
             del self.h5file[groupname]
         group = self.h5file.create_group(groupname)
         group.attrs['version'] = self.version
-        data.create_group(group, self.chunk_size)
+        data.init_group(group, self.chunk_size)
         return group

@@ -15,5 +15,5 @@ def test_from_exemple():
 
     with h5f.Reader(filename, 'group') as r:
         rdata = r.read()
-        assert len(rdata.entries['items'].data) == 100
+        assert len(rdata.items()) == 100
         assert data == rdata

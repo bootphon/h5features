@@ -59,11 +59,11 @@ class TestH5FeaturesWrite:
 
             g = f.get('f')
             assert list(g.keys()) == (
-                ['features', 'index', 'items', 'times'])
+                ['features', 'index', 'items', 'labels'])
 
             assert g['features'].shape == (30,20)
             assert g['items'].shape == (1,)
-            assert g['times'].shape == (30,)
+            assert g['labels'].shape == (30,)
             assert g['index'].shape == (1,)
 
     def test_write(self):
@@ -73,11 +73,11 @@ class TestH5FeaturesWrite:
         with h5py.File(self.filename, 'r') as f:
             assert ['f'] == list(f.keys ())
             g = f.get('f')
-            assert list(g.keys()) == ['features', 'index', 'items', 'times']
+            assert list(g.keys()) == ['features', 'index', 'items', 'labels']
             assert g.get('features').shape[1] == 20
             assert g.get('index').shape == (30,)
             assert g.get('items').shape == (30,)
-            assert g.get('features').shape[0] == g.get('times').shape[0]
+            assert g.get('features').shape[0] == g.get('labels').shape[0]
 
 
 class TestH5FeaturesReadWrite:
@@ -95,17 +95,18 @@ class TestH5FeaturesReadWrite:
         remove(self.filename)
 
     def test_write_simple(self):
-        # write/read a file with a single item
-        features_0 = np.random.randn(300, self.dim)
-        times_0 = np.linspace(0, 2, 300)
-        h5f.simple_write(self.filename, 'group1', times_0, features_0, 'item')
-        t0, f0 = h5f.read(self.filename, 'group1')
-
-        times_0_r, features_0_r = h5f.read(self.filename, 'group1')
-        assert list(times_0_r.keys()) == ['item']
-        assert list(features_0_r.keys ()) == ['item']
-        assert all(times_0_r['item'] == times_0)
-        assert (features_0_r['item'] == features_0).all()
+        """write/read a file with a single item of 30 frames"""
+        nframes = 30
+        f = np.random.randn(nframes, self.dim)
+        t = np.linspace(0, 2, nframes)
+        h5f.simple_write(self.filename, 'group1', t, f, 'item')
+        tr, fr = h5f.read(self.filename, 'group1')
+        assert list(tr.keys()) == ['item']
+        assert list(fr.keys ()) == ['item']
+        assert len(tr['item']) == 30
+        assert len(fr['item']) == 30
+        #assert tr['item'] == t
+        assert (fr['item'] == f).all()
 
     def test_append(self):
         """Append a new item to an existing dataset."""

@@ -128,20 +128,22 @@ class Reader(object):
             features = (self.group['features'][:, lower:upper].T
                         if self.version == '0.1'
                         else self.group['features'][lower:upper, :])
-            times = self.group['times'][lower:upper]
+            labels = (self.group['labels'][lower:upper]
+                      if self.version >= '1.1' else
+                      self.group['times'][lower:upper])
 
         # If we read a single item
         if to_idx == from_idx:
             features = [features]
-            times = [times]
+            labels = [labels]
         else: # Several items case: unindex data
             item_ends = self._index[from_idx:to_idx] - from_pos[0] + 1
             features = np.split(features, item_ends, axis=0)
-            times = np.split(times, item_ends, axis=0)
+            labels = np.split(labels, item_ends, axis=0)
 
         items = self.items.data[from_idx:to_idx + 1]
 
-        return Data(items, times, features, check=False)
+        return Data(items, labels, features, check=False)
 
     def _get_item_position(self, idx):
         """Return a tuple of (start, end) indices of an item given its index."""

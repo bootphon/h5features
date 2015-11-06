@@ -18,10 +18,10 @@
 """Provides the Items class to the h5features package."""
 
 from h5py import special_dtype
-from .dataentry import DataEntry
+from .entry import Entry
 
-def read_items(group, version, check=False):
-    """Return an Item instance initialized from a h5features group. """
+def read_items(group, version='1.1', check=False):
+    """Return an Items instance initialized from a h5features group."""
     if version == '0.1':
         # parse unicode to strings
         return ''.join(
@@ -33,7 +33,7 @@ def read_items(group, version, check=False):
         return Items(list(group['items'][...]), check)
 
 
-class Items(DataEntry):
+class Items(Entry):
     """This class manages items in h5features files.
 
     :param data: A list of item names (e.g. files from which the
@@ -54,13 +54,14 @@ class Items(DataEntry):
             if not len(set(data)) == len(data):
                 raise IOError('all items must have different names.')
 
-        super(Items, self).__init__(data, 1, special_dtype(vlen=str), check)
+        super(Items, self).__init__(
+            'items', data, 1, special_dtype(vlen=str), check)
 
     def create_dataset(self, group, chunk_size):
-        super(Items, self).create_dataset('items', group, chunk_size)
+        super(Items, self)._create_dataset(group, chunk_size)
 
     def is_appendable_to(self, group):
-        return (not set(group['items'][...]).intersection(self.data) or
+        return (not set(group[self.name][...]).intersection(self.data) or
                 self.continue_last_item(group))
 
     def continue_last_item(self, group):
@@ -78,7 +79,7 @@ class Items(DataEntry):
         * Otherwise raise IOError.
 
         """
-        items_in_group = group['items'][...]
+        items_in_group = group[self.name][...]
 
         # Shared items between self and the group
         # TODO Really usefull to compute the whole intersection ?
@@ -104,7 +105,7 @@ class Items(DataEntry):
 
         """
         # The HDF5 group where to write data
-        items_group = group['items']
+        items_group = group[self.name]
 
         nitems = items_group.shape[0]
         items_group.resize((nitems + len(self.data),))

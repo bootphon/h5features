@@ -14,62 +14,72 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
-"""Provides the Times class to the h5features module."""
+
+"""Provides the Labels class to the h5features module."""
 
 import numpy as np
-from .dataentry import DataEntry
+from .entry import Entry
 
-def parse_times(times, check=True):
-    """Return the times vectors dimension from raw times arrays.
+def read_labels(group, version='1.1', check=False):
+    """Return a Labels instance initialized from a h5features group."""
+    if version < '1.1':
+        return Labels(group['times'][...])
+    else:
+        return Labels(group['labels'][...])
 
-    :param times: Each element of the list contains the timestamps of
-        an h5features item. For all t in times, we must have t.ndim to
+def parse_labels(labels, check=True):
+    """Return the labels vectors dimension.
+
+    :param labels: Each element of the list contains the labels of an
+        h5features item. For all t in labels, we must have t.ndim to
         be either 1 or 2.
 
-        * 1D arrays contain the center timestamps of each frame of the
+        * 1D arrays contain the center labelstamps of each frame of the
           related item.
 
-        * 2D arrays contain the begin and end timestamps of each
+        * 2D arrays contain the begin and end labelstamps of each
           items's frame, thus having t.ndim == 2 and t.shape[1] == 2.
 
-    :type times: list of numpy arrays
+    :type labels: list of numpy arrays
 
     :param bool check: If True, raise on errors
 
-    :raise IOError: if the time format is not 1 or 2, or if times
+    :raise IOError: if the time format is not 1 or 2, or if labels
         arrays have different dimensions.
 
-    :return: The parsed times dimension is either 1 or 2 for 1D or 2D
-        times arrays respectively.
+    :return: The parsed labels dimension is either 1 or 2 for 1D or 2D
+        labels arrays respectively.
 
     """
-    dim = times[0].ndim
+    # TODO change that method to parse arbitrary type of labels
+    dim = labels[0].ndim
 
     if check:
         if dim > 2:
-            raise IOError('times must be a list of 1D or 2D numpy arrays.')
+            raise IOError('labels must be a list of 1D or 2D numpy arrays.')
 
-        if not all([t.ndim == dim for t in times]):
-            raise IOError('all times arrays must have the same dimension.')
+        if not all([t.ndim == dim for t in labels]):
+            raise IOError('all labels arrays must have the same dimension.')
 
-        if dim == 2 and not all(t.shape[1] == 2 for t in times):
-            raise IOError('2D times arrays must have 2 elements on 2nd dimension')
+        if dim == 2 and not all(t.shape[1] == 2 for t in labels):
+            raise IOError('2D labels arrays must have 2 elements on 2nd dimension')
     return dim
 
 
-class Times(DataEntry):
-    """This class manages times related operations for h5features files."""
+class Labels(Entry):
+    """This class manages labels related operations for h5features files."""
 
     def __init__(self, data, check=True):
-        dim = parse_times(data, check)
-        super(Times, self).__init__(data, dim, np.float64, check)
+        dim = parse_labels(data, check)
+        super(Labels, self).__init__('labels', data, dim, np.float64, check)
 
     def __eq__(self, other):
         if self is other:
             return True
         try:
             # check the little attributes
-            if not (self.dim == other.dim and
+            if not (self.name == other.name and
+                    self.dim == other.dim and
                     self.dtype == other.dtype and
                     len(self.data) == len(other.data)):
                 return False
@@ -82,25 +92,24 @@ class Times(DataEntry):
             return False
 
     def is_appendable_to(self, group):
-        return group['times'][...].ndim == self.dim
+        return group[self.name][...].ndim == self.dim
 
     def create_dataset(self, group, per_chunk):
         shape = (0,) if self.dim == 1 else (0, self.dim)
         maxshape = (None,) if self.dim == 1 else (None, self.dim)
         chunks = (per_chunk,) if self.dim == 1 else (per_chunk, self.dim)
 
-        group.create_dataset('times', shape, dtype=self.dtype,
+        group.create_dataset(self.name, shape, dtype=self.dtype,
                              chunks=chunks, maxshape=maxshape)
 
     def write_to(self, group):
-        name = 'times'
         nb_data = sum([d.shape[0] for d in self.data])
-        nb_group = group[name].shape[0]
+        nb_group = group[self.name].shape[0]
         new_size = nb_group + nb_data
 
         if self.dim == 1:
-            group[name].resize((new_size,))
-            group[name][nb_group:] = np.concatenate(self.data)
+            group[self.name].resize((new_size,))
+            group[self.name][nb_group:] = np.concatenate(self.data)
         else: # self.dim == 2
-            group[name].resize((new_size, 2))
-            group[name][nb_group:] = np.concatenate(self.data, axis=0)
+            group[self.name].resize((new_size, 2))
+            group[self.name][nb_group:] = np.concatenate(self.data, axis=0)
