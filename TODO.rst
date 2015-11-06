@@ -3,10 +3,9 @@ These document the scheduled and/or requested changes to the h5features package.
 For 1.1 release
 ---------------
 
-* docs/usage.rst
 * implement read(index)
 * read/write bigger than RAM
-* rename times as labels, arbitrary homogoneous type
+* labels can be of arbitrary type
 
 For a future release
 --------------------
