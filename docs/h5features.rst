@@ -1,27 +1,34 @@
-=============
 API reference
 =============
 
-.. automodule:: h5features
+h5features.converter module
+---------------------------
+
+.. automodule:: h5features.converter
     :members:
     :undoc-members:
     :show-inheritance:
 
-Reading and writing data
-========================
+h5features.data module
+----------------------
 
-h5features.reader module
-------------------------
-
-.. automodule:: h5features.reader
+.. automodule:: h5features.data
     :members:
     :undoc-members:
     :show-inheritance:
 
-h5features.writer module
-------------------------
+h5features.entry module
+-----------------------
 
-.. automodule:: h5features.writer
+.. automodule:: h5features.entry
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.features module
+--------------------------
+
+.. automodule:: h5features.features
     :members:
     :undoc-members:
     :show-inheritance:
@@ -34,78 +41,58 @@ h5features.h5features module
     :undoc-members:
     :show-inheritance:
 
-Converting h5features files
-===========================
-
-Between h5features versions
----------------------------
-
-.. automodule:: h5features.converter
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-From numpy npz to h5features
-----------------------------
-
-.. automodule:: h5features.npz2h5features
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Storing h5features data
-=======================
-
-The dataset module
-------------------
-
-.. automodule:: h5features.dataset
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-The items module
-----------------
-
-.. automodule:: h5features.items
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-The features module
--------------------
-
-.. automodule:: h5features.features
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-The times module
-----------------
-
-.. automodule:: h5features.times
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Internal details
-================
-
-The index module
-----------------
+h5features.index module
+-----------------------
 
 .. automodule:: h5features.index
     :members:
     :undoc-members:
     :show-inheritance:
 
+h5features.items module
+-----------------------
 
-The version module
-------------------
+.. automodule:: h5features.items
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.labels module
+------------------------
+
+.. automodule:: h5features.labels
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.npz2h5features module
+--------------------------------
+
+.. automodule:: h5features.npz2h5features
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.reader module
+------------------------
+
+.. automodule:: h5features.reader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.version module
+-------------------------
 
 .. automodule:: h5features.version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+h5features.writer module
+------------------------
+
+.. automodule:: h5features.writer
     :members:
     :undoc-members:
     :show-inheritance:
