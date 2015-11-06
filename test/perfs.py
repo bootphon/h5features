@@ -69,10 +69,9 @@ import h5features_v1_0 as h5f
 from utils import remove
 from __main__ import data, filename, groupname
     """
-
     v10_write = """\
 remove(filename)
-h5f.write(filename, groupname, data.items(), data.times(), data.features())
+h5f.write(filename, groupname, data.items(), data.labels(), data.features())
     """
     v11_setup = """\
 import h5features as h5f
@@ -91,7 +90,7 @@ h5f.Writer(filename).write(data, groupname)
 
     print('Reading:')
     remove(filename)
-    h5f.write(filename, groupname, data.items(), data.times(), data.features())
+    h5f.write(filename, groupname, data.items(), data.labels(), data.features())
     print('  1.0: ', timeme(read, v10_setup, args))
     print('  1.1: ', timeme(read, v11_setup, args))
 
