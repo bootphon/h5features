@@ -20,13 +20,6 @@
 import numpy as np
 from .entry import Entry
 
-def read_labels(group, version='1.1', check=False):
-    """Return a Labels instance initialized from a h5features group."""
-    if version < '1.1':
-        return Labels(group['times'][...])
-    else:
-        return Labels(group['labels'][...])
-
 def parse_labels(labels, check=True):
     """Return the labels vectors dimension.
 
@@ -57,12 +50,8 @@ def parse_labels(labels, check=True):
     if check:
         if dim > 2:
             raise IOError('labels must be a list of 1D or 2D numpy arrays.')
-
         if not all([t.ndim == dim for t in labels]):
             raise IOError('all labels arrays must have the same dimension.')
-
-        if dim == 2 and not all(t.shape[1] == 2 for t in labels):
-            raise IOError('2D labels arrays must have 2 elements on 2nd dimension')
     return dim
 
 

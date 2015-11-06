@@ -24,13 +24,14 @@ class TestParseLabels:
         assert parse_labels(self.t1*2, True) == 1
         assert parse_labels(self.t2, True) == 2
 
+        # 2D with shape[1] != 2
+        parse_labels([randn(10, 3)]) == 2
+        parse_labels([randn(5, 1)])
+        parse_labels([randn(2, 1)])
+
     def test_bad_format(self):
         # 3D
         assert_raise(parse_labels, [randn(2, 2, 2)], '1D or 2D numpy arrays')
-        # 2D with shape[1] != 2
-        assert_raise(parse_labels, [randn(10, 3)], 'must have 2 elements')
-        assert_raise(parse_labels, [randn(5, 1)], 'must have 2 elements')
-        assert_raise(parse_labels, [randn(2, 1)], 'must have 2 elements')
 
     def test_bad_dims(self):
         for arg in [self.t1+self.t2,
@@ -119,18 +120,19 @@ class TestReadWriteLevel:
 
     # This function is prefixed by an underscore so that it is not
     # detected by pytest as a test function.
-    def _test_wr(self, time_format):
+    def _test_wr(self, labeldim):
         """Test retrieving labels and files after a write/read operation."""
-        items, t_gold, feat = generate.full(self.nbitems, tformat=time_format)
+        items, t_gold, feat = generate.full(self.nbitems, tformat=labeldim)
         write(self.filename, self.group, items, t_gold, feat)
         t, _ = read(self.filename, self.group)
 
         assert len(t) == self.nbitems
-        if time_format == 2:
-            assert all([tt.shape[1] == time_format for tt in t.values()])
+        if not labeldim == 1:
+            assert all([tt.shape[1] == labeldim for tt in t.values()])
 
         # build a dict from gold to compare with t
-        d = {}
-        for k, v in zip(items, t_gold): d[k] = v
+        d = dict(zip(items, t_gold))
+        # d = {}
+        # for k, v in zip(items, t_gold): d[k] = v
         # compare the two dicts
         for dd, tt in zip(d, t): assert tt == dd
