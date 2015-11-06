@@ -13,20 +13,24 @@ API.
 
 * **Object oriented refactoring**
 
-  An object oriented architecture have been coded. The main entry
-  classes are Data, Reader and Writer.
+    An object oriented architecture have been coded. The main entry
+    classes are Data, Reader and Writer.
 
 * **Distinct overwrite/append mode**
 
-  Appending to an existing file is now optional. This allow minor
-  optimzations but that make sense when data is big.
+    Appending to an existing file is now optional. This allow minor
+    optimzations but that make sense when data is big.
 
 * **Change in the HDF5 file structure**
 
-  With *group* as the h5features root in a HDF5 file, the structure
-  evolved from *group/[files, times, features, file_index]* to
-  *group/[items, times, features, index]*. These changes are done
-  for clarity and consistency with code and usage.
+    With *group* as the h5features root in a HDF5 file, the structure
+    evolved from *group/[files, times, features, file_index]* to
+    *group/[items, labels, features, index]*. These changes are done
+    for clarity and consistency with code and usage.
+
+* **Change in times/labels**
+
+    You can now write 2D labels to h5features.
 
 * **Test suite**
 
