@@ -47,7 +47,7 @@ class Items(Entry):
         unique in the list.
 
     """
-    def __init__(self, data=[], check=True):
+    def __init__(self, data, check=True):
         if check:
             if not data:
                 raise IOError('data is empty')
