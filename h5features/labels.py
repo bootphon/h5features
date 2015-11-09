@@ -45,7 +45,7 @@ def parse_labels(labels, check=True):
 
     """
     # TODO change that method to parse arbitrary type of labels
-    dim = labels[0].ndim
+    dim = labels[0].ndim# if len(labels) else 1
 
     if check:
         if dim > 2:
@@ -99,6 +99,6 @@ class Labels(Entry):
         if self.dim == 1:
             group[self.name].resize((new_size,))
             group[self.name][nb_group:] = np.concatenate(self.data)
-        else: # self.dim == 2
-            group[self.name].resize((new_size, 2))
+        else:
+            group[self.name].resize((new_size, self.dim))
             group[self.name][nb_group:] = np.concatenate(self.data, axis=0)

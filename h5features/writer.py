@@ -23,24 +23,6 @@ import os
 from .index import write_index
 from .version import is_supported_version, is_same_version
 
-
-# def is_same_entries(data, group):
-#     """Check if `data` entries are consistent with a `group`.
-
-#     This function is used internally by the `Writer`. Only the names
-#     of the datasets are accessed, not their content.
-
-#     :param h5features.Data data:
-#     :param group: The group to compare the dataset with
-#     :type group: HDF5 group
-
-#     :return: True if each dataset in `data` is present in the
-#       `group`. False else.
-
-#     """
-#     return
-
-
 class Writer(object):
     """This class provides an interface for writing to h5features files.
 

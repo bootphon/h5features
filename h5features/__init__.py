@@ -17,9 +17,6 @@
 
 """This package defines a standard to read/write features from/to HDF5 files.
 
-The h5features file format is briefly documented at
-http://abxpy.readthedocs.org/en/latest/FilesFormat.html#features-file
-
 .. note::
 
    **The functions are not concurrent nor thread-safe**
@@ -35,10 +32,7 @@ from .h5features import read
 from .h5features import write
 from .h5features import simple_write
 
-from .writer import Writer
-from .reader import Reader
-
+from .converter import Converter
 from .data import Data
-# from .features import Features
-# from .times import Times
-# from .items import Items
+from .reader import Reader
+from .writer import Writer

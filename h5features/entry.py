@@ -59,15 +59,34 @@ class Entry(object):
         if self is other:
             return True
         try:
-            return (self.name == other.name and
-                    self.dim == other.dim and
-                    self.dtype == other.dtype and
+            return (self.is_appendable(other) and
                     self.data == other.data)
         except AttributeError:
             return False
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def clear(self):
+        """Erase stored data"""
+        self.data = []
+
+    def is_appendable(self, entry):
+        """Return True if entry can be appended to self"""
+        try:
+            if (self.name == entry.name and
+                self.dtype == entry.dtype and
+                self.dim == entry.dim):
+                return True
+        except AttributeError:
+            return False
+        return False
+
+    def append(self, entry):
+        """Append an entry to self"""
+        if not self.is_appendable(entry):
+            raise ValueError('entry not appendable')
+        self.data += entry.data
 
     def _create_dataset(self, group, chunk_size):
         """Create an empty dataset in a group."""
