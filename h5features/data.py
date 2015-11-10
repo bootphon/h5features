@@ -22,11 +22,13 @@ from .labels import Labels
 from .features import Features, SparseFeatures
 from .index import create_index, write_index
 
+
 class Data(object):
     """This class manages h5features data."""
     def __init__(self, items, labels, features, sparsity=None, check=True):
         if check and not (len(items) == len(labels) == len(features)):
-            raise ValueError('all entries must have the same length')
+            raise ValueError('all entries must have the same length ({} {} {})'
+                             .format(len(items), len(labels), len(features)))
 
         self._entries = {}
         self._entries['items'] = Items(items, check)
@@ -43,6 +45,19 @@ class Data(object):
 
     def _dict_entry(self, key):
         return dict(zip(self.items(), self._data(key)))
+
+    def is_empty(self):
+        return len(self.items()) == 0
+
+    def clear(self):
+        """Erase stored data"""
+        for e in self._entries.values():
+            e.clear()
+
+    def append(self, data):
+        """Append a Data instance to self"""
+        for k in self._entries.keys():
+            self._entries[k].append(data._entries[k])
 
     def items(self):
         """Returns the stored items as a list of str."""

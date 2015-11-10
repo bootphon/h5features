@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
@@ -15,49 +14,70 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+
 """Converter between different h5features versions."""
 
 import argparse
+import h5py
 import os
+import numpy as np
+import scipy.io as sio
+
+from .data import Data
 from .reader import Reader
 from .writer import Writer
 
-def converter(filein, fileout, version='1.1', groupname='features',verb=False):
-    """Convert a h5features file from a version to another.
+class Converter(object):
+    """This class allows convertion from various formats to h5features."""
+    def __init__(self, filename, groupname, chunk=0.1):
+        self._writer = Writer(filename, chunk)
+        self.groupname = groupname
 
-    This function is a simple wrapper to a *Reader* and a *Writer*.
-    """
-    reader = Reader(filein, groupname)
-    data = reader.read()
-    if verb:
-        print('version readed =', reader.version)
+    def _write(self, item, labels, features):
+        data = Data([item], [labels], [features])
+        self._writer.write(data, self.groupname, append=True)
 
-    if os.path.exists(fileout):
-        os.remove(fileout)
+    def _labels(self, data):
+        labels = 'labels' if 'labels' in data else 'times'
+        return data[labels]
 
-    writer = Writer(fileout, version=version)
-    writer.write(data, groupname, append=False)
-    if verb:
-        print('version writed =', writer.version)
+    def close(self):
+        self._writer.close()
 
+    def convert(self, infile):
+        if not os.path.isfile(infile):
+            raise IOError('{} is not a valid file'.format(infile))
 
-def main():
-    """Run a h5features converter from parsed arguments."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument('input', help='h5features input file to read')
-    parser.add_argument('-g', '--group',
-                        help='group in the file to convert',
-                        default='features')
-    parser.add_argument('-o', '--output',
-                        help='h5features output file to write',
-                        default=os.path.join(os.getcwd(), 'output.h5'))
-    parser.add_argument('-v', '--version',
-                        help='h5features version of the written file. '
-                        "Either '1.1', '1.0' or '0.1'", default='1.1')
+        ext = os.path.splitext(infile)[1]
+        if ext == '.npz':
+            self.npz_convert(infile)
+        elif ext == '.mat':
+            self.mat_convert(infile)
+        elif ext == '.h5':
+            self.h5features_convert(infile)
+        else:
+            raise IOError('Unknown file format for {}'.format(infile))
 
-    args = parser.parse_args()
-    converter(args.input, args.output, args.version, args.group)
+    def npz_convert(self, infile):
+        data = np.load(infile)
+        item = os.path.splitext(infile)[0]
+        labels = self._labels(data)
+        features = data['features']
+        self._write(item, labels, features)
 
+    def mat_convert(self, infile):
+        data = sio.loadmat(infile)
+        item = os.path.splitext(infile)[0]
+        labels = self._labels(data)[0]
+        features = data['features']
+        self._write(item, labels, features)
 
-if __name__ == '__main__':
-    main()
+    def h5features_convert(self, infile):
+        """Convert a h5features file to the latest version."""
+        # all groups in file
+        with h5py.File(infile, 'r') as f:
+            groups = list(f.keys())
+
+        for g in groups:
+            self._writer.write(Reader(infile, g).read(),
+                               self.groupname, append=True)
