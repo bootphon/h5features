@@ -42,6 +42,19 @@ used for exemple in the `ABXpy`_ package.
     following datasets: *items*, *labels*, *features* and *index*.
 
 
+Command line converter
+======================
+
+The scipt ``convert2h5features`` allows you to simply convert a set of
+files to a single h5features file. Supported files format are numpy
+NPZ and Octave/Matlab mat files.
+
+.. highlight:: bash
+
+For more info on that script, have a::
+
+  $ convert2h5features --help
+
 Basic usage
 ===========
 
