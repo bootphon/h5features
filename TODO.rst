@@ -3,8 +3,6 @@ These document the scheduled and/or requested changes to the h5features package.
 For 1.1 release
 ---------------
 
-* Fix doc
-* script convert2h5features in setup.py + test it
 * Test convertion from h5features old versions
 * implement read(index)
 * read/write bigger than RAM -> catch MemoryError when np.concatenate
