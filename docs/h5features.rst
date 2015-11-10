@@ -1,6 +1,3 @@
-API reference
-=============
-
 h5features.converter module
 ---------------------------
 
@@ -61,14 +58,6 @@ h5features.labels module
 ------------------------
 
 .. automodule:: h5features.labels
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-h5features.npz2h5features module
---------------------------------
-
-.. automodule:: h5features.npz2h5features
     :members:
     :undoc-members:
     :show-inheritance:

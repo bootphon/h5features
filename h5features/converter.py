@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Converter between different h5features versions."""
+"""Provides the Converter class to the h5features package."""
 
-import argparse
 import h5py
 import os
 import numpy as np
@@ -74,10 +73,10 @@ class Converter(object):
 
     def h5features_convert(self, infile):
         """Convert a h5features file to the latest version."""
-        # all groups in file
+        # TODO no need to read all data, just rename it
         with h5py.File(infile, 'r') as f:
             groups = list(f.keys())
 
-        for g in groups:
-            self._writer.write(Reader(infile, g).read(),
+        for group in groups:
+            self._writer.write(Reader(infile, group).read(),
                                self.groupname, append=True)

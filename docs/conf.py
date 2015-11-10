@@ -26,7 +26,7 @@ class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
             return Mock()
-MOCK_MODULES = ['scipy', 'numpy', 'h5py', 'scipy.sparse']
+MOCK_MODULES = ['scipy', 'numpy', 'h5py', 'scipy.sparse', 'scipy.io']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------

@@ -17,12 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Provides functions to convert files to the h5features format."""
+"""Script converting files in various formats to a single h5features file."""
 
 import argparse
 import h5features as h5f
 
 def parse_args():
+    """Define and parse command line arguments"""
     parser = argparse.ArgumentParser(
         description='Convert a set of files to a single h5features file')
 
@@ -38,17 +39,13 @@ def parse_args():
     parser.add_argument('--chunk', default=0.1, type=float,
                         help='size of a file chunk in MB.')
 
-    parser.add_argument('--nfiles', default=500, type=int,
-                        help='Max. number of files to store before writing.')
-
     return parser.parse_args()
 
 def main():
     """Main function of the converter command-line tool,
     ``convert2h5features --help`` for a more complete doc."""
-
     args = parse_args()
-    converter = h5f.Converter(args.output, args.group, args.chunk, args.nfiles)
+    converter = h5f.Converter(args.output, args.group, args.chunk)
     for infile in args.file:
         converter.convert(infile)
 
