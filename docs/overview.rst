@@ -45,7 +45,7 @@ used for exemple in the `ABXpy`_ package.
 Basic usage
 ===========
 
-.. include:: ../exemple.py
+.. include:: exemple.py
    :code: python
 
 .. _h5py: http://docs.h5py.org

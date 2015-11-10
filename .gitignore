@@ -11,3 +11,6 @@ test/stats
 *.h5
 *.pytest.restart
 /stats*
+/test/play.py
+*.mat
+*.npz

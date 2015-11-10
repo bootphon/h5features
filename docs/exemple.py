@@ -88,6 +88,7 @@ with h5f.Reader('exemple.h5', 'group1') as reader:
     rdata = reader.read(first_item, tenth_item)
     assert len(rdata.items()) == 10
 
+
 #####################
 # Playing with labels
 #####################
@@ -103,4 +104,8 @@ data = generate_data(100, labeldim=2)
 h5f.Writer('exemple.h5').write(data, 'group3')
 
 rdata = h5f.Reader('exemple.h5', 'group3').read()
-assert data == rdata
+assert rdata == data
+
+# Remove the writed file
+from os import remove
+remove('exemple.h5')
