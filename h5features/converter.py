@@ -43,8 +43,8 @@ class Converter(object):
         * **.mat** for Octave/Matlab files
 
         * **.h5** for h5features files. In this later case, the files
-            are simply converted to latest version of the h5features
-            data format
+          are simply converted to latest version of the h5features
+          data format
 
 
     :param str filename: The h5features to write in.
