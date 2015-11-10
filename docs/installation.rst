@@ -1,4 +1,5 @@
 .. _install:
+.. highlight:: bash
 
 ============
 Installation
