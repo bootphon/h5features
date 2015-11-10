@@ -72,7 +72,7 @@ def read_index(group, version='1.1'):
 
     :param h5py.Group group: The group to read the index from.
     :param str version: The h5features version of the `group`.
-    :return a 1D numpy array of features indices.
+    :return: a 1D numpy array of features indices.
     """
     if version == '0.1':
         return np.int64(group['index'][...])

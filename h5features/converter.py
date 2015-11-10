@@ -67,13 +67,15 @@ class Converter(object):
     def mat_convert(self, infile):
         data = sio.loadmat(infile)
         item = os.path.splitext(infile)[0]
-        labels = self._labels(data)[0]
+        labels = self._labels(data)
+        labels = labels[0] if labels.shape[0] == 1 else labels
         features = data['features']
         self._write(item, labels, features)
 
     def h5features_convert(self, infile):
         """Convert a h5features file to the latest version."""
         # TODO no need to read all data, just rename it
+        # TODO test it !
         with h5py.File(infile, 'r') as f:
             groups = list(f.keys())
 

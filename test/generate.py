@@ -17,6 +17,8 @@
 """Generate an artificial dataset for testing h5features."""
 
 import numpy as np
+import os
+import scipy.io as sio
 
 def _times_value(nframes, tformat):
     """Generate a new random value for times"""
@@ -93,3 +95,23 @@ def full_data(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
     from h5features.data import Data
     data = full(nitems, dim, max_frames, tformat, items_root)
     return Data(data[0], data[1], data[2])
+
+def npz(directory='./npz', nfiles=100,
+        dim=2, max_frames=3, tformat=1, items_root='item'):
+    if os.path.exists(directory):
+        raise OSError('directory {} already exists'.format(directory))
+    os.mkdir(directory)
+    data = full(nfiles, dim, max_frames, tformat, items_root)
+    for i in range(nfiles):
+        name = os.path.join(directory, data[0][i] + '.npz')
+        np.savez(name, labels=data[1][i], features=data[2][i])
+
+def mat(directory='./mat', nfiles=100,
+        dim=2, max_frames=3, tformat=1, items_root='item'):
+    if os.path.exists(directory):
+        raise OSError('directory {} already exists'.format(directory))
+    os.mkdir(directory)
+    data = full(nfiles, dim, max_frames, tformat, items_root)
+    for i in range(nfiles):
+        name = os.path.join(directory, data[0][i] + '.mat')
+        sio.savemat(name, {'labels':data[1][i], 'features':data[2][i]})

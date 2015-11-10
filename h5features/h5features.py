@@ -14,14 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+
 """Provides the read() and write() wrapper functions.
 
 .. note::
 
    For compatibility with h5features 1.0, this legacy top-level API
    have been conserved in this module. Except for use in legacy code,
-   it is **better not to use it**. Use instead the `h5features.write`
-   and `h5features.read` modules.
+   it is **better not to use it**. Use instead the `h5features.writer`
+   and `h5features.reader` modules.
 
 """
 
