@@ -4,7 +4,6 @@ For 1.1 release
 ---------------
 
 * Test convertion from h5features old versions
-* implement read(index)
 * read/write bigger than RAM -> catch MemoryError when np.concatenate
   on writing.
 
