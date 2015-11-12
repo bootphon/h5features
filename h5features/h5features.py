@@ -30,14 +30,16 @@ from .data import Data
 from .reader import Reader
 from .writer import Writer
 
-def read(filename, groupname, from_item=None, to_item=None,
+
+def read(filename, groupname=None, from_item=None, to_item=None,
          from_time=None, to_time=None, index=None):
     """Reads in a h5features file.
 
     :param str filename: Path to a hdf5 file potentially serving as a
         container for many small files
 
-    :param str groupname: HDF5 group to read the data from.
+    :param str groupname: HDF5 group to read the data from. If None,
+        guess there is one and only one group in `filename`.
 
     :param str from_item: Optional. Read the data starting from this
         item. (defaults to the first stored item)
@@ -135,6 +137,7 @@ def write(filename, groupname, items, times, features,
 
     # Write all that stuff in the HDF5 file's specified group
     Writer(filename, chunk_size).write(data, groupname, append=True)
+
 
 def simple_write(filename, group, times, features, item='item'):
     """Simplified version of `write()` when there is only one item."""

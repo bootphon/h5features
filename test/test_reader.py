@@ -46,7 +46,12 @@ class TestReader:
         assert 'not a valid group' in str(err.value)
 
     def test_read_basic(self):
-        h5f.Reader(self.filename, self.groupname).read()
+        data = h5f.Reader(self.filename, self.groupname).read()
+        assert self.data == data
+
+    def test_groupname_is_none(self):
+        data = h5f.Reader(self.filename, None).read()
+        assert self.data == data
 
     # def test_load_index(self):
     #     group = h5py.File(self.filename, 'r')[self.groupname]

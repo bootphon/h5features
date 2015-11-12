@@ -35,20 +35,29 @@ class Reader(object):
 
     :param str filename: Path to the HDF5 file to read from.
 
-    :param str groupname: Name of the group to read from in the file.
+    :param str groupname: Name of the group to read from in the
+        file. If None, guess there is one and only one group in
+        `filename`.
 
     :raise IOError: if `filename` is not an existing HDF5 file or
         if `groupname` is not a valid group in `filename`.
 
     """
-    def __init__(self, filename, groupname):
+    def __init__(self, filename, groupname=None):
         # open the file for reading
         if not os.path.exists(filename) or not h5py.is_hdf5(filename):
             raise IOError('{} is not a HDF5 file'.format(filename))
         self.h5file = h5py.File(filename, 'r')
 
         # open the requested group in the file
-        if not groupname in self.h5file:
+        if groupname is None:
+            # expect only one group in the file
+            groups = list(self.h5file.keys())
+            if not len(groups) == 1:
+                raise IOError('groupname is None and cannot be guessed in {}.'
+                              .format(filename))
+            groupname = groups[0]
+        elif not groupname in self.h5file:
             raise IOError('{} is not a valid group in {}'
                           .format(groupname, filename))
         self.group = self.h5file[groupname]
@@ -75,6 +84,7 @@ class Reader(object):
 
     def index_read(self, index):
         """Read data from its indexed coordinate"""
+        # TODO
         raise NotImplementedError
 
     def read(self, from_item=None, to_item=None,
