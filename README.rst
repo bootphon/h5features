@@ -1,8 +1,8 @@
-.. image:: https://readthedocs.org/projects/h5features/badge/?version=latest
-   :target: http://h5features.readthedocs.org/en/latest
+.. image:: https://readthedocs.org/projects/h5features/badge/?version=master
+   :target: http://h5features.readthedocs.org
    :alt: Documentation Status
 
-.. image:: https://travis-ci.org/bootphon/h5features.svg?branch=1.1
+.. image:: https://travis-ci.org/bootphon/h5features.svg?branch=master
     :target: https://travis-ci.org/bootphon/h5features
 
 ==========

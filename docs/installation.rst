@@ -9,9 +9,9 @@ Getting the source
 ==================
 
 The source code is publicly available at
-https://github.com/mmmaat/h5features ::
+https://github.com/bootphon/h5features ::
 
-    $ git clone https://github.com/mmmaat/h5features.git
+    $ git clone https://github.com/bootphon/h5features.git
 
 .. note::
 
@@ -42,7 +42,7 @@ Testing
 =======
 
 This package is continuously integrated with travis. You can follow
-the build status `here <https://travis-ci.org/mmmaat/h5features>`_.
+the build status `here <https://travis-ci.org/bootphon/h5features>`_.
 For testing it on your local machine, simply run from the root
 directory::
 
