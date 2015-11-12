@@ -2,7 +2,7 @@
    :target: http://h5features.readthedocs.org/en/latest
    :alt: Documentation Status
 
-.. image:: https://travis-ci.org/mmmaat/h5features.svg?branch=master
+.. image:: https://travis-ci.org/mmmaat/h5features.svg?branch=1.1
     :target: https://travis-ci.org/mmmaat/h5features
 
 ==========
