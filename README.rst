@@ -5,13 +5,14 @@
 .. image:: https://travis-ci.org/mmmaat/h5features.svg?branch=1.1
     :target: https://travis-ci.org/mmmaat/h5features
 
+.. highlight:: bash
+
 ==========
 h5features
 ==========
 
-The h5features **python package** provides **easy to use** and
-**efficient** storage of **big features data** to/from the HDF5 binary
-file format.
+The h5features **python package** provides easy to use and efficient
+storage of **large features data** on the HDF5 binary file format.
 
 Install it with::
 

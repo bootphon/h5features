@@ -233,7 +233,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'h5featuresrst.tex', 'h5features.rst Documentation',
+  (master_doc, 'h5features.tex', 'h5features Documentation',
    'Thomas Schatz, Mathieu Bernard, Roland Thiolliere', 'manual'),
 ]
 
@@ -263,7 +263,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'h5featuresrst', 'h5features.rst Documentation',
+    (master_doc, 'h5features', 'h5features Documentation',
      [author], 1)
 ]
 
