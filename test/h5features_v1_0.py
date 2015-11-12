@@ -1,17 +1,22 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 11 11:06:06 2013
+# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# This file is part of h5features.
+#
+# h5features is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h5features is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h5features.  If not, see <http://www.gnu.org/licenses/>.
+"""The legacy version of h5features.
 
-@author: Thomas Schatz
-"""
-
-
-# FIXME test that read is still compatible with legacy version (should it take
-# a transpose at some point ?)
-# FIXME implement sparse functionalities
-# FIXME create github with MIT license, test profile and document everything
-# FIXME introduce support for empty internal files ?
-# for profiling and doc could re-use stuff on LSCP wiki
+For compatibility tests only."""
 
 import h5py
 import os
@@ -289,7 +294,7 @@ def write(filename, group, files, times, features, features_format='dense',
                     nb_frames_by_chunk, dim), maxshape=(None, dim))
             g.create_dataset('times', (0,), dtype=np.float64, chunks=(
                 nb_frames_by_chunk,), maxshape=(None,))
-            str_dtype = h5py.special_dtype(vlen=unicode)
+            str_dtype = h5py.special_dtype(vlen=str)
             # typical filename is 20 characters i.e. around 20 bytes
             nb_lines_by_chunk = max(10, nb_lines(20, 1, chunk_size * 1000))
             g.create_dataset(

@@ -1,18 +1,22 @@
-.. h5features documentation master file, created by
-   sphinx-quickstart on Mon Sep  8 15:56:39 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+=========================
+h5features  documentation
+=========================
 
-Welcome to h5features's documentation!
-======================================
+.. note::
 
-Contents:
+   The source code is available at
+   `<http://www.github.com/bootphon/h5features>`_.
+
+**Table of contents**
 
 .. toctree::
    :maxdepth: 2
 
+   overview
+   installation
    h5features
-
+   whatsnew
+   license
 
 Indices and tables
 ==================
@@ -20,4 +24,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
