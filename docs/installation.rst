@@ -9,16 +9,16 @@ Getting the source
 ==================
 
 The source code is publicly available at
-https://github.com/mmmaat/h5features2 ::
+https://github.com/mmmaat/h5features ::
 
-    $ git clone https://github.com/mmmaat/h5features2.git
+    $ git clone https://github.com/mmmaat/h5features.git
 
 .. note::
 
    In what follows we suppose your current directory is the root of
    the h5features package you just cloned::
 
-     $ cd h5features2
+     $ cd h5features
 
 Installing
 ==========
@@ -42,7 +42,7 @@ Testing
 =======
 
 This package is continuously integrated with travis. You can follow
-the build status `here <https://travis-ci.org/mmmaat/h5features2>`_.
+the build status `here <https://travis-ci.org/mmmaat/h5features>`_.
 For testing it on your local machine, simply run from the root
 directory::
 

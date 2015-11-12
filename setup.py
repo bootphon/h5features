@@ -38,7 +38,7 @@ setup(
     keywords='HDF5 h5py features read write',
     author='Thomas Schatz, Mathieu Bernard, Roland Thiolliere',
     author_email='mmathieubernardd@gmail.com',
-    url='https://github.com/mmmaat/h5features2',
+    url='https://github.com/mmmaat/h5features',
     license='GPLv3',
     packages=find_packages(exclude=['test']),
     include_package_data=True,

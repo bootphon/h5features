@@ -1,7 +1,4 @@
-"""Test of the h5features2.features module.
-
-@author: Mathieu Bernard <mmathieubernardd@gmail.com>
-"""
+"""Test of the h5features.features module."""
 
 import h5py
 import numpy as np
