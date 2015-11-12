@@ -5,7 +5,7 @@ h5features  documentation
 .. note::
 
    The source code is available at
-   `<http://www.github.com/mmmaat/h5features>`_.
+   `<http://www.github.com/bootphon/h5features>`_.
 
 **Table of contents**
 
