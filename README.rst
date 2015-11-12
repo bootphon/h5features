@@ -2,8 +2,8 @@
    :target: http://h5features.readthedocs.org/en/latest
    :alt: Documentation Status
 
-.. image:: https://travis-ci.org/mmmaat/h5features.svg?branch=1.1
-    :target: https://travis-ci.org/mmmaat/h5features
+.. image:: https://travis-ci.org/bootphon/h5features.svg?branch=1.1
+    :target: https://travis-ci.org/bootphon/h5features
 
 .. highlight:: bash
 
