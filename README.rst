@@ -5,8 +5,6 @@
 .. image:: https://travis-ci.org/bootphon/h5features.svg?branch=1.1
     :target: https://travis-ci.org/bootphon/h5features
 
-.. highlight:: bash
-
 ==========
 h5features
 ==========
