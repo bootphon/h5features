@@ -49,7 +49,18 @@ class TestConverterSimple:
 
         Converter(self.h5file, 'group').convert(self.matfile)
         rdata = Reader(self.h5file, 'group').read()
-        assert rdata.items() == [os.path.splitext(self.matfile)[0]]
+        assert rdata.items() == [os.path.splitext(self.matfile)[0]]        
+        assert (rdata.labels()[0] == data[1][0]).all()
+        assert (rdata.features()[0] == data[2][0]).all()
+        assert rdata == Data([os.path.splitext(self.matfile)[0]], data[1], data[2])
+
+    def test_2D_labels_one_frame(self):
+        data = generate.full(1, 5, 1, 2)
+        sio.savemat(self.matfile, {'labels':data[1][0], 'features':data[2][0]})
+
+        Converter(self.h5file, 'group').convert(self.matfile)
+        rdata = Reader(self.h5file, 'group').read()
+        assert rdata.items() == [os.path.splitext(self.matfile)[0]]        
         assert (rdata.labels()[0] == data[1][0]).all()
         assert (rdata.features()[0] == data[2][0]).all()
         assert rdata == Data([os.path.splitext(self.matfile)[0]], data[1], data[2])

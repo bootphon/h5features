@@ -20,7 +20,6 @@
 import h5py
 import os
 
-from .index import write_index
 from .version import is_supported_version, is_same_version
 
 class Writer(object):
@@ -98,6 +97,7 @@ class Writer(object):
                               .format(group.name))
         else: # overwrite any existing data in group
             group = self._prepare(data, groupname)
+            
         data.write_to(group, append)
 
     def _prepare(self, data, groupname):
