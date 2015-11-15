@@ -26,13 +26,14 @@ from .data import Data
 from .reader import Reader
 from .writer import Writer
 
+
 class Converter(object):
     """This class allows convertion from various formats to h5features.
 
-    * A *Converter* instance owns an h5features file and write converted
+    * A `Converter` instance owns an h5features file and write converted
       input files to it, in a specified group.
 
-    * An input file is converted to h5fatures using the *convert*
+    * An input file is converted to h5fatures using the `convert`
       method, which choose a concrete conversion method based on the
       input file extension.
 
@@ -48,21 +49,25 @@ class Converter(object):
 
 
     :param str filename: The h5features to write in.
-    :param str groupname: The group to write in *filename*
-    :param float chunk: Size a chunk in *filename*, in MBytes.
+    :param str groupname: The group to write in `filename`
+    :param float chunk: Size a chunk in `filename`, in MBytes.
 
     """
     def __init__(self, filename, groupname, chunk=0.1):
         self._writer = Writer(filename, chunk)
         self.groupname = groupname
 
-    def _write(self, item, labels, features):
-        data = Data([item], [labels], [features])
-        self._writer.write(data, self.groupname, append=True)
-
-    def _labels(self, data):
+    @staticmethod
+    def _labels(data):
+        """Returns the labels according to version"""
         labels = 'labels' if 'labels' in data else 'times'
         return data[labels]
+
+    def _write(self, item, labels, features):
+        """ Writes the given item to the owned file."""
+        data = Data([item], [labels], [features])
+        #print(data.labels()[0].shape)
+        self._writer.write(data, self.groupname, append=True)
 
     def close(self):
         """Close the converter and release the owned h5features file."""
@@ -71,8 +76,8 @@ class Converter(object):
     def convert(self, infile):
         """Convert an input file to h5features based on its extension.
 
-        :raise IOError: if *infile* is not a valid file.
-        :raise IOError: if *infile* extension is not supported.
+        :raise IOError: if `infile` is not a valid file.
+        :raise IOError: if `infile` extension is not supported.
 
         """
         if not os.path.isfile(infile):

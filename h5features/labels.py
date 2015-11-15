@@ -20,47 +20,51 @@
 import numpy as np
 from .entry import Entry
 
-def parse_labels(labels, check=True):
-    """Return the labels vectors dimension.
-
-    :param labels: Each element of the list contains the labels of an
-        h5features item. For all t in labels, we must have t.ndim to
-        be either 1 or 2.
-
-        * 1D arrays contain the center labelstamps of each frame of the
-          related item.
-
-        * 2D arrays contain the begin and end labelstamps of each
-          items's frame, thus having t.ndim == 2 and t.shape[1] == 2.
-
-    :type labels: list of numpy arrays
-
-    :param bool check: If True, raise on errors
-
-    :raise IOError: if the time format is not 1 or 2, or if labels
-        arrays have different dimensions.
-
-    :return: The parsed labels dimension is either 1 or 2 for 1D or 2D
-        labels arrays respectively.
-
-    """
-    # TODO change that method to parse arbitrary type of labels
-    dim = labels[0].ndim# if len(labels) else 1
-
-    if check:
-        if dim > 2:
-            raise IOError('labels must be a list of 1D or 2D numpy arrays.')
-        if not all([t.ndim == dim for t in labels]):
-            raise IOError('all labels arrays must have the same dimension.')
-    return dim
-
 
 class Labels(Entry):
     """This class manages labels related operations for h5features files."""
 
     def __init__(self, data, check=True):
-        dim = parse_labels(data, check)
+        dim = self.parse_labels(data, check)
         super(Labels, self).__init__('labels', data, dim, np.float64, check)
+
+    @staticmethod
+    def parse_labels(labels, check=True):
+        """Return the labels vectors dimension.
+
+        :param labels: Each element of the list contains the labels of
+            an h5features item. For all t in labels, we must have
+            t.ndim to be either 1 or 2.
+
+            * 1D arrays contain the center labelstamps of each frame of the
+              related item.
+
+            * 2D arrays contain the begin and end labelstamps of each
+              items's frame, thus having t.ndim == 2 and t.shape[1] == 2.
+
+        :type labels: list of numpy arrays
+
+        :param bool check: If True, raise on errors
+
+        :raise IOError: if the time format is not 1 or 2, or if labels
+            arrays have different dimensions.
+
+        :return: The parsed labels dimension is either 1 or 2 for 1D
+            or 2D labels arrays respectively.
+
+        """
+        # TODO change that method to parse arbitrary type of labels
+        try:
+            dim = labels[0].ndim
+        except:
+            dim = 1
+
+        if check:
+            if dim > 2:
+                raise IOError('labels must be a list of 1D or 2D numpy arrays.')
+            if not all([t.ndim == dim for t in labels]):
+                raise IOError('all labels arrays must have the same dimension.')
+        return dim
 
     def __eq__(self, other):
         if self is other:

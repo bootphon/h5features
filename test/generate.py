@@ -82,12 +82,12 @@ def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
 def full_dict(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
     """Return a data dictionary"""
     from h5features.items import Items
-    from h5features.times import Times
+    from h5features.labels import Labels
     from h5features.features import Features
 
     data = full(nitems, dim, max_frames, tformat, items_root)
     return {'items':Items(data[0]),
-            'times':Times(data[1]),
+            'times':Labels(data[1]),
             'features':Features(data[2])}
 
 def full_data(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):

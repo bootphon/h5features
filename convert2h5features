@@ -22,6 +22,7 @@
 import argparse
 import h5features as h5f
 
+
 def parse_args():
     """Define and parse command line arguments"""
     parser = argparse.ArgumentParser(
@@ -41,6 +42,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def main():
     """Main function of the converter command-line tool,
     ``convert2h5features --help`` for a more complete doc."""
@@ -48,6 +50,7 @@ def main():
     converter = h5f.Converter(args.output, args.group, args.chunk)
     for infile in args.file:
         converter.convert(infile)
+
 
 if __name__ == '__main__':
     main()
