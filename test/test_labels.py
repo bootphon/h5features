@@ -16,7 +16,7 @@ class TestParseLabels:
     def setup(self):
         self.t1 = generate.labels(10, tformat=1)
         self.t2 = generate.labels(10, tformat=2)
-        self.parse = Labels([np.array([])], False).parse_labels
+        self.parse = Labels.parse_dim
 
     def teardown(self):
         pass

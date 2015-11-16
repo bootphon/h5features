@@ -83,11 +83,10 @@ def parse_dim(features, check=True):
 class Features(Entry):
     """This class manages features in h5features files.
 
-    :param data: Features should have time along the lines and
+    :param data: Features must have time along the lines and
         features along the columns (accomodating row-major storage
         in hdf5 files).
-
-    :type data: list of 2D numpy array like
+    :type data: list of 2D numpy arrays
 
     :param bool sparsetodense: If True convert sparse matrices to
         dense when writing. Used for compatibility with 1.0.

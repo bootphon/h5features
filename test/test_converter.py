@@ -73,7 +73,7 @@ class TestConverterSimple:
                              data[1], data[2])
 
 
-class TestMatFiles:
+class TestMatFilesLabels1D:
     def setup(self):
         self.nfiles = 10
         self.h5file = 'data.h5'
@@ -94,8 +94,8 @@ class TestMatFiles:
             sio.savemat(self.matfiles[i], {'labels':data.labels()[i],
                                            'features':data.features()[i]})
 
-        for l in data.labels():
-            print(l)
+        # for l in data.labels():
+        #     print(l)
 
         # convert it to h5features
         conv = Converter(self.h5file, 'group')

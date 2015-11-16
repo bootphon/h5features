@@ -25,12 +25,11 @@ class Labels(Entry):
     """This class manages labels related operations for h5features files."""
 
     def __init__(self, data, check=True):
-        dim = self.parse_labels(data, check)
+        dim = self.parse_dim(data, check)
         super(Labels, self).__init__('labels', data, dim, np.float64, check)
-#        print('new labels with dim={}, shape={}'.format(dim, data[0].shape))
 
     @staticmethod
-    def parse_labels(labels, check=True):
+    def parse_dim(labels, check=True):
         """Return the labels vectors dimension.
 
         :param labels: Each element of the list contains the labels of
@@ -55,12 +54,14 @@ class Labels(Entry):
 
         """
         if check:
+            # paranoid check because was buggy
             if not isinstance(labels, list):
                 raise IOError('labels are not in a list')
             if not len(labels):
                 raise IOError('The labels list is empty')
             if not all([isinstance(l, np.ndarray) for l in labels]):
                 raise IOError('All labels must be numpy arrays')
+
             ndim = labels[0].ndim
             if ndim not in [1, 2]:
                 raise IOError('Labels dimension must be 1 or 2')
@@ -93,16 +94,13 @@ class Labels(Entry):
             return False
 
     def is_appendable_to(self, group):
-        res = False
-
-        labels = group[self.name][...]
-        if self.dim == 1:
-            if labels.ndim == 1:
-                res = True
+        shape = group[self.name].shape
+        if len(shape) == 1:
+            res = self.dim == 1
         else:
-            if not labels.ndim == 1:
-                res = (labels.shape[1] == self.dim)
-        print('is app ?', res, self.data, labels)
+            res = self.data[0].ndim == 2
+        print('app? {}. shape='.format(res),
+              shape, self.dim, self.data[0].shape)
         return res
 
     def create_dataset(self, group, per_chunk):
