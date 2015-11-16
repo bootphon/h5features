@@ -4,8 +4,8 @@ import h5py
 import os
 import pytest
 
-import generate
-from utils import remove, assert_raise
+from aux import generate
+from aux.utils import remove, assert_raise
 from h5features.h5features import write
 from h5features.writer import Writer
 from h5features.features import Features

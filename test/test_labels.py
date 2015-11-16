@@ -5,10 +5,24 @@ from numpy.random import randn
 import pytest
 import numpy as np
 
-import generate
-from utils import assert_raise, remove
-from h5features.h5features import write, read
+from aux import generate
+from aux.utils import assert_raise, remove
+from h5features import write, read
 from h5features.labels import Labels
+
+
+def test_label_one_frame_2D():
+    from h5features.labels import Labels
+    gold = np.array([[0, 1, 2]])
+    label = Labels([gold])
+    assert isinstance(label.data, list)
+    assert len(label.data) == 1
+
+    test = label.data[0]
+    assert isinstance(test, np.ndarray)
+    assert test.ndim == gold.ndim
+    assert test.shape == gold.shape
+    assert (test == gold).all()
 
 
 class TestParseLabels:

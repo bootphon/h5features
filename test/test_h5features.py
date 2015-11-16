@@ -5,8 +5,8 @@ import h5py
 import pytest
 
 import h5features.h5features as h5f
-import generate
-from utils import remove
+from aux import generate
+from aux.utils import remove
 
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)
@@ -17,7 +17,6 @@ def test_raise_on_write_sparse():
 
 class TestH5FeaturesWrite:
     """Test write methods."""
-
     def setup(self):
         self.filename = 'test.h5'
 
@@ -67,16 +66,16 @@ class TestH5FeaturesWrite:
             assert g['index'].shape == (1,)
 
     def test_write(self):
-        files, times, features = generate.full(30, 20, 10)
+        files, times, features = generate.full(10, 2, 5)
         h5f.write(self.filename, 'f', files, times, features)
 
         with h5py.File(self.filename, 'r') as f:
             assert ['f'] == list(f.keys ())
             g = f.get('f')
             assert list(g.keys()) == ['features', 'index', 'items', 'labels']
-            assert g.get('features').shape[1] == 20
-            assert g.get('index').shape == (30,)
-            assert g.get('items').shape == (30,)
+            assert g.get('features').shape[1] == 2
+            assert g.get('index').shape == (10,)
+            assert g.get('items').shape == (10,)
             assert g.get('features').shape[0] == g.get('labels').shape[0]
 
 

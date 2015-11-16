@@ -2,7 +2,7 @@
 
 import numpy as np
 from h5features.data import Data
-import generate
+from aux import generate
 
 class TestData:
     def setup(self):

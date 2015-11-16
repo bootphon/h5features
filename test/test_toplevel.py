@@ -2,8 +2,8 @@
 
 import numpy as np
 import h5features as h5f
-import generate
-from utils import remove
+from aux import generate
+from aux.utils import remove
 
 def test_from_exemple():
     filename = '/tmp/exemple.h5'
@@ -20,20 +20,11 @@ def test_from_exemple():
         assert data == rdata
     remove(filename)
 
-# class TestLabels():
-#     """Test labels other than 1D times stamps"""
-#     def setup(self):
-#         self.filename = 'test.h5'
-#         self.nitems = 10
-#         self.features = generate.features(self.nitems)
-#         self.items = generate.items(self.nitems)
+def test_rw_one_frame_2D():
+    h5file = 'data.h5'
+    gold = generate.full_data(1,3,1,2)
+    remove(h5file)
+    h5f.Writer(h5file).write(gold)
+    test = h5f.Reader(h5file).read()
+    assert test == gold
 
-#     def teardown(self):
-#         remove(self.filename)
-
-#     def test_str(self):
-#         labels = [np.array(['a'])] * self.nitems
-#         data = h5f.Data(self.items, labels, self.features)
-#         h5f.Writer(self.filename).write(data, 'group')
-#         rdata = h5f.Reader(self.filename, 'group').read()
-#         assert rdata == data

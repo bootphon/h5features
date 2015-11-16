@@ -99,14 +99,15 @@ class Labels(Entry):
             res = self.dim == 1
         else:
             res = self.data[0].ndim == 2
-        print('app? {}. shape='.format(res),
-              shape, self.dim, self.data[0].shape)
         return res
 
+    def _dim_tuple(self, value):
+        return (value,) if self.dim == 1 else (value, self.dim)
+    
     def create_dataset(self, group, per_chunk):
-        shape = (0,) if self.dim == 1 else (0, self.dim)
-        maxshape = (None,) if self.dim == 1 else (None, self.dim)
-        chunks = (per_chunk,) if self.dim == 1 else (per_chunk, self.dim)
+        shape = self._dim_tuple(0)
+        maxshape = self._dim_tuple(None)
+        chunks = self._dim_tuple(per_chunk)
 
         group.create_dataset(self.name, shape, dtype=self.dtype,
                              chunks=chunks, maxshape=maxshape)
@@ -118,7 +119,10 @@ class Labels(Entry):
 
         if self.dim == 1:
             group[self.name].resize((new_size,))
-            group[self.name][nb_group:] = np.concatenate(self.data)
+            if len(self.data) == 1:
+                group[self.name][nb_group:] = self.data[0].T
+            else:
+                group[self.name][nb_group:] = np.concatenate(self.data)
         else:
             group[self.name].resize((new_size, self.dim))
             group[self.name][nb_group:] = np.concatenate(self.data, axis=0)

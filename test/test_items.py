@@ -6,8 +6,8 @@
 import h5py
 import pytest
 
-import generate
-from utils import assert_raise, remove
+from aux import generate
+from aux.utils import assert_raise, remove
 from h5features.items import Items
 
 

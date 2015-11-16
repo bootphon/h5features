@@ -10,8 +10,8 @@ import h5py
 import pytest
 import tempfile
 
-import generate
-from utils import remove
+from aux import generate
+from aux.utils import remove
 import h5features as h5f
 
 class TestReader:

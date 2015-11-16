@@ -53,7 +53,7 @@ class Converter(object):
     :param float chunk: Size a chunk in `filename`, in MBytes.
 
     """
-    def __init__(self, filename, groupname, chunk=0.1):
+    def __init__(self, filename, groupname='h5features', chunk=0.1):
         self._writer = Writer(filename, chunk)
         self.groupname = groupname
 
@@ -65,15 +65,21 @@ class Converter(object):
     def _write(self, item, labels, features):
         """ Writes the given item to the owned file."""
         data = Data([item], [labels], [features])
-        #print(data.labels()[0].shape)
         self._writer.write(data, self.groupname, append=True)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     def close(self):
         """Close the converter and release the owned h5features file."""
         self._writer.close()
 
-    def convert(self, infile):
-        """Convert an input file to h5features based on its extension.
+    # TODO add item_name=None as argument. When None take infile basename.
+    def convert(self, infile, item=None):
+        """Convert an input file to h5features based on its extension.        
 
         :raise IOError: if `infile` is not a valid file.
         :raise IOError: if `infile` extension is not supported.
@@ -82,31 +88,30 @@ class Converter(object):
         if not os.path.isfile(infile):
             raise IOError('{} is not a valid file'.format(infile))
 
+        if item == None:
+            item = os.path.splitext(infile)[0]
+
         ext = os.path.splitext(infile)[1]
         if ext == '.npz':
-            self.npz_convert(infile)
+            self.npz_convert(infile, item)
         elif ext == '.mat':
-            self.mat_convert(infile)
+            self.mat_convert(infile, item)
         elif ext == '.h5':
             self.h5features_convert(infile)
         else:
             raise IOError('Unknown file format for {}'.format(infile))
 
-    def npz_convert(self, infile):
+    def npz_convert(self, infile, item):
         """Convert a numpy NPZ file to h5features."""
         data = np.load(infile)
-        item = os.path.splitext(infile)[0]
         labels = self._labels(data)
         features = data['features']
         self._write(item, labels, features)
 
-    def mat_convert(self, infile):
+    def mat_convert(self, infile, item):
         """Convert a Octave/Matlab file to h5features."""
         data = sio.loadmat(infile)
-        item = os.path.splitext(infile)[0]
         labels = self._labels(data)
-        print('labels=', labels[0].ndim, labels[0].shape, labels[0])
-        #labels = labels[0] if labels.shape[0] == 1 else labels
         features = data['features']
         self._write(item, labels, features)
 
