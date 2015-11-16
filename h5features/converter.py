@@ -60,8 +60,7 @@ class Converter(object):
     @staticmethod
     def _labels(data):
         """Returns the labels according to version"""
-        labels = 'labels' if 'labels' in data else 'times'
-        return data[labels]
+        return data['labels' if 'labels' in data else 'times']
 
     def _write(self, item, labels, features):
         """ Writes the given item to the owned file."""
@@ -106,7 +105,8 @@ class Converter(object):
         data = sio.loadmat(infile)
         item = os.path.splitext(infile)[0]
         labels = self._labels(data)
-        labels = labels[0] if labels.shape[0] == 1 else labels
+        print('labels=', labels[0].ndim, labels[0].shape, labels[0])
+        #labels = labels[0] if labels.shape[0] == 1 else labels
         features = data['features']
         self._write(item, labels, features)
 
@@ -114,7 +114,6 @@ class Converter(object):
         """Convert a h5features file to the latest h5features version."""
         with h5py.File(infile, 'r') as f:
             groups = list(f.keys())
-
         for group in groups:
             self._writer.write(Reader(infile, group).read(),
                                self.groupname, append=True)

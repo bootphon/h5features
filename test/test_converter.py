@@ -21,15 +21,20 @@ class TestConverterSimple:
 
     def test_mat(self):
         # generate a unique item
-        data = generate.full(1, 20, 30)
+        data = generate.full_data(1, 20, 10)
 
         # write it to a mat file
-        sio.savemat(self.matfile, {'labels':data[1][0], 'features':data[2][0]})
+        sio.savemat(self.matfile, {'labels':data.labels()[0],
+                                   'features':data.features()[0]})
 
         # check data conservation in mat file
         mat = sio.loadmat(self.matfile)
-        assert (mat['labels'] == data[1][0]).all()
-        assert (mat['features'] == data[2][0]).all()
+        assert (mat['labels'] == data.labels()[0]).all()
+        assert (mat['features'] == data.features()[0]).all()
+
+        print(data.labels()[0].shape)
+        print(data.labels()[0].ndim)
+        print(data.labels()[0])
 
         # convert it to h5features
         Converter(self.h5file, 'group').convert(self.matfile)
@@ -37,8 +42,8 @@ class TestConverterSimple:
 
         # check convertion is correct
         assert rdata.items() == [os.path.splitext(self.matfile)[0]]
-        assert (rdata.labels()[0] == data[1][0]).all()
-        assert (rdata.features()[0] == data[2][0]).all()
+        assert (rdata.labels()[0] == data.labels()[0]).all()
+        assert (rdata.features()[0] == data.features()[0]).all()
 
     def test_2D_labels(self):
         data = generate.full(1, 5, 10, 2)
@@ -49,7 +54,7 @@ class TestConverterSimple:
 
         Converter(self.h5file, 'group').convert(self.matfile)
         rdata = Reader(self.h5file, 'group').read()
-        assert rdata.items() == [os.path.splitext(self.matfile)[0]]        
+        assert rdata.items() == [os.path.splitext(self.matfile)[0]]
         assert (rdata.labels()[0] == data[1][0]).all()
         assert (rdata.features()[0] == data[2][0]).all()
         assert rdata == Data([os.path.splitext(self.matfile)[0]], data[1], data[2])
@@ -60,10 +65,12 @@ class TestConverterSimple:
 
         Converter(self.h5file, 'group').convert(self.matfile)
         rdata = Reader(self.h5file, 'group').read()
-        assert rdata.items() == [os.path.splitext(self.matfile)[0]]        
-        assert (rdata.labels()[0] == data[1][0]).all()
+        assert rdata.items() == [os.path.splitext(self.matfile)[0]]
         assert (rdata.features()[0] == data[2][0]).all()
-        assert rdata == Data([os.path.splitext(self.matfile)[0]], data[1], data[2])
+
+        assert (rdata.labels()[0] == data[1][0]).all()
+        assert rdata == Data([os.path.splitext(self.matfile)[0]],
+                             data[1], data[2])
 
 
 class TestMatFiles:
@@ -80,21 +87,22 @@ class TestMatFiles:
 
     def test_mat(self):
         # generate 10 items
-        data = generate.full(self.nfiles, 10, 30)
+        data = generate.full_data(self.nfiles, 3, 5)
 
         # write them in 10 mat files
         for i in range(self.nfiles):
-            sio.savemat(self.matfiles[i],
-                        {'labels':data[1][i], 'features':data[2][i]})
+            sio.savemat(self.matfiles[i], {'labels':data.labels()[i],
+                                           'features':data.features()[i]})
 
-            # check data conservation in mat file
-            mat = sio.loadmat(self.matfiles[i])
-            assert (mat['features'] == data[2][i]).all()
-            assert (mat['labels'] == data[1][i]).all()
+        for l in data.labels():
+            print(l)
 
         # convert it to h5features
         conv = Converter(self.h5file, 'group')
+        i = 0
         for name in self.matfiles:
+            i += 1
+            print('convert', i)
             conv.convert(name)
         conv.close()
 
@@ -102,8 +110,8 @@ class TestMatFiles:
         rdata = Reader(self.h5file, 'group').read()
         assert len(rdata.items()) == self.nfiles
         for i in range(self.nfiles):
-            assert (rdata.labels()[i] == data[1][i]).all()
-            assert (rdata.features()[i] == data[2][i]).all()
+            assert (rdata.labels()[i] == data.labels()[i]).all()
+            assert (rdata.features()[i] == data.features()[i]).all()
 
 class TestNpz:
     def setup(self):

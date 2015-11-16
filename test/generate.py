@@ -39,7 +39,7 @@ def items(nitems, root='item'):
     return ['{}_{}'.format(root, i) for i in range(nitems)]
 
 
-def times(nitems, max_frames=3, tformat=1):
+def labels(nitems, max_frames=3, tformat=1):
     """Random times data generator."""
     return [_times_value(_nframes(max_frames), tformat) for _ in range(nitems)]
 
@@ -87,14 +87,14 @@ def full_dict(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
 
     data = full(nitems, dim, max_frames, tformat, items_root)
     return {'items':Items(data[0]),
-            'times':Labels(data[1]),
+            'labels':Labels(data[1]),
             'features':Features(data[2])}
 
 def full_data(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
     """Return a h5features.Data instance"""
     from h5features.data import Data
     data = full(nitems, dim, max_frames, tformat, items_root)
-    return Data(data[0], data[1], data[2])
+    return Data(data[0], data[1], data[2], check=True)
 
 def npz(directory='./npz', nfiles=100,
         dim=2, max_frames=3, tformat=1, items_root='item'):

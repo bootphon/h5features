@@ -14,10 +14,10 @@ from h5features.labels import Labels
 class TestParseLabels:
     """Test of the parse_labels function."""
     def setup(self):
-        self.t1 = generate.times(10, tformat=1)
-        self.t2 = generate.times(10, tformat=2)
-        self.parse = Labels(None, False).parse_labels
-        
+        self.t1 = generate.labels(10, tformat=1)
+        self.t2 = generate.labels(10, tformat=2)
+        self.parse = Labels([np.array([])], False).parse_labels
+
     def teardown(self):
         pass
 
@@ -33,13 +33,13 @@ class TestParseLabels:
 
     def test_bad_format(self):
         # 3D
-        assert_raise(self.parse, [randn(2, 2, 2)], '1D or 2D numpy arrays')
+        assert_raise(self.parse, [randn(2, 2, 2)], 'must be 1 or 2')
 
     def test_bad_dims(self):
         for arg in [self.t1+self.t2,
                     self.t2+self.t1,
                     self.t2+[np.array([1, 2, 3])]]:
-            assert_raise(self.parse, arg, 'the same dimension')
+            assert_raise(self.parse, arg, 'dimensions must be equal')
 
 
 class TestLabels1D:
@@ -55,19 +55,19 @@ class TestLabels1D:
         remove(self.filename)
 
     def test_appendable(self):
-        t = Labels(generate.times(5, tformat=1))
+        t = Labels(generate.labels(5, tformat=1))
         assert t.is_appendable_to(self.group)
 
-        t = Labels(generate.times(5, 12, tformat=1))
+        t = Labels(generate.labels(5, 12, tformat=1))
         assert t.is_appendable_to(self.group)
 
-        t = Labels(generate.times(10, 1, tformat=2))
+        t = Labels(generate.labels(10, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
-        t = Labels(generate.times(5, 1, tformat=2))
+        t = Labels(generate.labels(5, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
-        t = Labels(generate.times(10, 1, tformat=2))
+        t = Labels(generate.labels(10, 1, tformat=2))
         assert not t.is_appendable_to(self.group)
 
     def test_create(self):
@@ -91,13 +91,13 @@ def test_2D_one_frame():
     assert label.data[0].ndim == 2
     #print(label.data[0].shape, label.data[0])
 
-    
+
 class TestLabels2D:
     """Test of the Labels class for 2D labels vectors."""
     def setup(self):
         self.filename = 'test.h5'
         self.group = h5py.File(self.filename).create_group('group')
-        self.data = generate.times(2,5,2)
+        self.data = generate.labels(2,5,2)
 
     def teardown(self):
         remove(self.filename)

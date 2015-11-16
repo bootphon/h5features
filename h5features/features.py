@@ -108,7 +108,6 @@ class Features(Entry):
         self.dformat = 'dense'
         self.sparsetodense = sparsetodense
 
-
     def __eq__(self, other):
         if self is other:
             return True

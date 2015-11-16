@@ -91,13 +91,16 @@ class Writer(object):
         if append and groupname in self.h5file:
             # append data to the group, raise if we cannot
             group = self.h5file[groupname]
-            if not(is_same_version(self.version, group)
-                   and data.is_appendable_to(group)):
+            if not is_same_version(self.version, group):
+                raise IOError('data is not appendable to the group {}: '
+                              'versions are different'
+                              .format(group.name))
+            if not data.is_appendable_to(group):
                 raise IOError('data is not appendable to the group {}'
                               .format(group.name))
         else: # overwrite any existing data in group
             group = self._prepare(data, groupname)
-            
+
         data.write_to(group, append)
 
     def _prepare(self, data, groupname):

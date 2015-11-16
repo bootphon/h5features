@@ -27,14 +27,15 @@ class Labels(Entry):
     def __init__(self, data, check=True):
         dim = self.parse_labels(data, check)
         super(Labels, self).__init__('labels', data, dim, np.float64, check)
+#        print('new labels with dim={}, shape={}'.format(dim, data[0].shape))
 
     @staticmethod
     def parse_labels(labels, check=True):
         """Return the labels vectors dimension.
 
         :param labels: Each element of the list contains the labels of
-            an h5features item. For all t in labels, we must have
-            t.ndim to be either 1 or 2.
+            an h5features item. Empty list are not accepted. For all t
+            in labels, we must have t.ndim to be either 1 or 2.
 
             * 1D arrays contain the center labelstamps of each frame of the
               related item.
@@ -53,18 +54,25 @@ class Labels(Entry):
             or 2D labels arrays respectively.
 
         """
-        # TODO change that method to parse arbitrary type of labels
-        try:
-            dim = labels[0].ndim
-        except:
-            dim = 1
-
         if check:
-            if dim > 2:
-                raise IOError('labels must be a list of 1D or 2D numpy arrays.')
-            if not all([t.ndim == dim for t in labels]):
-                raise IOError('all labels arrays must have the same dimension.')
-        return dim
+            if not isinstance(labels, list):
+                raise IOError('labels are not in a list')
+            if not len(labels):
+                raise IOError('The labels list is empty')
+            if not all([isinstance(l, np.ndarray) for l in labels]):
+                raise IOError('All labels must be numpy arrays')
+            ndim = labels[0].ndim
+            if ndim not in [1, 2]:
+                raise IOError('Labels dimension must be 1 or 2')
+            if not all([l.ndim == ndim for l in labels]):
+                raise IOError('All labels dimensions must be equal')
+            if ndim == 2:
+                shape1 = labels[0].shape[1]
+                if not all([l.shape[1] == shape1 for l in labels]):
+                    raise IOError('All labels must have same shape on 2nd dim')
+
+        return 1 if labels[0].ndim == 1 else labels[0].shape[1]
+        #return labels[0].ndim
 
     def __eq__(self, other):
         if self is other:
@@ -85,7 +93,17 @@ class Labels(Entry):
             return False
 
     def is_appendable_to(self, group):
-        return group[self.name][...].ndim == self.dim
+        res = False
+
+        labels = group[self.name][...]
+        if self.dim == 1:
+            if labels.ndim == 1:
+                res = True
+        else:
+            if not labels.ndim == 1:
+                res = (labels.shape[1] == self.dim)
+        print('is app ?', res, self.data, labels)
+        return res
 
     def create_dataset(self, group, per_chunk):
         shape = (0,) if self.dim == 1 else (0, self.dim)
