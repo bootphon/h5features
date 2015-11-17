@@ -27,4 +27,4 @@ def test_rw_one_frame_2D():
     h5f.Writer(h5file).write(gold)
     test = h5f.Reader(h5file).read()
     assert test == gold
-
+    remove(h5file)
