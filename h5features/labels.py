@@ -95,15 +95,12 @@ class Labels(Entry):
 
     def is_appendable_to(self, group):
         shape = group[self.name].shape
-        if len(shape) == 1:
-            res = self.dim == 1
-        else:
-            res = self.data[0].ndim == 2
+        res = self.dim == 1 if len(shape) == 1 else self.data[0].ndim == 2
         return res
 
     def _dim_tuple(self, value):
         return (value,) if self.dim == 1 else (value, self.dim)
-    
+
     def create_dataset(self, group, per_chunk):
         shape = self._dim_tuple(0)
         maxshape = self._dim_tuple(None)

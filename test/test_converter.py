@@ -194,6 +194,7 @@ class TestMatFilesLabels:
             sio.savemat(self.matfiles[i], {'labels':data.labels()[i],
                                            'features':data.features()[i]},
                         oned_as='column')
+
         conv = h5f.Converter(self.h5file)
         for name in self.matfiles:
             conv.convert(name)
@@ -204,10 +205,10 @@ class TestMatFilesLabels:
         for i in range(self.nfiles):
             assert (rdata.labels()[i] == data.labels()[i]).all()
             assert (rdata.features()[i] == data.features()[i]).all()
-        
+
     def _writer_test(self, tformat):
         data = generate.full_data(self.nfiles, 3, 5, tformat)
-        
+
         writer = h5f.Writer(self.h5file)
         for i in range(self.nfiles):
             d = h5f.Data([data.items()[i]],
@@ -221,8 +222,7 @@ class TestMatFilesLabels:
         for i in range(self.nfiles):
             assert (rdata.labels()[i] == data.labels()[i]).all()
             assert (rdata.features()[i] == data.features()[i]).all()
-        
-        
+
     def test_cmat_1d(self):
         self._converter_test(1)
 
@@ -234,7 +234,7 @@ class TestMatFilesLabels:
 
     def test_wmat_2d(self):
         self._writer_test(2)
-            
+
 # class TestH5f():
 #     def setup(self):
 #         pass
