@@ -26,4 +26,3 @@ install:
 
 script:
   - py.test test
-  # python setup.py test
