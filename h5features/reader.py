@@ -165,7 +165,7 @@ class Reader(object):
         if time is None:
             return pos[0]
         else:
-            times = self.group['times'][pos[0]:pos[1] + 1]
+            times = self.group['labels'][pos[0]:pos[1] + 1]
             try:
                 return pos[0] + np.where(times >= time)[0][0]
             except IndexError:
@@ -175,7 +175,7 @@ class Reader(object):
         if time is None:
             return pos[1]
         else:
-            times = self.group['times'][pos[0]:pos[1] + 1]
+            times = self.group['labels'][pos[0]:pos[1] + 1]
             try:
                 return pos[0] + np.where(times <= time)[0][-1]
             except IndexError:
