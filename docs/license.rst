@@ -3,7 +3,7 @@ License and copyright
 
 This package is developed whithin the `Bootphon project`_.
 
-Copyright 2014, 2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere.
+Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere.
 
 h5features is free software: you can redistribute it and/or modify
 it under the terms of the **GNU General Public License** as published by
