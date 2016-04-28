@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
-
 """Provides the Entry class to the h5features package."""
 
 import numpy as np

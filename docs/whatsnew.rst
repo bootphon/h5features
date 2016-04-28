@@ -4,6 +4,13 @@
 What's new ?
 ============
 
+
+Unreleased changes
+==================
+
+* Bugfix when reading from time/to time in Reader
+
+
 What's new in h5features 1.1
 ============================
 
