@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -123,10 +123,11 @@ def write(filename, groupname, items, times, features,
         the file already exists.
 
     :param float sparsity: Optional. Tuning parameter corresponding to
-        the expected proportion (in [0, 1]) of non-zeros elements on average in a
-        single frame.
+        the expected proportion (in [0, 1]) of non-zeros elements on
+        average in a single frame.
 
-    :raise IOError: if the filename is not valid or parameters are inconsistent.
+    :raise IOError: if the filename is not valid or parameters are
+        inconsistent.
 
     :raise NotImplementedError: if dformat == 'sparse'
 

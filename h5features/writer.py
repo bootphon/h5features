@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -59,7 +59,7 @@ class Writer(object):
 
         try:
             self.h5file = h5py.File(self.filename, mode='a')
-        except OSError as err:
+        except OSError:
             raise IOError('file {} cannot be opened'.format(self.filename))
 
     def __enter__(self):
@@ -98,7 +98,7 @@ class Writer(object):
             if not data.is_appendable_to(group):
                 raise IOError('data is not appendable to the group {}'
                               .format(group.name))
-        else: # overwrite any existing data in group
+        else:  # overwrite any existing data in group
             group = self._prepare(data, groupname)
 
         data.write_to(group, append)

@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -57,7 +57,7 @@ class Reader(object):
                 raise IOError('groupname is None and cannot be guessed in {}.'
                               .format(filename))
             groupname = groups[0]
-        elif not groupname in self.h5file:
+        elif groupname not in self.h5file:
             raise IOError('{} is not a valid group in {}'
                           .format(groupname, filename))
         self.group = self.h5file[groupname]
@@ -66,6 +66,10 @@ class Reader(object):
         self.version = read_version(self.group)
         self.items = read_items(self.group, self.version)
         self._index = read_index(self.group, self.version)
+
+        # access to the labels group according to version
+        self._labels_group = (self.group['labels'] if self.version >= '1.1'
+                              else self.group['times'])
 
         self.dformat = self.group.attrs['format']
         if self.dformat == 'sparse':
@@ -85,7 +89,8 @@ class Reader(object):
     def index_read(self, index):
         """Read data from its indexed coordinate"""
         # TODO
-        raise NotImplementedError
+        raise NotImplementedError(
+            'h5features.Reader.index_read(index) not implemented ')
 
     def read(self, from_item=None, to_item=None,
              from_time=None, to_time=None):
@@ -106,8 +111,8 @@ class Reader(object):
             in to_item) the specified times are included in the
             output.
 
-        :return: A dictionary where keys are 'items', 'times, and
-            'features' and the values are instances of Items, Times, and
+        :return: A dictionary where keys are 'items', 'lanels, and
+            'features' and the values are instances of Items, Labels, and
             Features repectively.
 
         """
@@ -133,20 +138,19 @@ class Reader(object):
 
         # Step 2: access actual data
         if self.dformat == 'sparse':
-            raise NotImplementedError('Reading sparse features not implemented')
+            raise NotImplementedError(
+                'Reading sparse features not implemented')
         else:
             features = (self.group['features'][:, lower:upper].T
                         if self.version == '0.1'
                         else self.group['features'][lower:upper, :])
-            labels = (self.group['labels'][lower:upper]
-                      if self.version >= '1.1' else
-                      self.group['times'][lower:upper])
+            labels = self._labels_group[lower:upper]
 
         # If we read a single item
         if to_idx == from_idx:
             features = [features]
             labels = [labels]
-        else: # Several items case: unindex data
+        else:  # Several items case: unindex data
             item_ends = self._index[from_idx:to_idx] - from_pos[0] + 1
             features = np.split(features, item_ends, axis=0)
             labels = np.split(labels, item_ends, axis=0)
@@ -156,7 +160,7 @@ class Reader(object):
         return Data(items, labels, features, check=False)
 
     def _get_item_position(self, idx):
-        """Return a tuple of (start, end) indices of an item given its index."""
+        """Return a tuple of (start, end) indices of an item from its index."""
         start = 0 if idx == 0 else self._index[idx - 1] + 1
         end = self._index[idx]
         return start, end
@@ -165,7 +169,7 @@ class Reader(object):
         if time is None:
             return pos[0]
         else:
-            times = self.group['times'][pos[0]:pos[1] + 1]
+            times = self._labels_group[pos[0]:pos[1] + 1]
             try:
                 return pos[0] + np.where(times >= time)[0][0]
             except IndexError:
@@ -175,7 +179,7 @@ class Reader(object):
         if time is None:
             return pos[1]
         else:
-            times = self.group['times'][pos[0]:pos[1] + 1]
+            times = self._labels_group[pos[0]:pos[1] + 1]
             try:
                 return pos[0] + np.where(times <= time)[0][-1]
             except IndexError:

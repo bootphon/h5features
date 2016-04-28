@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -14,10 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
-
 """Provides the Entry class to the h5features package."""
 
 import numpy as np
+
 
 def nb_per_chunk(item_size, item_dim, chunk_size):
     """Return the number of items that can be stored in one chunk.

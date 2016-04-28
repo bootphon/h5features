@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -79,7 +79,7 @@ class Converter(object):
 
     # TODO add item_name=None as argument. When None take infile basename.
     def convert(self, infile, item=None):
-        """Convert an input file to h5features based on its extension.        
+        """Convert an input file to h5features based on its extension.
 
         :raise IOError: if `infile` is not a valid file.
         :raise IOError: if `infile` extension is not supported.

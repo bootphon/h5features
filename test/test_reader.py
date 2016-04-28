@@ -14,6 +14,7 @@ from aux import generate
 from aux.utils import remove
 import h5features as h5f
 
+
 class TestReader:
     def setup(self):
         self.filename = 'test.h5'
@@ -57,8 +58,12 @@ class TestReader:
     #     group = h5py.File(self.filename, 'r')[self.groupname]
     #     print(list(group.keys()))
 
-    # def test_init_basic(self):
-    #     reader = Reader(self.filename, self.groupe)
-    #     assert reader.version == '1.1'
-    #     assert reader.dformat == 'dense'
-    #     assert len(reader.items) == self.nitems
+    def test_init_basic(self):
+        reader = h5f.Reader(self.filename, self.groupname)
+        assert reader.version == '1.1'
+        assert reader.dformat == 'dense'
+        assert len(reader.items.data) == self.nitems
+
+    def test_read_time(self):
+        reader = h5f.Reader(self.filename, self.groupname)
+        assert reader.read(from_time=0, to_time=1) == reader.read()

@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -27,17 +27,21 @@ supported.
 
 """
 
+
 def supported_versions():
-    """Return the list of the file format versions supported by `h5features`."""
+    """Return the list of file format versions supported by h5features."""
     return ['0.1', '1.0', '1.1']
+
 
 def is_supported_version(version):
     """Return True if the `version` is supported by h5features."""
     return version in supported_versions()
 
+
 def is_same_version(version, group):
     """Return True if `version` and `read_version(group)` are equals."""
     return version == read_version(group)
+
 
 def read_version(group):
     """Return the h5features version of a given HDF5 `group`.
@@ -47,7 +51,7 @@ def read_version(group):
     if it is not supported.
 
     """
-    version = ('0.1' if not 'version' in group.attrs
+    version = ('0.1' if 'version' not in group.attrs
                else group.attrs['version'])
 
     # decode from bytes to str if needed
