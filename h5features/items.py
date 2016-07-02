@@ -20,6 +20,7 @@
 from h5py import special_dtype
 from .entry import Entry
 
+
 def read_items(group, version='1.1', check=False):
     """Return an Items instance initialized from a h5features group."""
     if version == '0.1':
@@ -40,8 +41,6 @@ class Items(Entry):
         features where extracted). Each name of the list must be
         unique.
     :type data: list of str
-
-    :param str name: Optional. The name of this items dataset.
 
     :raise IOError: if data is empty or if one or more names are not
         unique in the list.

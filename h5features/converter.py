@@ -88,7 +88,7 @@ class Converter(object):
         if not os.path.isfile(infile):
             raise IOError('{} is not a valid file'.format(infile))
 
-        if item == None:
+        if item is None:
             item = os.path.splitext(infile)[0]
 
         ext = os.path.splitext(infile)[1]
