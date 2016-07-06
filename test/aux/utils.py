@@ -21,6 +21,7 @@ import os
 import pytest
 import subprocess
 
+
 def cmp(f1, f2):
     """Compare two files.
 
@@ -28,6 +29,7 @@ def cmp(f1, f2):
     checked only on file descriptors (see os.stat).
     """
     return filecmp.cmp(f1, f2, shallow=True)
+
 
 def h5cmp(f1, f2):
     """Compare two HDF5 files.
@@ -44,6 +46,7 @@ def h5cmp(f1, f2):
     if out:
         return False
     return True
+
 
 def assert_raise(func, arg, msg, except_type=IOError):
     """Assert that func(arg) raises a specified exception containing msg."""

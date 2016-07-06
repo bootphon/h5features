@@ -45,7 +45,7 @@ class TestData:
         assert self.data.items() == self.items
         h5f.Writer(h5file, mode=mode).write(self.data, append=append)
         assert self.data.items() == self.items
-        assert h5f.Reader(h5file).read() != self.data
+        assert h5f.Reader(h5file).read() == self.data
 
         # second write of the same data
         if mode == 'a' and append is True:
@@ -54,4 +54,4 @@ class TestData:
         else:
             h5f.Writer(h5file, mode=mode).write(self.data, append=append)
             assert self.data.items() == self.items
-            assert h5f.Reader(h5file).read() != self.data
+            assert h5f.Reader(h5file).read() == self.data
