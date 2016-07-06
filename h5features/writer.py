@@ -22,6 +22,7 @@ import os
 
 from .version import is_supported_version, is_same_version
 
+
 class Writer(object):
     """This class provides an interface for writing to h5features files.
 
@@ -33,18 +34,21 @@ class Writer(object):
         the file. Default is 0.1 Mo. A chunk size below 8 Ko is not
         allowed as it results in poor performances.
 
-    :param str version: Optional. The file format version to write.
+    :param str version: Optional. The file format version to write,
+        default is to write the latest version.
 
-    :raise IOError: if the file exists but is not HDF5 or if the file
-        can be opened.
+    :param char mode: Optional. The mode for overwriting an existing
+        file, 'a' to append data to the file, 'w' to overwrite it
+
+    :raise IOError: if the file exists but is not HDF5, if the file
+        can be opened, or if the mode is not 'a' or 'w'.
 
     :raise IOError: if the chunk size is below 8 Ko.
 
     :raise IOError: if the requested version is not supported.
 
     """
-    # TODO add a mode attribute to safely overwrite existing file
-    def __init__(self, filename, chunk_size=0.1, version='1.1'):
+    def __init__(self, filename, chunk_size=0.1, version='1.1', mode='a'):
         if not is_supported_version(version):
             raise IOError('version {} is not supported'.format(version))
         self.version = version
@@ -57,8 +61,12 @@ class Writer(object):
             raise IOError('chunk size is below 8 Ko')
         self.chunk_size = chunk_size
 
+        if mode not in ('w', 'a'):
+            raise IOError(
+                "mode for writing must be 'a' or 'w', it is '{}'".format(mode))
+
         try:
-            self.h5file = h5py.File(self.filename, mode='a')
+            self.h5file = h5py.File(self.filename, mode=mode)
         except OSError:
             raise IOError('file {} cannot be opened'.format(self.filename))
 
@@ -95,6 +103,7 @@ class Writer(object):
                 raise IOError('data is not appendable to the group {}: '
                               'versions are different'
                               .format(group.name))
+
             if not data.is_appendable_to(group):
                 raise IOError('data is not appendable to the group {}'
                               .format(group.name))

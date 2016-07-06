@@ -43,7 +43,7 @@ def contains_empty(features):
 
 def parse_dformat(dformat, check=True):
     """Return `dformat` or raise if it is not 'dense' or 'sparse'"""
-    if check and not dformat in ['dense', 'sparse']:
+    if check and dformat not in ['dense', 'sparse']:
         raise IOError(
             "{} is a bad features format, please choose 'dense' or 'sparse'"
             .format(dformat))
@@ -181,7 +181,8 @@ class SparseFeatures(Features):
         self.sparsity = sparsity
 
         super(SparseFeatures, self).__init__(data, check)
-        raise NotImplementedError('Writing sparse features is not implemented.')
+        raise NotImplementedError(
+            'Writing sparse features is not implemented.')
 
     def __eq__(self, other):
         try:
@@ -216,7 +217,9 @@ class SparseFeatures(Features):
 
         # Needed by Times.create_dataset
         self.nb_per_chunk = nb_per_chunk(
-            self.dtype.itemsize, int(round(self.sparsity*self.dim)), chunk_size)
+            self.dtype.itemsize,
+            int(round(self.sparsity*self.dim)),
+            chunk_size)
 
     def write_to(self, group, append=False):
         pass

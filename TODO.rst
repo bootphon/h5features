@@ -6,7 +6,6 @@ For 1.1 release
 * Test convertion from h5features old versions
 * read/write bigger than RAM -> catch MemoryError when np.concatenate
   on writing.
-* Data.__repr__
 
 For a future release
 --------------------

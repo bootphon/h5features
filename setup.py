@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -20,7 +20,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 # On Reads The Docs we don't install any package
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'

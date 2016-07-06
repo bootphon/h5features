@@ -60,7 +60,7 @@ class TestH5FeaturesWrite:
             assert list(g.keys()) == (
                 ['features', 'index', 'items', 'labels'])
 
-            assert g['features'].shape == (30,20)
+            assert g['features'].shape == (30, 20)
             assert g['items'].shape == (1,)
             assert g['labels'].shape == (30,)
             assert g['index'].shape == (1,)
@@ -70,7 +70,7 @@ class TestH5FeaturesWrite:
         h5f.write(self.filename, 'f', files, times, features)
 
         with h5py.File(self.filename, 'r') as f:
-            assert ['f'] == list(f.keys ())
+            assert ['f'] == list(f.keys())
             g = f.get('f')
             assert list(g.keys()) == ['features', 'index', 'items', 'labels']
             assert g.get('features').shape[1] == 2
@@ -88,7 +88,7 @@ class TestH5FeaturesReadWrite:
     """
     def setup(self):
         self.filename = 'test.h5'
-        self.dim = 20 # Dimensions of the features
+        self.dim = 20  # Dimensions of the features
 
     def teardown(self):
         remove(self.filename)
@@ -101,10 +101,10 @@ class TestH5FeaturesReadWrite:
         h5f.simple_write(self.filename, 'group1', t, f, 'item')
         tr, fr = h5f.read(self.filename, 'group1')
         assert list(tr.keys()) == ['item']
-        assert list(fr.keys ()) == ['item']
+        assert list(fr.keys()) == ['item']
         assert len(tr['item']) == 30
         assert len(fr['item']) == 30
-        #assert tr['item'] == t
+        # assert tr['item'] == t
         assert (fr['item'] == f).all()
 
     def test_append(self):
@@ -121,7 +121,7 @@ class TestH5FeaturesReadWrite:
         with pytest.raises(IOError) as err:
             h5f.write(self.filename, 'group', ['File_3'],
                       [times_added], [features_added])
-        assert 'data can be added only at the end' in str(err.value)
+        assert 'data is not appendable to the group' in str(err.value)
 
         # read it
         times_r, features_r = h5f.read(self.filename, 'group')
@@ -130,33 +130,16 @@ class TestH5FeaturesReadWrite:
         assert all(times_r['File_31'] == times_added)
         assert (features_r['File_31'] == features_added).all()
 
-    # def test_concat(self):
-    #     """Concatenate new data to an existing item in an existing file."""
+    def test_concat(self):
+        """Concatenate new data to an existing item in an existing file."""
 
-    #     # write a single item named 'item_0'
-    #     data1 = generate.full(1, self.dim, 10, items_root='item')
-    #     h5f.write(self.filename, 'group1', data1[0], data1[1], data1[2])
-    #     h5f.write(self.filename, 'group3', data1[0], data1[1], data1[2])
+        # write a single item named 'item_0'
+        data1 = generate.full(1, self.dim, 10, items_root='item')
+        h5f.write(self.filename, 'group1', data1[0], data1[1], data1[2])
+        h5f.write(self.filename, 'group3', data1[0], data1[1], data1[2])
 
-    #     # concatenate new data to 'item_0'
-    #     data2 = generate.full(1, self.dim, 20, items_root='item')
-    #     h5f.write(self.filename, 'group2', data2[0], data2[1], data2[2])
-    #     h5f.write(self.filename, 'group3', data2[0], data2[1], data2[2])
-
-    #     remove('toto.h5')
-    #     copyfile(self.filename, 'toto.h5')
-
-    #     r_t, r_f = h5f.read(self.filename, 'group')
-    #     items = list(r_f.keys())
-    #     times = list(r_t.values())
-    #     features = list(r_f.values())
-    #     assert items == data1[0]
-    #     assert times == np.concatenate([data1[1][-1], data2[1]], axis=0)
-    #     #assert all([(t == d).all() for t, d in zip(features, new_data[2])])
-    #     #assert (features[item] == data[2][index]).all()
-
-    #     # print(times_r['File_0'], '\n'*2, t[-1], '\n'*2, times_added)
-    #     # assert times_r['File_0'] == np.concatenate([t[-1], times_added])
-    #     # assert (features_r['File_0'] == np.concatenate([f[-1],
-    #     #                                                 features_added],
-    #     #                                                axis=0) ).all()
+        # concatenate new data to 'item_0'
+        data2 = generate.full(1, self.dim, 20, items_root='item')
+        h5f.write(self.filename, 'group2', data2[0], data2[1], data2[2])
+        with pytest.raises(IOError):
+            h5f.write(self.filename, 'group3', data2[0], data2[1], data2[2])

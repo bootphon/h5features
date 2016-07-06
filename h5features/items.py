@@ -60,42 +60,44 @@ class Items(Entry):
         super(Items, self)._create_dataset(group, chunk_size)
 
     def is_appendable_to(self, group):
-        return (not set(group[self.name][...]).intersection(self.data) or
-                self.continue_last_item(group))
+        return not set(group[self.name][...]).intersection(self.data)
+        # or self._continue_last_item(group))
 
-    def continue_last_item(self, group):
-        """Return True if we can continue writing to the last item in the group.
+    # def _continue_last_item(self, group):
+    #     """Return True if we can continue writing to the last item
+    #     in the group.
 
-        This method compares the shared items between the given group
-        and self. Given these shared items, three cases can occur:
+    #     This method compares the shared items between the given group
+    #     and self. Given these shared items, three cases can occur:
 
-        * No shared items: return False
+    #     * No shared items: return False
 
-        * There is only one shared item. It is first in self and last
-          in group : return True. In that case the first item in self is
-          erased.
+    #     * There is only one shared item. It is first in self and last
+    #       in group : return True. In that case the first item in self is
+    #       erased.
 
-        * Otherwise raise IOError.
+    #     * Otherwise raise IOError.
 
-        """
-        items_in_group = group[self.name][...]
+    #     """
+    #     items_in_group = group[self.name][...]
 
-        # Shared items between self and the group
-        # TODO Really usefull to compute the whole intersection ?
-        shared = set(items_in_group).intersection(self.data)
-        nshared = len(shared)
+    #     # Shared items between self and the group
+    #     shared = set(items_in_group).intersection(self.data)
+    #     nshared = len(shared)
 
-        if nshared == 0:
-            return False
-        elif nshared == 1:
-            # Assert the last item in group is the first item in self.
-            if not self.data[0] == items_in_group[-1]:
-                raise IOError('data can be added only at the end'
-                              'of the last written file.')
-            self.data = self.data[1:]
-            return True
-        else:
-            raise IOError('groups cannot have more than one shared items.')
+    #     if nshared == 0:
+    #         return False
+    #     if nshared == 1:
+    #         # Assert the last item in group is the first item in self.
+    #         if not self.data[0] == items_in_group[-1]:
+    #             raise IOError('data can be added only at the end'
+    #                           'of the last written file.')
+    #         # TODO commented out because side effects on data (do not
+    #         # break any test)
+    #         self.data = self.data[1:]
+    #         return True
+    #     else:
+    #         raise IOError('groups cannot have more than one shared item.')
 
     def write_to(self, group):
         """Write stored items to the given HDF5 group.
