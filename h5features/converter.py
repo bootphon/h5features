@@ -77,7 +77,6 @@ class Converter(object):
         """Close the converter and release the owned h5features file."""
         self._writer.close()
 
-    # TODO add item_name=None as argument. When None take infile basename.
     def convert(self, infile, item=None):
         """Convert an input file to h5features based on its extension.
 
@@ -88,7 +87,7 @@ class Converter(object):
         if not os.path.isfile(infile):
             raise IOError('{} is not a valid file'.format(infile))
 
-        if item == None:
+        if item is None:
             item = os.path.splitext(infile)[0]
 
         ext = os.path.splitext(infile)[1]
