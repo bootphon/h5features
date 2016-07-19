@@ -74,9 +74,11 @@ class Entry(object):
     def is_appendable(self, entry):
         """Return True if entry can be appended to self"""
         try:
-            if (self.name == entry.name and
-                self.dtype == entry.dtype and
-                self.dim == entry.dim):
+            if (
+                    self.name == entry.name and
+                    self.dtype == entry.dtype and
+                    self.dim == entry.dim
+            ):
                 return True
         except AttributeError:
             return False

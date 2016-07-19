@@ -73,7 +73,7 @@ class Labels(Entry):
                     raise IOError('All labels must have same shape on 2nd dim')
 
         return 1 if labels[0].ndim == 1 else labels[0].shape[1]
-        #return labels[0].ndim
+        # return labels[0].ndim
 
     def __eq__(self, other):
         if self is other:

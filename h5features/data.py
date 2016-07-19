@@ -101,10 +101,12 @@ class Data(object):
         # First check only the names
         if not all([k in group for k in self._entries.keys()]):
             return False
+
         # If names are matching, check the contents
         for k in self._entries.keys():
             if not self._entries[k].is_appendable_to(group):
                 return False
+
         return True
 
     def write_to(self, group, append=False):

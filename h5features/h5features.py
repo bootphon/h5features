@@ -82,7 +82,7 @@ def read(filename, groupname=None, from_item=None, to_item=None,
 
 
 def write(filename, groupname, items, times, features,
-          dformat='dense', chunk_size=0.1, sparsity=0.1):
+          dformat='dense', chunk_size=0.1, sparsity=0.1, mode='a'):
     """Write h5features data in a HDF5 file.
 
     This function is a wrapper to the Writer class. It has three purposes:
@@ -100,7 +100,7 @@ def write(filename, groupname, items, times, features,
         to append the data to if the group already exists in the file.
 
     :param items: List of files from which the features where
-        extracted.
+        extracted. Items must not contain duplicates.
     :type items: list of str
 
     :param times: Time value for the features array. Elements of
@@ -126,6 +126,9 @@ def write(filename, groupname, items, times, features,
         the expected proportion (in [0, 1]) of non-zeros elements on
         average in a single frame.
 
+    :param char mode: Optional. The mode for overwriting an existing
+        file, 'a' to append data to the file, 'w' to overwrite it
+
     :raise IOError: if the filename is not valid or parameters are
         inconsistent.
 
@@ -137,9 +140,9 @@ def write(filename, groupname, items, times, features,
     data = Data(items, times, features, sparsity=sparsity, check=True)
 
     # Write all that stuff in the HDF5 file's specified group
-    Writer(filename, chunk_size).write(data, groupname, append=True)
+    Writer(filename, chunk_size=chunk_size).write(data, groupname, append=True)
 
 
-def simple_write(filename, group, times, features, item='item'):
+def simple_write(filename, group, times, features, item='item', mode='a'):
     """Simplified version of `write()` when there is only one item."""
-    write(filename, group, [item], [times], [features])
+    write(filename, group, [item], [times], [features], mode=mode)

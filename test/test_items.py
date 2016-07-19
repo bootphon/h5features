@@ -3,6 +3,7 @@
 @author: Mathieu Bernard <mmathieubernardd@gmail.com>
 """
 
+import copy
 import h5py
 import pytest
 
@@ -24,6 +25,7 @@ class TestItemsInit:
         for arg in args:
             assert_raise(Items, arg, msg)
 
+
 class TestCreate:
     """Test of Items.create."""
     def setup(self):
@@ -41,14 +43,13 @@ class TestCreate:
         group = self.group['items']
         assert group.name.split('/')[2] == 'items'
         assert group.shape == (0,)
-        #assert group.chunks == (10,) TODO why this have changed ?
         assert group.chunks == (5000,)
         assert group.maxshape == (None,)
         assert group.dtype == type(str)
 
     def test_create_on_existing_group(self):
         self.group.create_dataset('items', (0,))
-        with pytest.raises(RuntimeError) as err:
+        with pytest.raises(RuntimeError):
             self.items.create_dataset(self.group, 10)
 
 
@@ -61,9 +62,13 @@ def wrapper_is_compat(l1, l2):
         g = h5file.create_group('deleteme')
         i2.create_dataset(g, 10)
         i2.write_to(g)
+
+        _items = copy.deepcopy(i1.data)
         res = i1.is_appendable_to(g)
+        assert _items == i1.data
     remove('test.h5.tmp')
     return res
+
 
 class TestIsAppendableTo:
     def setup(self):
@@ -82,32 +87,30 @@ class TestIsAppendableTo:
 
         # Create an empty items group
         self.items.create_dataset(group, 10)
+        _items = copy.deepcopy(self.items.data)
         assert self.items.is_appendable_to(group)
+        assert _items == self.items.data
 
     def test_same_items_twice(self):
         group = self.h5file.create_group('group')
         self.items.create_dataset(group, 10)
         self.items.write_to(group)
-        assert_raise(self.items.is_appendable_to, group,
-                     'more than one shared items')
+        assert not self.items.is_appendable_to(group)
 
     def test_simple(self):
         l1 = ['c', 'd', 'e']
         l2 = ['a', 'b', 'c']
         l3 = [c for c in 'def']
-        assert wrapper_is_compat(l1, l2)
-        with pytest.raises(IOError):
-            wrapper_is_compat(l2, l1)
+        assert not wrapper_is_compat(l1, l2)
+        assert not wrapper_is_compat(l2, l1)
 
         assert wrapper_is_compat(l2, l3)
         assert wrapper_is_compat(l3, l2)
 
-        with pytest.raises(IOError):
-            wrapper_is_compat(l1, l3)
-        with pytest.raises(IOError):
-            wrapper_is_compat(l3, l1)
-        with pytest.raises(IOError):
-            wrapper_is_compat(l1, l1)
+        assert not wrapper_is_compat(l1, l3)
+        assert not wrapper_is_compat(l3, l1)
+        assert not wrapper_is_compat(l1, l1)
+
 
 class TestWrite:
     def setup(self):

@@ -26,6 +26,7 @@ from .items import read_items
 from .index import read_index
 from .version import read_version
 
+
 class Reader(object):
     """This class provides an interface for reading from h5features files.
 
@@ -111,7 +112,7 @@ class Reader(object):
             in to_item) the specified times are included in the
             output.
 
-        :return: A dictionary where keys are 'items', 'lanels, and
+        :return: A dictionary where keys are 'items', 'labels, and
             'features' and the values are instances of Items, Labels, and
             Features repectively.
 

@@ -1,3 +1,4 @@
+.. highlight:: python
 .. _whatsnew:
 
 ============
@@ -5,10 +6,21 @@ What's new ?
 ============
 
 
-Unreleased changes
-==================
+What's new in h5features 1.1.1
+==============================
 
 * Bugfix when reading from time/to time in Reader
+
+* Safely overwrite existing files with mode='w'
+
+* **Breaking change**
+
+  Appending new to an exisiting item is no more allowed.
+
+  Suppose a h5f file with 3 items ``['a', 'b', 'c']``, in 1.1 it was
+  possible to append 3 items ``['c', 'd', 'e']``, giving a file with 5
+  items, item ``'c'`` being the concatenation of original and appended
+  data. That facility was buggy and is removed in 1.1.1.
 
 
 What's new in h5features 1.1

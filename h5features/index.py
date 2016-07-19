@@ -28,9 +28,11 @@ representation.
 import numpy as np
 from .entry import nb_per_chunk
 
+
 def cumindex(features):
     """Return the index computed from features."""
     return np.cumsum([x.shape[0] for x in features.data])
+
 
 def create_index(group, chunk_size):
     """Create an empty index dataset in the given group."""
@@ -38,6 +40,7 @@ def create_index(group, chunk_size):
     chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
     group.create_dataset('index', (0,), dtype=dtype,
                          chunks=chunks, maxshape=(None,))
+
 
 def write_index(data, group, append):
     """Write the data index to the given group.
@@ -56,15 +59,16 @@ def write_index(data, group, append):
 
     if append:
         nidx = group['index'].shape[0]
-        # in case we append to the end of an existing item
-        if data._entries['items'].continue_last_item(group):
-            nidx -= 1
+        # # in case we append to the end of an existing item
+        # if data._entries['items']._continue_last_item(group):
+        #     nidx -= 1
 
         group['index'].resize((nidx + index.shape[0],))
         group['index'][nidx:] = index
     else:
         group['index'].resize((index.shape[0],))
         group['index'][...] = index
+
 
 def read_index(group, version='1.1'):
     """Return the index stored in a h5features group.

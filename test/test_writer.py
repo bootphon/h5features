@@ -3,15 +3,14 @@
 import h5py
 import os
 import pytest
+import h5features as h5f
+import numpy as np
 
 from aux import generate
 from aux.utils import remove, assert_raise
-from h5features.h5features import write
 from h5features.writer import Writer
-from h5features.features import Features
-from h5features.labels import Labels
-from h5features.items import Items
 from h5features.data import Data
+
 
 def test_create_a_file():
     name = 'azecqgxqsdqxws.eztcqezxf'
@@ -19,6 +18,7 @@ def test_create_a_file():
     Writer(name)
     assert os.path.exists(name)
     remove(name)
+
 
 class TestInit:
     """Test of Writer.__init__"""
@@ -40,14 +40,14 @@ class TestInit:
     def test_chunk_good(self):
         args = [0.008, 0.01, 12, 1e30]
         for arg in args:
-            Writer(self.filename, arg)
+            Writer(self.filename, chunk_size=arg)
 
     def test_chunk_bad(self):
         args = [0.008-1e-2, .0001, 0, -1e30]
         msg = 'chunk size is below 8 Ko'
         for arg in args:
             with pytest.raises(IOError) as err:
-                Writer(self.filename, arg)
+                Writer(self.filename, chunk_size=arg)
             assert msg in str(err.value)
 
 
@@ -84,33 +84,68 @@ class TestWriteAppendable:
         assert self.g.attrs['version'] == Writer('toto').version
         remove('toto')
 
-    # def test_group(self):
-    #     with pytest.raises(IOError):
-    #         w = h5f.writer.Writer(self.filename)
-    #         w.is_appendable(self.g, None)
+    def test_group(self):
+        with pytest.raises(IOError):
+            w = h5f.writer.Writer(self.filename)
+            w.is_appendable(self.g, None)
 
-    # def test_bad_dim(self):
-    #     with pytest.raises(IOError) as ioerror:
-    #         h5f._need_to_append(
-    #             self.f, self.group, self.datasets, self.h5format,
-    #             self.h5dim+1, self.h5type, self.version, self.times)
-    #     assert 'mismatch' in str(ioerror.value)
 
 class TestWrite:
     """test the Writer.write method"""
     def setup(self):
-        self.data = generate.full_data(10)
         self.filename = 'test.h5'
         remove(self.filename)
+
         self.group = 'group'
-        self.writer = Writer(self.filename)
 
     def teardown(self):
         remove(self.filename)
 
     def test_no_append(self):
-        self.writer.write(self.data, self.group, append=False)
+        h5f.Writer(self.filename).write(
+            generate.full_data(10), self.group, append=False)
+
         with h5py.File(self.filename, 'r') as f:
             g = f[self.group]
             assert len(g['items'][...]) == 10
             assert not all([(l == 0).all() for l in g['features'][...]])
+
+    def test_append_distinct_items(self):
+        data1 = generate.full_data(10)
+        h5f.Writer(self.filename).write(data1, self.group, append=False)
+
+        data2 = generate.full_data(10, items_root='items_bis')
+        h5f.Writer(self.filename).write(data2, self.group, append=True)
+
+        with h5py.File(self.filename, 'r') as f:
+            g = f[self.group]
+            items = g['items'][...]
+            assert len(items) == 20
+            assert all('bis' not in i for i in items[:10])
+            assert all('bis' in i for i in items[10:])
+            assert not all([(l == 0).all() for l in g['features'][...]])
+
+    # def test_append_one_shared_item(self):
+    #     data1 = generate.full_data(10)
+    #     shape1 = data1.features()[-1].shape
+    #     shared_item = data1.items()[-1]
+    #     h5f.Writer(self.filename).write(data1, self.group, append=False)
+
+    #     # one item in data, same as in data1
+    #     data2 = generate.full_data(1, max_frames=10)
+    #     shape2 = data2.features()[0].shape
+    #     data2.items()[0] = shared_item
+
+    #     expected_result = np.vstack((
+    #         data1.dict_features()[shared_item],
+    #         data2.dict_features()[shared_item]))
+
+    #     h5f.Writer(self.filename).write(data2, self.group, append=True)
+
+    #     data_read = h5f.Reader(self.filename, self.group).read()
+    #     assert len(data_read.items()) == len(data1.items())
+    #     assert np.array_equal(
+    #         data_read.dict_features()[shared_item],
+    #         expected_result)
+    #     print shape1, shape2, data_read.dict_features()[shared_item].shape
+    #     print data_read.items()

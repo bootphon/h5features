@@ -54,7 +54,7 @@ class Converter(object):
 
     """
     def __init__(self, filename, groupname='h5features', chunk=0.1):
-        self._writer = Writer(filename, chunk)
+        self._writer = Writer(filename, chunk_size=chunk)
         self.groupname = groupname
 
     @staticmethod
