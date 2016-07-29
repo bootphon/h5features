@@ -112,9 +112,7 @@ class Reader(object):
             in to_item) the specified times are included in the
             output.
 
-        :return: A dictionary where keys are 'items', 'labels, and
-            'features' and the values are instances of Items, Labels, and
-            Features repectively.
+        :return: An instance of h5features.Data read from the file.
 
         """
         # handling default arguments

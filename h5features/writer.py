@@ -90,8 +90,8 @@ class Writer(object):
 
         :param bool append: Optional. This parameter has no effect if
            the `groupname` is not an existing group in the file. If
-           set to True (default), try to append new data in the
-           group. If False erase all data in the group before writing.
+           set to True, try to append new data in the group. If False
+           (default) erase all data in the group before writing.
 
         :raise IOError: if append requested but not possible.
 
