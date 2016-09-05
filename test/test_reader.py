@@ -6,7 +6,7 @@
 
 """
 
-import h5py
+import os
 import pytest
 import tempfile
 
@@ -54,10 +54,6 @@ class TestReader:
         data = h5f.Reader(self.filename, None).read()
         assert self.data == data
 
-    # def test_load_index(self):
-    #     group = h5py.File(self.filename, 'r')[self.groupname]
-    #     print(list(group.keys()))
-
     def test_init_basic(self):
         reader = h5f.Reader(self.filename, self.groupname)
         assert reader.version == '1.1'
@@ -67,3 +63,22 @@ class TestReader:
     def test_read_time(self):
         reader = h5f.Reader(self.filename, self.groupname)
         assert reader.read(from_time=0, to_time=1) == reader.read()
+
+
+@pytest.mark.parametrize('dim', [1, 2, 10])
+def test_read_tofromtimes(tmpdir, dim):
+    filename = os.path.join(str(tmpdir), 'test.h5f')
+    groupname = 'group'
+    data = generate.full_data(1, dim, 300)
+    h5f.Writer(filename, mode='w').write(data, groupname=groupname)
+
+    data2 = h5f.Reader(filename, groupname).read()
+    assert data == data2
+
+    data3 = h5f.Reader(filename, groupname).read(from_time=0, to_time=1)
+    assert data3 == data
+
+    data4 = h5f.Reader(filename, groupname).read(from_time=0.4, to_time=0.5)
+    print data4.labels()
+    assert data4.labels()[0][0] >= 0.4
+    assert data4.labels()[0][-1] <= 0.5

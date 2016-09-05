@@ -101,20 +101,22 @@ class TestWrite:
     def teardown(self):
         remove(self.filename)
 
-    def test_no_append(self):
+    @pytest.mark.parametrize('dim', [1, 2, 10])
+    def test_no_append(self, dim):
         h5f.Writer(self.filename).write(
-            generate.full_data(10), self.group, append=False)
+            generate.full_data(10, dim=dim), self.group, append=False)
 
         with h5py.File(self.filename, 'r') as f:
             g = f[self.group]
             assert len(g['items'][...]) == 10
             assert not all([(l == 0).all() for l in g['features'][...]])
 
-    def test_append_distinct_items(self):
-        data1 = generate.full_data(10)
+    @pytest.mark.parametrize('dim', [1, 2, 10])
+    def test_append(self, dim):
+        data1 = generate.full_data(10, dim=dim)
         h5f.Writer(self.filename).write(data1, self.group, append=False)
 
-        data2 = generate.full_data(10, items_root='items_bis')
+        data2 = generate.full_data(10, dim=dim, items_root='items_bis')
         h5f.Writer(self.filename).write(data2, self.group, append=True)
 
         with h5py.File(self.filename, 'r') as f:
@@ -124,28 +126,3 @@ class TestWrite:
             assert all('bis' not in i for i in items[:10])
             assert all('bis' in i for i in items[10:])
             assert not all([(l == 0).all() for l in g['features'][...]])
-
-    # def test_append_one_shared_item(self):
-    #     data1 = generate.full_data(10)
-    #     shape1 = data1.features()[-1].shape
-    #     shared_item = data1.items()[-1]
-    #     h5f.Writer(self.filename).write(data1, self.group, append=False)
-
-    #     # one item in data, same as in data1
-    #     data2 = generate.full_data(1, max_frames=10)
-    #     shape2 = data2.features()[0].shape
-    #     data2.items()[0] = shared_item
-
-    #     expected_result = np.vstack((
-    #         data1.dict_features()[shared_item],
-    #         data2.dict_features()[shared_item]))
-
-    #     h5f.Writer(self.filename).write(data2, self.group, append=True)
-
-    #     data_read = h5f.Reader(self.filename, self.group).read()
-    #     assert len(data_read.items()) == len(data1.items())
-    #     assert np.array_equal(
-    #         data_read.dict_features()[shared_item],
-    #         expected_result)
-    #     print shape1, shape2, data_read.dict_features()[shared_item].shape
-    #     print data_read.items()

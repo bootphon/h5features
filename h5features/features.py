@@ -25,7 +25,7 @@ from .entry import nb_per_chunk
 
 
 def contains_empty(features):
-    """Check features data are not empty.
+    """Check features data are not empty
 
     :param features: The features data to check.
     :type features: list of numpy arrays.
@@ -51,7 +51,7 @@ def parse_dformat(dformat, check=True):
 
 
 def parse_dtype(features, check=True):
-    """Return the features scalar type, raise if error.
+    """Return the features scalar type, raise if error
 
     Raise IOError if all features have not the same data type.
     Return dtype, the features scalar type.
@@ -81,7 +81,7 @@ def parse_dim(features, check=True):
 
 
 class Features(Entry):
-    """This class manages features in h5features files.
+    """This class manages features in h5features files
 
     :param data: Features must have time along the lines and
         features along the columns (accomodating row-major storage
@@ -129,49 +129,57 @@ class Features(Entry):
             return False
 
     def is_sparse(self):
-        """Return True if features are sparse matrices."""
+        """Return True if features are sparse matrices"""
         return self.dformat == 'sparse'
 
     def is_appendable_to(self, group):
-        """Return True if features are appendable to a HDF5 group."""
+        """Return True if features are appendable to a HDF5 group"""
         return (group.attrs['format'] == self.dformat and
                 group[self.name].dtype == self.dtype and
                 # We use a method because dim differs in dense and sparse.
                 self._group_dim(group) == self.dim)
 
     def _group_dim(self, group):
-        """Return the dimension of features stored in a HDF5 group."""
-        return group[self.name].shape[1]
+        """Return the dimension of features stored in a HDF5 group"""
+        try:
+            return group[self.name].shape[1]
+        except IndexError:
+            return 1
 
     def create_dataset(self, group, chunk_size):
-        """Initialize the features subgoup."""
+        """Initialize the features subgoup"""
         group.attrs['format'] = self.dformat
         super(Features, self)._create_dataset(group, chunk_size)
 
-        # attribute declared outside __init__ is not safe. Used because
-        # Labels.create_dataset need it.
-        self.nb_per_chunk = nb_per_chunk(self.dtype.itemsize,
-                                         self.dim, chunk_size)
+        # TODO attribute declared outside __init__ is not safe. Used
+        # because Labels.create_dataset need it.
+        self.nb_per_chunk = nb_per_chunk(
+            self.dtype.itemsize, self.dim, chunk_size)
 
     def write_to(self, group, append=False):
-        """Write stored features to a given group."""
+        """Write stored features to a given group"""
         if self.sparsetodense:
             self.data = [x.todense() if sp.issparse(x) else x
                          for x in self.data]
+
         nframes = sum([d.shape[0] for d in self.data])
-        dim = group[self.name].shape[1]
+        dim = self._group_dim(group)
         if append:
             nframes_group = group[self.name].shape[0]
             group[self.name].resize((nframes_group + nframes, dim))
             group[self.name][nframes_group:, :] = np.concatenate(
                 self.data, axis=0)
         else:
-            group[self.name].resize((nframes, dim))
+            if dim == 1:
+                group[self.name].resize((nframes,))
+            else:
+                group[self.name].resize((nframes, dim))
+            # print group[self.name].shape, group[self.name].maxshape, dim
             group[self.name][...] = np.concatenate(self.data, axis=0)
 
 
 class SparseFeatures(Features):
-    """This class is specialized for managing sparse matrices as features."""
+    """This class is specialized for managing sparse matrices as features"""
 
     def __init__(self, data, sparsity, check=True):
         self.dformat = 'sparse'
@@ -182,7 +190,7 @@ class SparseFeatures(Features):
 
         super(SparseFeatures, self).__init__(data, check)
         raise NotImplementedError(
-            'Writing sparse features is not implemented.')
+            'writing sparse features is not implemented')
 
     def __eq__(self, other):
         try:
@@ -192,11 +200,11 @@ class SparseFeatures(Features):
             return False
 
     def _group_dim(self, group):
-        """Return the dimension of features stored in a HDF5 group."""
+        """Return the dimension of features stored in a HDF5 group"""
         return group.attrs['dim']
 
     def create_dataset(self, group, chunk_size):
-        """Initializes sparse specific datasets."""
+        """Initializes sparse specific datasets"""
         group.attrs['format'] = self.dformat
         group.attrs['dim'] = self.dim
 
@@ -222,7 +230,7 @@ class SparseFeatures(Features):
             chunk_size)
 
     def write_to(self, group, append=False):
-        pass
+        raise NotImplementedError
         # TODO implement this
         # 1- concatenation. put them in right format if they aren't already
         # are_sparse = [x.isspmatrix_coo() for x in features]
@@ -233,11 +241,11 @@ class SparseFeatures(Features):
         # need to get the coo by line ...
 
         # 2- writing
-        #nb, = g['features'].shape
+        # nb, = g['features'].shape
         # g['feature'].resize((nb+features.shape[0],))
-        #g['features'][nb:] = features
+        # g['features'][nb:] = features
         # g['coordinates'].resize((nb+features.shape[0],2))
-        #g['coordinates'][nb:,:] = coordinates
-        #nb, = g['frames'].shape
+        # g['coordinates'][nb:,:] = coordinates
+        # nb, = g['frames'].shape
         # g['frames'].resize((nb+frames.shape[0],))
-        #g['frames'][nb:] = frames
+        # g['frames'][nb:] = frames

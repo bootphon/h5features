@@ -6,37 +6,33 @@ import pytest
 import h5features as h5f
 
 from aux import generate
-from aux.utils import remove
 
 
-def test_from_exemple():
-    filename = '/tmp/exemple.h5'
-    remove(filename)
+def test_from_exemple(tmpdir):
+    filename = os.path.join(str(tmpdir), 'exemple.h5')
     a1, a2, a3 = generate.full(100)
     data = h5f.Data(a1, a2, a3)
 
-    with h5f.Writer(filename) as w:
-        w.write(data, 'group')
+    h5f.Writer(filename).write(data, 'group')
 
     with h5f.Reader(filename, 'group') as r:
         rdata = r.read()
         assert len(rdata.items()) == 100
         assert data == rdata
-    remove(filename)
 
 
-def test_rw_one_frame_2D():
-    h5file = 'data.h5'
+def test_rw_one_frame_2D(tmpdir):
+    h5file = os.path.join(str(tmpdir), 'exemple.h5')
     gold = generate.full_data(1, 3, 1, 2)
-    remove(h5file)
+
     h5f.Writer(h5file).write(gold)
     test = h5f.Reader(h5file).read()
     assert test == gold
-    remove(h5file)
 
 
-@pytest.mark.parametrize('mode, append',
-                         [(m, a) for m in ('w', 'a') for a in (False, True)])
+@pytest.mark.parametrize(
+    'mode, append',
+    [(m, a) for m in ('w', 'a') for a in (False, True)])
 def test_write_mode(tmpdir, mode, append):
     h5file = os.path.join(str(tmpdir) + 'test.h5')
     data = generate.full_data(1, 3, 1, 2)

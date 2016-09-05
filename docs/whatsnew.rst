@@ -5,22 +5,36 @@
 What's new ?
 ============
 
+What's new in h5features 1.1.2
+==============================
+
+* **Breaking change**
+
+  Labels associated with features data must be sorted in increasing
+  order. This is convenient to use with timestamps and improve reading
+  huge datasets with long labels.
+
+* Bugfix when writing unidimensional features
+
+* Now more than 100 test cases
+
 
 What's new in h5features 1.1.1
 ==============================
 
 * Bugfix when reading from time/to time in Reader
 
-* Safely overwrite existing files with mode='w'
+* Safely overwrite existing groups in h5features files with mode='w'
 
 * **Breaking change**
 
-  Appending new to an exisiting item is no more allowed.
+  Appending new data to an exisiting item is no more allowed.
 
   Suppose a h5f file with 3 items ``['a', 'b', 'c']``, in 1.1 it was
-  possible to append 3 items ``['c', 'd', 'e']``, giving a file with 5
-  items, item ``'c'`` being the concatenation of original and appended
-  data. That facility was buggy and is removed in 1.1.1.
+  possible to append 3 items ``['c', 'd', 'e']``, giving a file with
+  the 5 items ``['a', 'b', 'c', 'd', 'e']``, where the item ``'c'``
+  being the concatenation of original and appended data. That facility
+  was messy and is removed in 1.1.1.
 
 
 What's new in h5features 1.1

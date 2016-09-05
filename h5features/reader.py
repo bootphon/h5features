@@ -55,8 +55,9 @@ class Reader(object):
             # expect only one group in the file
             groups = list(self.h5file.keys())
             if not len(groups) == 1:
-                raise IOError('groupname is None and cannot be guessed in {}.'
-                              .format(filename))
+                raise IOError(
+                    'groupname not specified and several groups in {}.'
+                    .format(filename))
             groupname = groups[0]
         elif groupname not in self.h5file:
             raise IOError('{} is not a valid group in {}'
@@ -133,7 +134,7 @@ class Reader(object):
 
         lower = self._get_from_time(from_time, from_pos)
         # upper included with +1
-        upper = 1 + self._get_to_time(to_time, to_pos)
+        upper = self._get_to_time(to_time, to_pos) + 1
 
         # Step 2: access actual data
         if self.dformat == 'sparse':
@@ -170,7 +171,7 @@ class Reader(object):
         else:
             times = self._labels_group[pos[0]:pos[1] + 1]
             try:
-                return pos[0] + np.where(times >= time)[0][0]
+                return pos[0] + times.searchsorted(time)
             except IndexError:
                 raise IOError('time {} is too large'.format(time))
 
@@ -180,6 +181,6 @@ class Reader(object):
         else:
             times = self._labels_group[pos[0]:pos[1] + 1]
             try:
-                return pos[0] + np.where(times <= time)[0][-1]
+                return pos[0] + times.searchsorted(time, side='right') - 1
             except IndexError:
                 raise IOError('time {} is too small'.format(time))

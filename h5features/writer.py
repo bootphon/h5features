@@ -18,6 +18,7 @@
 """Provides the Writer class to the h5features module."""
 
 import h5py
+import numbers
 import os
 
 from .version import is_supported_version, is_same_version
@@ -41,26 +42,32 @@ class Writer(object):
         file, 'a' to append data to the file, 'w' to overwrite it
 
     :raise IOError: if the file exists but is not HDF5, if the file
-        can be opened, or if the mode is not 'a' or 'w'.
-
-    :raise IOError: if the chunk size is below 8 Ko.
-
-    :raise IOError: if the requested version is not supported.
+        can be opened, if the mode is not 'a' or 'w', if the chunk
+        size is below 8 Ko or if the requested version is not
+        supported.
 
     """
     def __init__(self, filename, chunk_size=0.1, version='1.1', mode='a'):
+        # check version
         if not is_supported_version(version):
             raise IOError('version {} is not supported'.format(version))
         self.version = version
 
+        # check filename
         if os.path.isfile(filename) and not h5py.is_hdf5(filename):
             raise IOError('{} is not a HDF5 file.'.format(filename))
         self.filename = filename
 
+        # check chunk size
+        if not isinstance(chunk_size, numbers.Number):
+            raise IOError(
+                'chunk size must be a number, it is {}'.format(
+                    chunk_size.__class__))
         if chunk_size < 0.008:
             raise IOError('chunk size is below 8 Ko')
         self.chunk_size = chunk_size
 
+        # check mode
         if mode not in ('w', 'a'):
             raise IOError(
                 "mode for writing must be 'a' or 'w', it is '{}'".format(mode))
@@ -100,13 +107,14 @@ class Writer(object):
             # append data to the group, raise if we cannot
             group = self.h5file[groupname]
             if not is_same_version(self.version, group):
-                raise IOError('data is not appendable to the group {}: '
-                              'versions are different'
-                              .format(group.name))
+                raise IOError(
+                    'data is not appendable to the group {}: '
+                    'versions are different'.format(group.name))
 
             if not data.is_appendable_to(group):
-                raise IOError('data is not appendable to the group {}'
-                              .format(group.name))
+                raise IOError(
+                    'data is not appendable to the group {}'
+                    .format(group.name))
         else:  # overwrite any existing data in group
             group = self._prepare(data, groupname)
 

@@ -30,36 +30,32 @@ class TestParseLabels:
     def setup(self):
         self.t1 = generate.labels(10, tformat=1)
         self.t2 = generate.labels(10, tformat=2)
-        self.parse = Labels.parse_dim
-
-    def teardown(self):
-        pass
 
     def test_good(self):
-        assert self.parse(self.t1, True) == 1
-        assert self.parse(self.t1*2, True) == 1
-        assert self.parse(self.t2, True) == 2
+        assert Labels.parse_dim(self.t1) == 1
+        assert Labels.parse_dim(self.t1*2) == 1
+        assert Labels.parse_dim(self.t2) == 2
 
         # 2D with shape[1] != 2
-        self.parse([randn(10, 3)]) == 2
-        self.parse([randn(5, 1)])
-        self.parse([randn(2, 1)])
+        Labels.parse_dim([randn(10, 3)]) == 2
+        Labels.parse_dim([randn(5, 1)])
+        Labels.parse_dim([randn(2, 1)])
 
     def test_bad_format(self):
         # 3D
-        assert_raise(self.parse, [randn(2, 2, 2)], 'must be 1 or 2')
+        assert_raise(Labels.check, [randn(2, 2, 2)], 'must be 1 or 2')
 
     def test_bad_dims(self):
         for arg in [self.t1+self.t2,
                     self.t2+self.t1,
                     self.t2+[np.array([1, 2, 3])]]:
-            assert_raise(self.parse, arg, 'dimensions must be equal')
+            assert_raise(Labels.check, arg, 'dimensions must be equal')
 
 
 class TestLabels1D:
     """Test the Labels class for 1D labels vectors."""
     def setup(self):
-        items, self.data, feats = generate.full(10,tformat=1)
+        items, self.data, feats = generate.full(10, tformat=1)
         self.filename = 'test.h5'
         self.teardown()
         write(self.filename, 'group', items, self.data, feats)
@@ -103,7 +99,6 @@ def test_2D_one_frame():
     assert isinstance(label.data, list)
     assert isinstance(label.data[0], np.ndarray)
     assert label.data[0].ndim == 2
-    #print(label.data[0].shape, label.data[0])
 
 
 class TestLabels2D:
@@ -111,7 +106,7 @@ class TestLabels2D:
     def setup(self):
         self.filename = 'test.h5'
         self.group = h5py.File(self.filename).create_group('group')
-        self.data = generate.labels(2,5,2)
+        self.data = generate.labels(2, 5, 2)
 
     def teardown(self):
         remove(self.filename)
@@ -158,7 +153,40 @@ class TestReadWriteLevel:
 
         # build a dict from gold to compare with t
         d = dict(zip(items, t_gold))
-        # d = {}
-        # for k, v in zip(items, t_gold): d[k] = v
-        # compare the two dicts
-        for dd, tt in zip(d, t): assert tt == dd
+        for dd, tt in zip(d, t):
+            assert tt == dd
+
+
+class TestSortedLabels:
+    """Test sorting labels on write/read operations"""
+    def setup(self):
+        pass
+
+    def test_sort_1D(self):
+        l = [np.array([i for i in range(9)])]
+        Labels.check(l)
+
+        l[0][[0, 1]] = l[0][[1, 0]]
+        assert_raise(Labels.check, l, 'not sorted')
+
+        l.append(np.array([i for i in range(9)]))
+        assert_raise(Labels.check, l, 'not sorted')
+
+        l[0][[1, 0]] = l[0][[0, 1]]
+        Labels.check(l)
+
+    def test_sorted_2D(self):
+        # dont use generate.labels to ensure 2 elements.
+        l = [np.array([[0., 1.],
+                       [0.33333333, 1.33333333],
+                       [0.66666667, 1.66666667],
+                       [1., 2.]]),
+             np.array([[0., 1.],
+                       [1., 2.]])]
+
+        # sorted, pass
+        Labels.check(l)
+
+        # unsorted, fails
+        l[0][[0, 1], :] = l[0][[1, 0], :]
+        assert_raise(Labels.check, l, 'not sorted')
