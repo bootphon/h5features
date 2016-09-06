@@ -87,7 +87,7 @@ class Labels(Entry):
             # print label, index
             # print len(index), label.shape[0]
             assert len(index) == label.shape[0]
-            if not all(n == index[n] for n in xrange(label.shape[0]-1)):
+            if not all(n == index[n] for n in range(label.shape[0]-1)):
                 raise IOError('labels are not sorted in increasing order')
 
     @staticmethod
