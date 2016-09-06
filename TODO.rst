@@ -1,15 +1,5 @@
 These document the scheduled and/or requested changes to the h5features package.
 
-For 1.1.2 release
------------------
-
-* Sorted labels
-
-  * Check labels are sorted when writing
-
-  * Replace np.where by np.searchsorted when reading
-
-
 For a future release
 --------------------
 
@@ -18,8 +8,7 @@ For a future release
 * read/write bigger than RAM -> catch MemoryError when np.concatenate
   on writing.
 
-* labels can be of arbitrary type
-
+* labels can be of arbitrary type (optionally sorted)
 
 * Have a h5features.File class inspired by h5py.File
 
@@ -36,4 +25,4 @@ For a future release
 * Implement sparse functionalities
 * Handle h5py MPI driver for concurent reading
 * Enable autochunking from h5py (with chunk=None)
-* Allow data compression as an option
+* Allow data compression as an option for the writer
