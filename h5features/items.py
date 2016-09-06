@@ -17,8 +17,10 @@
 
 """Provides the Items class to the h5features package."""
 
+import numpy as np
+
 from h5py import special_dtype
-from .entry import Entry
+from .entry import Entry, nb_per_chunk
 
 
 def read_items(group, version='1.1', check=False):
@@ -57,47 +59,10 @@ class Items(Entry):
             'items', data, 1, special_dtype(vlen=str), check)
 
     def create_dataset(self, group, chunk_size):
-        super(Items, self)._create_dataset(group, chunk_size)
+        self._create_dataset(group, chunk_size)
 
     def is_appendable_to(self, group):
         return not set(group[self.name][...]).intersection(self.data)
-        # or self._continue_last_item(group))
-
-    # def _continue_last_item(self, group):
-    #     """Return True if we can continue writing to the last item
-    #     in the group.
-
-    #     This method compares the shared items between the given group
-    #     and self. Given these shared items, three cases can occur:
-
-    #     * No shared items: return False
-
-    #     * There is only one shared item. It is first in self and last
-    #       in group : return True. In that case the first item in self is
-    #       erased.
-
-    #     * Otherwise raise IOError.
-
-    #     """
-    #     items_in_group = group[self.name][...]
-
-    #     # Shared items between self and the group
-    #     shared = set(items_in_group).intersection(self.data)
-    #     nshared = len(shared)
-
-    #     if nshared == 0:
-    #         return False
-    #     if nshared == 1:
-    #         # Assert the last item in group is the first item in self.
-    #         if not self.data[0] == items_in_group[-1]:
-    #             raise IOError('data can be added only at the end'
-    #                           'of the last written file.')
-    #         # TODO commented out because side effects on data (do not
-    #         # break any test)
-    #         self.data = self.data[1:]
-    #         return True
-    #     else:
-    #         raise IOError('groups cannot have more than one shared item.')
 
     def write_to(self, group):
         """Write stored items to the given HDF5 group.
@@ -121,3 +86,19 @@ class Items(Entry):
             return (lower_idx, upper_idx) if lower_idx <= upper_idx else False
         except ValueError:
             return False
+
+    def _create_dataset(self, group, chunk_size):
+        """Create an empty dataset in a group."""
+        # if dtype is a variable str, guess representative size is 20 bytes
+        per_chunk = (
+            nb_per_chunk(20, 1, chunk_size) if self.dtype == np.dtype('O')
+            else nb_per_chunk(np.dtype(self.dtype).itemsize, 1, chunk_size))
+
+        shape = (0,)
+        maxshape = (None,)
+        chunks = (per_chunk,)
+
+        # raise if per_chunk >= 4 Gb, this is requested by h5py
+        group.create_dataset(
+            self.name, shape, dtype=self.dtype,
+            chunks=chunks, maxshape=maxshape)

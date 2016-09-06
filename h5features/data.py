@@ -34,7 +34,7 @@ class Data(object):
         self._entries['items'] = Items(items, check)
         self._entries['labels'] = Labels(labels, check)
         self._entries['features'] = (
-            Features(features, check) if sparsity is None else
+            Features(features, check) if not sparsity else
             SparseFeatures(features, sparsity, check))
 
     def __eq__(self, other):

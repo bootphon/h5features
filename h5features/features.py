@@ -61,7 +61,7 @@ def parse_dtype(features, check=True):
     if check:
         types = [x.dtype for x in features]
         if not all([t == dtype for t in types]):
-            raise IOError('features must be homogeneous.')
+            raise IOError('features must be homogeneous')
     return dtype
 
 
@@ -72,11 +72,15 @@ def parse_dim(features, check=True):
     dimension.  Return dim (int), the features dimension.
 
     """
+    # try:
     dim = features[0].shape[1]
+    # except IndexError:
+    #     dim = 1
+
     if check and not dim > 0:
-        raise IOError('features dimension must be strictly positive.')
+        raise IOError('features dimension must be strictly positive')
     if check and not all([d == dim for d in [x.shape[1] for x in features]]):
-        raise IOError('all files must have the same feature dimension.')
+        raise IOError('all files must have the same feature dimension')
     return dim
 
 
@@ -164,18 +168,18 @@ class Features(Entry):
 
         nframes = sum([d.shape[0] for d in self.data])
         dim = self._group_dim(group)
+        feats = np.concatenate(self.data, axis=0)
+
         if append:
             nframes_group = group[self.name].shape[0]
-            group[self.name].resize((nframes_group + nframes, dim))
-            group[self.name][nframes_group:, :] = np.concatenate(
-                self.data, axis=0)
-        else:
+            group[self.name].resize(nframes_group + nframes, axis=0)
             if dim == 1:
-                group[self.name].resize((nframes,))
+                group[self.name][nframes_group:] = feats
             else:
-                group[self.name].resize((nframes, dim))
-            # print group[self.name].shape, group[self.name].maxshape, dim
-            group[self.name][...] = np.concatenate(self.data, axis=0)
+                group[self.name][nframes_group:, :] = feats
+        else:
+            group[self.name].resize(nframes, axis=0)
+            group[self.name][...] = feats if dim == 1 else feats
 
 
 class SparseFeatures(Features):

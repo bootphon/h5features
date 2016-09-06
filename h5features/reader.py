@@ -143,14 +143,15 @@ class Reader(object):
         else:
             features = (self.group['features'][:, lower:upper].T
                         if self.version == '0.1'
-                        else self.group['features'][lower:upper, :])
+                        else self.group['features'][lower:upper, ...])
             labels = self._labels_group[lower:upper]
 
         # If we read a single item
         if to_idx == from_idx:
             features = [features]
             labels = [labels]
-        else:  # Several items case: unindex data
+        # Several items case: split them from the index
+        else:
             item_ends = self._index[from_idx:to_idx] - from_pos[0] + 1
             features = np.split(features, item_ends, axis=0)
             labels = np.split(labels, item_ends, axis=0)

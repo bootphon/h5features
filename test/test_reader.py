@@ -6,6 +6,7 @@
 
 """
 
+import numpy as np
 import os
 import pytest
 import tempfile
@@ -73,12 +74,19 @@ def test_read_tofromtimes(tmpdir, dim):
     h5f.Writer(filename, mode='w').write(data, groupname=groupname)
 
     data2 = h5f.Reader(filename, groupname).read()
+
+    f1 = data.features()[0]
+    f2 = data2.features()[0]
+    f2 = f2.reshape(f2.shape[0], f1.shape[1])
+    print
+    print f1.shape, f2.shape
+    assert np.array_equal(f1, f2)
     assert data == data2
 
     data3 = h5f.Reader(filename, groupname).read(from_time=0, to_time=1)
     assert data3 == data
 
     data4 = h5f.Reader(filename, groupname).read(from_time=0.4, to_time=0.5)
-    print data4.labels()
+    #print data4.labels()
     assert data4.labels()[0][0] >= 0.4
     assert data4.labels()[0][-1] <= 0.5

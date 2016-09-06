@@ -1,4 +1,5 @@
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#!/usr/bin/env python
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -22,9 +23,10 @@ import cProfile
 import os
 import timeit
 
-import generate
-import h5features_v1_0 as h5f
-from utils import remove
+from aux import generate
+import aux.h5features_v1_0 as h5f
+from aux.utils import remove
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -50,9 +52,11 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def timeme(cmd, setup, args):
     return min(timeit.repeat(
         cmd, setup=setup, number=args.ntimes, repeat=args.repeat))
+
 
 if __name__ == '__main__':
     args = parse_args()
@@ -65,8 +69,8 @@ if __name__ == '__main__':
     groupname = 'group'
 
     v10_setup = """\
-import h5features_v1_0 as h5f
-from utils import remove
+import aux.h5features_v1_0 as h5f
+from aux.utils import remove
 from __main__ import data, filename, groupname
     """
     v10_write = """\
@@ -75,7 +79,7 @@ h5f.write(filename, groupname, data.items(), data.labels(), data.features())
     """
     v11_setup = """\
 import h5features as h5f
-from utils import remove
+from aux.utils import remove
 from __main__ import data, filename, groupname
     """
     v11_write = """\
@@ -90,7 +94,8 @@ h5f.Writer(filename).write(data, groupname)
 
     print('Reading:')
     remove(filename)
-    h5f.write(filename, groupname, data.items(), data.labels(), data.features())
+    h5f.write(
+        filename, groupname, data.items(), data.labels(), data.features())
     print('  1.0: ', timeme(read, v10_setup, args))
     print('  1.1: ', timeme(read, v11_setup, args))
 
