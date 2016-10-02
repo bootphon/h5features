@@ -21,11 +21,13 @@ from setuptools import setup, find_packages
 
 VERSION = '1.2'
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+
 # On Reads The Docs we don't install any package
-ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
-REQUIREMENTS = [] if ON_RTD else [
-    'h5py >= 2.3.0',
+# ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+REQUIREMENTS = [  # ] if ON_RTD else [
     'numpy >= 1.8.0',
+    'h5py >= 2.3.0',
     'scipy >= 0.13.0',
 ]
 
@@ -33,7 +35,7 @@ setup(
     name='h5features',
     version=VERSION,
     description='efficient storage of large features data',
-    long_description=open('README.rst').read(),
+    long_description=open(os.path.join(HERE, 'README.rst')).read(),
     keywords='HDF5 h5py features read write',
     author='Thomas Schatz, Mathieu Bernard, Roland Thiolliere',
     author_email='mmathieubernardd@gmail.com',
