@@ -24,8 +24,8 @@ VERSION = '1.2'
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # On Reads The Docs we don't install any package
-# ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
-REQUIREMENTS = [  # ] if ON_RTD else [
+ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+REQUIREMENTS = [] if ON_RTD else [
     'numpy >= 1.8.0',
     'h5py >= 2.3.0',
     'scipy >= 0.13.0',
