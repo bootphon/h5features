@@ -23,6 +23,10 @@ installed by the setup script). Install it with::
 
   $ python setup.py build && python setup.py install
 
+Or you can install it with pip::
+
+  $ pip install h5features
+
 
 Documentation
 -------------
