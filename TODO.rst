@@ -1,7 +1,8 @@
-These document the scheduled and/or requested changes to the h5features package.
-
 For a future release
 --------------------
+
+* Converter: Possibility to specify other names than 'labels',
+  'features' for the input files
 
 * Test convertion from h5features old versions
 

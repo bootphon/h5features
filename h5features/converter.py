@@ -33,7 +33,7 @@ class Converter(object):
     * A `Converter` instance owns an h5features file and write converted
       input files to it, in a specified group.
 
-    * An input file is converted to h5fatures using the `convert`
+    * An input file is converted to h5features using the `convert`
       method, which choose a concrete conversion method based on the
       input file extension.
 
