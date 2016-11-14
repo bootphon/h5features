@@ -5,6 +5,12 @@
 What's new ?
 ============
 
+What's new in master branch (not yet released)
+==============================================
+
+* The script ``convert2h5features`` is now installed by the setup
+  script.
+
 What's new in h5features 1.2
 ============================
 

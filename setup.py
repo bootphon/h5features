@@ -34,15 +34,21 @@ REQUIREMENTS = [] if ON_RTD else [
 setup(
     name='h5features',
     version=VERSION,
-    description='efficient storage of large features data',
-    long_description=open(os.path.join(HERE, 'README.rst')).read(),
-    keywords='HDF5 h5py features read write',
-    author='Thomas Schatz, Mathieu Bernard, Roland Thiolliere',
-    author_email='mmathieubernardd@gmail.com',
-    url='https://github.com/bootphon/h5features',
-    license='GPLv3',
     packages=find_packages(exclude=['test']),
     include_package_data=True,
     zip_safe=False,
     install_requires=REQUIREMENTS,
+
+    # install the convert2h5features script
+    entry_points={'console_scripts': [
+        'convert2h5features = h5features.convert2h5features:main']},
+
+    # metadata for upload to PyPI
+    author='Thomas Schatz, Mathieu Bernard, Roland Thiolliere',
+    author_email='mmathieubernardd@gmail.com',
+    description='efficient storage of large features data',
+    keywords='HDF5 h5py features read write',
+    url='https://github.com/bootphon/h5features',
+    license='GPLv3',
+    long_description=open(os.path.join(HERE, 'README.rst')).read(),
 )

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-
-# Copyright 2014-2015 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+#
+# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -26,19 +26,23 @@ import h5features as h5f
 def parse_args():
     """Define and parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description='Convert a set of files to a single h5features file')
+        description='''Convert a set of files to a single h5features file, input files
+        can be npz (numpy) or mat (MATLAB) files.''')
 
     parser.add_argument('file', nargs='+', type=str,
-                        help='A file to convert in the h5features format.')
+                        help='File to convert in the h5features format')
 
     parser.add_argument('-o', '--output', default='features.h5', type=str,
-                        help='The output h5features file to write on')
+                        help='''The output h5features file to write on
+                        (default is %(default)s)''')
 
     parser.add_argument('-g', '--group', default='h5features', type=str,
-                        help='The group to write in the output file')
+                        help='''The group to write in the output file
+                        (default is %(default)s)''')
 
     parser.add_argument('--chunk', default=0.1, type=float,
-                        help='size of a file chunk in MB.')
+                        help='''size of a file chunk in MB
+                        (default is %(default)s)''')
 
     return parser.parse_args()
 
