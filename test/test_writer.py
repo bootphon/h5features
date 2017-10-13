@@ -4,7 +4,6 @@ import h5py
 import os
 import pytest
 import h5features as h5f
-import numpy as np
 
 from aux import generate
 from aux.utils import remove, assert_raise
@@ -52,7 +51,12 @@ class TestInit:
 
 
 class TestWriteAppendable:
-    """Test of the _appendable() method."""
+    """Test of the _appendable() method.
+
+    This functionnality is removed since h5features-1.2 so this test
+    is deprecated...
+
+    """
 
     def setup(self):
         # init default parameters
@@ -84,10 +88,10 @@ class TestWriteAppendable:
         assert self.g.attrs['version'] == Writer('toto').version
         remove('toto')
 
-    def test_group(self):
-        with pytest.raises(IOError):
-            w = h5f.writer.Writer(self.filename)
-            w.is_appendable(self.g, None)
+    # def test_group(self):
+    #     with pytest.raises(IOError):
+    #         w = h5f.writer.Writer(self.filename)
+    #         w.is_appendable_to(self.g, None)
 
 
 class TestWrite:

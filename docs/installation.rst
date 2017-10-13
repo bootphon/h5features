@@ -1,5 +1,4 @@
 .. _install:
-.. highlight:: bash
 
 ============
 Installation
@@ -23,10 +22,8 @@ https://github.com/bootphon/h5features ::
 Installing
 ==========
 
-To install the package, run::
-
-    $ python setup.py build
-    $ [sudo] python setup.py install
+Dependancies
+------------
 
 `h5features` relies on external dependencies. The setup script should
 install it automatically, but you may want to install it manually. The
@@ -35,8 +32,31 @@ required packages are:
 * h5py 2.3.0 or newer
 * NumPy 1.8.0 or newer
 * scipy 0.13.0 or newer
+
+On Debian/Ubuntu::
+
+  sudo apt-get install python3-numpy python3-scipy python3-h5py
+
+Using Python anaconda::
+
+  conda install numpy scipy h5py
+
+
+For testing and documenting the following Python packages are
+required:
+
 * pytest
 * sphinx
+
+
+Setup
+-----
+
+To install the package, run::
+
+    python setup.py build
+    [sudo] python setup.py install
+
 
 Testing
 =======
@@ -46,7 +66,7 @@ the build status `here <https://travis-ci.org/bootphon/h5features>`_.
 For testing it on your local machine, simply run from the root
 directory::
 
-  $ py.test
+  pytest -v ./test
 
 
 Building the documentation
@@ -56,10 +76,11 @@ The documentation (the one you are currently reading) is builded with
 `sphinx`. The main HTML page is generated to
 *docs/build/html/index.html*::
 
-  $ python setup.py build_sphinx
+  pip install Sphinx
+  python setup.py build_sphinx
 
 Or::
 
-  $ cd docs && make html
+  cd docs && make html
 
 .. _pytest: http://pytest.org/latest/
