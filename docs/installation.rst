@@ -41,14 +41,6 @@ Using Python anaconda::
 
   conda install numpy scipy h5py
 
-
-For testing and documenting the following Python packages are
-required:
-
-* pytest
-* sphinx
-
-
 Setup
 -----
 
@@ -63,8 +55,12 @@ Testing
 
 This package is continuously integrated with travis. You can follow
 the build status `here <https://travis-ci.org/bootphon/h5features>`_.
-For testing it on your local machine, simply run from the root
-directory::
+
+For testing it on your local machine, make sure you have `pytest` installed::
+
+  pip install pytest
+
+Then simply run from the root directory::
 
   pytest -v ./test
 
@@ -76,7 +72,8 @@ The documentation (the one you are currently reading) is builded with
 `sphinx`. The main HTML page is generated to
 *docs/build/html/index.html*::
 
-  pip install Sphinx
+  pip install Sphinx mock sphinx_rtd_theme
+
   python setup.py build_sphinx
 
 Or::

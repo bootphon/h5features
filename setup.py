@@ -19,7 +19,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.2'
+VERSION = open('VERSION').read().strip()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
