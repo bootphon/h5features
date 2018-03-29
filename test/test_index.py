@@ -22,7 +22,7 @@ class TestIndex:
 
         with pytest.raises(RuntimeError) as err:
             index.create_index(self.group, 0.1)
-        assert 'Name already exists' in str(err.value)
+        assert 'name already exists' in str(err.value).lower()
 
     def test_write(self):
         index.create_index(self.group, 0.1)
