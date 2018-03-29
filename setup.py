@@ -36,7 +36,7 @@ setup(
     version=VERSION,
     packages=find_packages(exclude=['test']),
     include_package_data=True,
-    zip_safe=False,
+    zip_safe=True,
     install_requires=REQUIREMENTS,
 
     # install the convert2h5features script

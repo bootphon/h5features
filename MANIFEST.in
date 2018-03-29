@@ -1,1 +1,2 @@
-include README.rst TODO.rst LICENSE.txt
+include README.rst LICENSE.txt VERSION TODO.org
+recursive-include test/aux *.py
