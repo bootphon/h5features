@@ -5,14 +5,25 @@
 What's new ?
 ============
 
-What's new in master branch (not yet released)
-==============================================
+
+h5features-1.2.2
+================
+
+* bugfix: broken test on python-3.6.3.
+
+* bugfix: missing files in MANIFEST.in for installation with `pip
+  install h5features`.
+
+
+h5features-1.2.1
+================
 
 * The script ``convert2h5features`` is now installed by the setup
   script.
 
-What's new in h5features 1.2
-============================
+
+h5features-1.2
+==============
 
 * **Breaking change** Labels associated with features data must be
   sorted in increasing order. This is convenient to use with
@@ -36,8 +47,8 @@ What's new in h5features 1.2
 * Now more than 100 test cases
 
 
-What's new in h5features 1.1
-============================
+h5features-1.1
+==============
 
 The main goal of the 1.1 release is to provide a better, safer and
 clearer code than previous release whithout changing the front-end
@@ -74,8 +85,8 @@ API.
     This is what you are reading now!
 
 
-What's new in h5features 1.0
-============================
+h5features-1.0
+==============
 
 Over the previous development release (0.1), the 1.0 release changes
 the underlying HDF5 file structure, add a *version* attribute and
