@@ -21,7 +21,7 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION h5py numpy scipy pytest
+  - conda create -q -n test-environment python=$(echo $TRAVIS_PYTHON_VERSION | cut -f1 -d-) h5py numpy scipy pytest
   - source activate test-environment
   - python setup.py install
 
