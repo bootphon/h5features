@@ -1,0 +1,16 @@
+package:
+  name: h5features
+  version: "1.2.2"
+
+source:
+  path: . 
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - h5py >=2.3.0
+    - numpy >=1.8.0
+    - scipy >=0.13.0
