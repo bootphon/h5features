@@ -32,5 +32,3 @@ For h5features-1.3
 
 * Add an optional properties field in the dataset to store a
   dictionary of various entries (basically features parameters)
-
-* Enable autochunking from h5py (with chunk=None)

@@ -8,6 +8,8 @@ What's new ?
 h5features-1.3
 ==============
 
+* ``chunk_size`` is automatically computed by default in the writer.
+
 * New optional compression in ``h5features.Writer``.
 
 

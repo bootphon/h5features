@@ -31,9 +31,10 @@ class Writer(object):
         clarity you should use a '.h5' or '.h5f' extension but this is
         not required by the package.
 
-    :param float chunk_size: Optional. The size in Mo of a chunk in
-        the file. Default is 0.1 Mo. A chunk size below 8 Ko is not
-        allowed as it results in poor performances.
+    :param float_or_str chunk_size: Optional. The size in Mo of a
+        chunk in the file, or 'auto' to let HDF5 guess a chunk size
+        automatically. Default is 'auto'. A chunk size below 8 Ko is
+        not allowed as it results in poor performances.
 
     :param str version: Optional. The file format version to write,
         default is to write the latest version.
@@ -56,7 +57,7 @@ class Writer(object):
         supported or if the specified compression is not valid.
 
     """
-    def __init__(self, filename, chunk_size=0.1, version='1.1',
+    def __init__(self, filename, chunk_size='auto', version='1.1',
                  mode='a', compression=None):
         # check version
         if not is_supported_version(version):
@@ -69,12 +70,13 @@ class Writer(object):
         self.filename = filename
 
         # check chunk size
-        if not isinstance(chunk_size, numbers.Number):
-            raise IOError(
-                'chunk size must be a number, it is {}'.format(
-                    chunk_size.__class__.__name__))
-        if chunk_size < 0.008:
-            raise IOError('chunk size is below 8 Ko')
+        if not chunk_size == 'auto':
+            if not isinstance(chunk_size, numbers.Number):
+                raise IOError(
+                    "chunk size must be 'auto' or a number, it is {}"
+                    .format(chunk_size))
+            if chunk_size < 0.008:
+                raise IOError('chunk size is below 8 Ko')
         self.chunk_size = chunk_size
 
         # check mode

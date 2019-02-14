@@ -19,11 +19,13 @@ class TestData:
         assert self.data.items() == self.items
         assert self.data.labels() == self.labels
         assert self.data.features() == self.features
+        assert not self.data.is_empty()
 
     def test_clear(self):
         for entry in self.data._entries.values():
             assert len(entry.data)
         self.data.clear()
+        assert self.data.is_empty()
         for entry in self.data._entries.values():
             assert not len(entry.data)
 
@@ -55,3 +57,9 @@ class TestData:
             h5f.Writer(h5file, mode=mode).write(self.data, append=append)
             assert self.data.items() == self.items
             assert h5f.Reader(h5file).read() == self.data
+
+
+def test_bad_len():
+    with pytest.raises(ValueError) as err:
+        Data([1], [1], [1, 2])
+    assert 'all entries must have the same length' in str(err)

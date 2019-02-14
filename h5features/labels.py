@@ -125,7 +125,10 @@ class Labels(Entry):
             self, group, per_chunk, compression=None, compression_opts=None):
         shape = self._dim_tuple(0)
         maxshape = self._dim_tuple(None)
-        chunks = self._dim_tuple(per_chunk)
+        if per_chunk == 'auto':
+            chunks = True
+        else:
+            chunks = self._dim_tuple(per_chunk)
 
         group.create_dataset(
             self.name, shape, dtype=self.dtype,

@@ -15,7 +15,8 @@ from h5features.data import Data
 def test_create_a_file():
     name = 'azecqgxqsdqxws.eztcqezxf'
     assert not os.path.exists(name)
-    Writer(name)
+    with Writer(name) as writer:
+        pass
     assert os.path.exists(name)
     remove(name)
 
@@ -37,14 +38,26 @@ class TestInit:
         for arg in self.filename, 'abc', 'toto.zip':
             Writer(self.filename)
 
+    def test_bad_mode(self):
+        with pytest.raises(IOError):
+            Writer(self.filename, mode='r')
+
     def test_chunk_good(self):
-        args = [0.008, 0.01, 12, 1e30]
+        args = ['auto', 0.008, 0.01, 12, 1e30]
         for arg in args:
             Writer(self.filename, chunk_size=arg)
 
-    def test_chunk_bad(self):
+    def test_chunk_below(self):
         args = [0.008-1e-2, .0001, 0, -1e30]
-        msg = 'chunk size is below 8 Ko'
+        msg = "chunk size is below 8 Ko"
+        for arg in args:
+            with pytest.raises(IOError) as err:
+                Writer(self.filename, chunk_size=arg)
+            assert msg in str(err.value)
+
+    def test_chunk_bad(self):
+        args = ['spam', [1, 2, 3]]
+        msg = "chunk size must be 'auto' or a number"
         for arg in args:
             with pytest.raises(IOError) as err:
                 Writer(self.filename, chunk_size=arg)

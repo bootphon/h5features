@@ -16,6 +16,11 @@ def test_raise_on_write_sparse():
     assert 'sparse' in str(ioerror.value)
 
 
+def test_raise_with_index():
+    with pytest.raises(NotImplementedError):
+        h5f.read('test.h5', index=0)
+
+
 class TestH5FeaturesWrite:
     """Test write methods."""
     def setup(self):

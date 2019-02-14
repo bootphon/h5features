@@ -159,8 +159,11 @@ class Features(Entry):
 
         # TODO attribute declared outside __init__ is not safe. Used
         # because Labels.create_dataset need it.
-        self.nb_per_chunk = nb_per_chunk(
-            self.dtype.itemsize, self.dim, chunk_size)
+        if chunk_size != 'auto':
+            self.nb_per_chunk = nb_per_chunk(
+                self.dtype.itemsize, self.dim, chunk_size)
+        else:
+            self.nb_per_chunk = 'auto'
 
     def write_to(self, group, append=False):
         """Write stored features to a given group"""
@@ -214,26 +217,43 @@ class SparseFeatures(Features):
         group.attrs['format'] = self.dformat
         group.attrs['dim'] = self.dim
 
-        # for storing sparse data we don't use the self.nb_per_chunk,
-        # which is only used by the Writer to determine times chunking.
-        per_chunk = nb_per_chunk(self.dtype.itemsize, 1, chunk_size)
+        if chunk_size == 'auto':
+            group.create_dataset(
+                'coordinates', (0, 2), dtype=np.float64,
+                chunks=True, maxshape=(None, 2))
 
-        group.create_dataset('coordinates', (0, 2), dtype=np.float64,
-                             chunks=(per_chunk, 2), maxshape=(None, 2))
+            group.create_dataset(
+                self.name, (0,), dtype=self.dtype,
+                chunks=True, maxshape=(None,))
 
-        group.create_dataset(self.name, (0,), dtype=self.dtype,
-                             chunks=(per_chunk,), maxshape=(None,))
+        else:
+            # for storing sparse data we don't use the self.nb_per_chunk,
+            # which is only used by the Writer to determine times chunking.
+            per_chunk = nb_per_chunk(self.dtype.itemsize, 1, chunk_size)
+
+            group.create_dataset(
+                'coordinates', (0, 2), dtype=np.float64,
+                chunks=(per_chunk, 2), maxshape=(None, 2))
+
+            group.create_dataset(
+                self.name, (0,), dtype=self.dtype,
+                chunks=(per_chunk,), maxshape=(None,))
 
         dtype = np.int64
-        chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
-        group.create_dataset('frames', (0,), dtype=dtype,
-                             chunks=chunks, maxshape=(None,))
+        if chunk_size == 'auto':
+            chunks = True
+            self.nb_per_chunk = 'auto'
+        else:
+            chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
+            # Needed by Times.create_dataset
+            self.nb_per_chunk = nb_per_chunk(
+                self.dtype.itemsize,
+                int(round(self.sparsity*self.dim)),
+                chunk_size)
 
-        # Needed by Times.create_dataset
-        self.nb_per_chunk = nb_per_chunk(
-            self.dtype.itemsize,
-            int(round(self.sparsity*self.dim)),
-            chunk_size)
+        group.create_dataset(
+            'frames', (0,), dtype=dtype,
+            chunks=chunks, maxshape=(None,))
 
     def write_to(self, group, append=False):
         raise NotImplementedError
