@@ -150,10 +150,12 @@ class Features(Entry):
         except IndexError:
             return 1
 
-    def create_dataset(self, group, chunk_size):
+    def create_dataset(
+            self, group, chunk_size, compression=None, compression_opts=None):
         """Initialize the features subgoup"""
         group.attrs['format'] = self.dformat
-        super(Features, self)._create_dataset(group, chunk_size)
+        super(Features, self)._create_dataset(
+            group, chunk_size, compression, compression_opts)
 
         # TODO attribute declared outside __init__ is not safe. Used
         # because Labels.create_dataset need it.

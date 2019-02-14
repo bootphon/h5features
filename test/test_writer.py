@@ -8,6 +8,7 @@ import h5features as h5f
 from aux import generate
 from aux.utils import remove, assert_raise
 from h5features.writer import Writer
+from h5features.reader import Reader
 from h5features.data import Data
 
 
@@ -130,3 +131,29 @@ class TestWrite:
             assert all('bis' not in i for i in items[:10])
             assert all('bis' in i for i in items[10:])
             assert not all([(l == 0).all() for l in g['features'][...]])
+
+
+@pytest.mark.parametrize('compression', [None, 'gzip', 'lzf'])
+def test_compression(tmpdir, compression):
+    filename = str(tmpdir.join('test.h5'))
+    data = generate.full_data(10, dim=2)
+    h5f.Writer(filename, compression=compression).write(data, 'group')
+    assert data == h5f.Reader(filename, groupname='group').read()
+
+
+def test_compression_size(tmpdir):
+    data = generate.full_data(10, dim=2)
+    sizes = []
+    for i in range(10):
+        filename = str(tmpdir.join('test.h5.' + str(i)))
+        h5f.Writer(filename, compression=i).write(data, 'group')
+        sizes.append(os.path.getsize(filename))
+
+    assert sizes[::-1] == sorted(sizes)
+
+
+@pytest.mark.parametrize('compression', ['zip', 'spam', 1.0, -1, 15])
+def test_compression_bad(tmpdir, compression):
+    filename = str(tmpdir.join('test.h5'))
+    with pytest.raises(IOError):
+        h5f.Writer(filename, compression=compression)

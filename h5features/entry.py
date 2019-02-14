@@ -90,7 +90,8 @@ class Entry(object):
             raise ValueError('entry not appendable')
         self.data += entry.data
 
-    def _create_dataset(self, group, chunk_size):
+    def _create_dataset(
+            self, group, chunk_size, compression, compression_opts):
         """Create an empty dataset in a group."""
         # if dtype is a variable str, guess representative size is 20 bytes
         per_chunk = (
@@ -106,4 +107,5 @@ class Entry(object):
         # raise if per_chunk >= 4 Gb, this is requested by h5py
         group.create_dataset(
             self.name, shape, dtype=self.dtype,
-            chunks=chunks, maxshape=maxshape)
+            chunks=chunks, maxshape=maxshape, compression=compression,
+            compression_opts=compression_opts)

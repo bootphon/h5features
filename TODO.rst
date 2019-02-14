@@ -15,15 +15,22 @@ For a future release
 
   * Make Data a dict with the following syntax::
 
-      reader = h5f.Reader(file, group)
-      reader['item'][from_time:to_time]
-      reader['item'].features
-      reader['item'].labels
-      reader.keys()
+      with h5f.Reader(file, group) as reader:
+          reader['item'][from_time:to_time]
+          reader['item'].features
+          reader['item'].labels
+          reader.keys()
 
   * Make an Item class wrapping Labels and Features
 
 * Implement sparse functionalities
 * Handle h5py MPI driver for concurent reading
+
+
+For h5features-1.3
+------------------
+
+* Add an optional properties field in the dataset to store a
+  dictionary of various entries (basically features parameters)
+
 * Enable autochunking from h5py (with chunk=None)
-* Allow data compression as an option for the writer

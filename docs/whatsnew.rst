@@ -5,6 +5,11 @@
 What's new ?
 ============
 
+h5features-1.3
+==============
+
+* New optional compression in ``h5features.Writer``.
+
 
 h5features-1.2.2
 ================

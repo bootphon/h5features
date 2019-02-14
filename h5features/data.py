@@ -79,7 +79,8 @@ class Data(object):
         """Returns a items/labels dictionary."""
         return self._dict_entry('labels')
 
-    def init_group(self, group, chunk_size):
+    def init_group(self, group, chunk_size,
+                   compression=None, compression_opts=None):
         """Initializes a HDF5 group compliant with the stored data.
 
         This method creates the datasets 'items', 'labels', 'features'
@@ -87,14 +88,24 @@ class Data(object):
 
         :param h5py.Group group: The group to initializes.
         :param float chunk_size: The size of a chunk in the file (in MB).
+        :param str compression: Optional compression, see
+            :class:`h5features.writer` for details
+        :param str compression: Optional compression options, see
+            :class:`h5features.writer` for details
 
         """
         create_index(group, chunk_size)
-        self._entries['items'].create_dataset(group, chunk_size)
-        self._entries['features'].create_dataset(group, chunk_size)
+        self._entries['items'].create_dataset(
+            group, chunk_size, compression=compression,
+            compression_opts=compression_opts)
+        self._entries['features'].create_dataset(
+            group, chunk_size, compression=compression,
+            compression_opts=compression_opts)
         # chunking the labels depends on features chunks
         self._entries['labels'].create_dataset(
-            group, self._entries['features'].nb_per_chunk)
+            group, self._entries['features'].nb_per_chunk,
+            compression=compression,
+            compression_opts=compression_opts)
 
     def is_appendable_to(self, group):
         """Returns True if the data can be appended in a given group."""

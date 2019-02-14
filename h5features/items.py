@@ -58,8 +58,9 @@ class Items(Entry):
         super(Items, self).__init__(
             'items', data, 1, special_dtype(vlen=str), check)
 
-    def create_dataset(self, group, chunk_size):
-        self._create_dataset(group, chunk_size)
+    def create_dataset(
+            self, group, chunk_size, compression=None, compression_opts=None):
+        self._create_dataset(group, chunk_size, compression, compression_opts)
 
     def is_appendable_to(self, group):
         return not set(group[self.name][...]).intersection(self.data)
@@ -87,7 +88,8 @@ class Items(Entry):
         except ValueError:
             return False
 
-    def _create_dataset(self, group, chunk_size):
+    def _create_dataset(
+            self, group, chunk_size, compression, compression_opts):
         """Create an empty dataset in a group."""
         # if dtype is a variable str, guess representative size is 20 bytes
         per_chunk = (
@@ -101,4 +103,5 @@ class Items(Entry):
         # raise if per_chunk >= 4 Gb, this is requested by h5py
         group.create_dataset(
             self.name, shape, dtype=self.dtype,
-            chunks=chunks, maxshape=maxshape)
+            chunks=chunks, maxshape=maxshape, compression=compression,
+            compression_opts=compression_opts)
