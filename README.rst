@@ -1,9 +1,15 @@
 .. image:: https://readthedocs.org/projects/h5features/badge/?version=master
    :target: http://h5features.readthedocs.org
-   :alt: Documentation Status
+   :alt: Documentation status
 
 .. image:: https://travis-ci.org/bootphon/h5features.svg?branch=master
     :target: https://travis-ci.org/bootphon/h5features
+    :alt: Tests status
+
+.. image:: https://codecov.io/gh/bootphon/h5features/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/bootphon/h5features
+    :alt: Coverage status
+
 
 ==========
 h5features
