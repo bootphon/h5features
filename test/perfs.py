@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -19,9 +19,9 @@
 """Comparing execution times of h5features 1.0 and 1.1 versions."""
 
 import argparse
-import cProfile
-import os
 import timeit
+# import cProfile
+# import os
 
 from aux import generate
 import aux.h5features_v1_0 as h5f

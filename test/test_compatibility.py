@@ -6,7 +6,8 @@ import os
 from aux.utils import remove, h5cmp
 from aux import generate
 from aux import h5features_v1_0 as h5f_1_0
-import h5features      as h5f_1_1
+import h5features as h5f_1_1
+
 
 class TestReadWriteCompatibility:
     """Test that v1.0 and v1.1 behave equally."""
@@ -14,9 +15,9 @@ class TestReadWriteCompatibility:
     def setup(self):
         self.file_v1 = 'v1.0.h5'
         self.file_v2 = 'v1.1.h5'
-        self.teardown() # in case files already exist, remove it
+        self.teardown()  # in case files already exist, remove it
 
-        items, times, features = generate.full(20,10)
+        items, times, features = generate.full(20, 10)
         h5f_1_0.write(self.file_v1, 'features', items, times, features)
         h5f_1_1.write(self.file_v2, 'features', items, times, features)
 
@@ -47,7 +48,7 @@ class TestReadWriteCompatibility:
         t1, f1 = h5f_1_0.read(fname, 'features')
         t2, f2 = h5f_1_1.read(fname, 'features')
 
-        for tt1, tt2 in zip(t1,t2):
+        for tt1, tt2 in zip(t1, t2):
             assert tt1 == tt2
-        for ff1, ff2 in zip(f1,f2):
+        for ff1, ff2 in zip(f1, f2):
             assert ff1 == ff2

@@ -6,6 +6,7 @@ from aux import generate
 from aux.utils import remove
 from h5features import Data, index
 
+
 class TestIndex:
     def setup(self):
         self.filename = 'test.h5'

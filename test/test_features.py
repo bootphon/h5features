@@ -6,15 +6,19 @@ import pytest
 
 from aux import generate
 from aux.utils import remove, assert_raise
-from h5features.features import *
+from h5features.features import (
+    Features, SparseFeatures,
+    contains_empty, parse_dformat, parse_dtype, parse_dim)
 
 
 def test_contains_empty_good():
     assert not contains_empty(generate.features(10))
 
+
 def test_contains_empty_none():
     for arg in [None, False, 0]:
         assert contains_empty(arg)
+
 
 def test_contains_empty_bad():
     bad = generate.features(10) + [np.array([])]
@@ -23,9 +27,11 @@ def test_contains_empty_bad():
     bad += generate.features(2, 3)
     assert contains_empty(bad)
 
+
 def test_parse_dformat_good():
     for arg in ['dense', 'sparse']:
         assert arg == parse_dformat(arg, True)
+
 
 def test_parse_dformat_bad():
     msg = 'is a bad features format, please choose'
@@ -116,7 +122,7 @@ class TestFeaturesParse:
 
     def test_dim_bad(self):
         bad_feat = self.feat
-        bad_feat[5] = bad_feat[5][:,:-1]
+        bad_feat[5] = bad_feat[5][:, :-1]
         assert_raise(parse_dim, bad_feat, 'same feature dimension')
 
         # TODO test with [np.array([1,2,3]),np.array([1,2])]
@@ -150,7 +156,7 @@ class TestEq:
     def test_bad(self):
         assert not self.feat == self.feat.data
         assert not self.feat == ''
-        assert not self.feat == None
+        assert self.feat is not None
 
     def test_polymorph(self):
         feat = Features(self.feat.data)
@@ -163,12 +169,13 @@ class TestEq:
         feat = Features(self.feat.data, sparsetodense=True)
         assert not feat == self.feat
 
+
 class TestFeatures:
     def setup(self):
         self.filename = 'test.h5'
         remove(self.filename)
         self.group = h5py.File(self.filename).create_group('group')
-        self.data = generate.features(10,5,100)
+        self.data = generate.features(10, 5, 100)
         self.feat = Features(self.data)
 
     def teardown(self):

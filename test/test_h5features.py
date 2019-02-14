@@ -8,6 +8,7 @@ import h5features.h5features as h5f
 from aux import generate
 from aux.utils import remove
 
+
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)
     with pytest.raises(NotImplementedError) as ioerror:

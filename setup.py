@@ -45,7 +45,7 @@ setup(
 
     # metadata for upload to PyPI
     author='Thomas Schatz, Mathieu Bernard, Roland Thiolliere',
-    author_email='mmathieubernardd@gmail.com',
+    author_email='mathieu.a.bernard@inria.fr',
     description='efficient storage of large features data',
     keywords='HDF5 h5py features read write',
     url='https://github.com/bootphon/h5features',
