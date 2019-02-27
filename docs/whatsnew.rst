@@ -8,6 +8,9 @@ What's new ?
 h5features-1.3
 ==============
 
+* Add an optional properties field in the dataset to store a
+  dictionary of various entries (basically features parameters).
+
 * ``chunk_size`` is automatically computed by default in the writer.
 
 * New optional compression in ``h5features.Writer``.

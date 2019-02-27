@@ -24,11 +24,5 @@ For a future release
   * Make an Item class wrapping Labels and Features
 
 * Implement sparse functionalities
+
 * Handle h5py MPI driver for concurent reading
-
-
-For h5features-1.3
-------------------
-
-* Add an optional properties field in the dataset to store a
-  dictionary of various entries (basically features parameters)
