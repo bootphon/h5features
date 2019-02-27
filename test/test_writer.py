@@ -8,13 +8,15 @@ import h5features as h5f
 from aux import generate
 from aux.utils import remove, assert_raise
 from h5features.writer import Writer
+from h5features.reader import Reader
 from h5features.data import Data
 
 
 def test_create_a_file():
     name = 'azecqgxqsdqxws.eztcqezxf'
     assert not os.path.exists(name)
-    Writer(name)
+    with Writer(name) as writer:
+        pass
     assert os.path.exists(name)
     remove(name)
 
@@ -36,14 +38,26 @@ class TestInit:
         for arg in self.filename, 'abc', 'toto.zip':
             Writer(self.filename)
 
+    def test_bad_mode(self):
+        with pytest.raises(IOError):
+            Writer(self.filename, mode='r')
+
     def test_chunk_good(self):
-        args = [0.008, 0.01, 12, 1e30]
+        args = ['auto', 0.008, 0.01, 12, 1e30]
         for arg in args:
             Writer(self.filename, chunk_size=arg)
 
-    def test_chunk_bad(self):
+    def test_chunk_below(self):
         args = [0.008-1e-2, .0001, 0, -1e30]
-        msg = 'chunk size is below 8 Ko'
+        msg = "chunk size is below 8 Ko"
+        for arg in args:
+            with pytest.raises(IOError) as err:
+                Writer(self.filename, chunk_size=arg)
+            assert msg in str(err.value)
+
+    def test_chunk_bad(self):
+        args = ['spam', [1, 2, 3]]
+        msg = "chunk size must be 'auto' or a number"
         for arg in args:
             with pytest.raises(IOError) as err:
                 Writer(self.filename, chunk_size=arg)
@@ -130,3 +144,29 @@ class TestWrite:
             assert all('bis' not in i for i in items[:10])
             assert all('bis' in i for i in items[10:])
             assert not all([(l == 0).all() for l in g['features'][...]])
+
+
+@pytest.mark.parametrize('compression', [None, 'gzip', 'lzf'])
+def test_compression(tmpdir, compression):
+    filename = str(tmpdir.join('test.h5'))
+    data = generate.full_data(10, dim=2)
+    h5f.Writer(filename, compression=compression).write(data, 'group')
+    assert data == h5f.Reader(filename, groupname='group').read()
+
+
+def test_compression_size(tmpdir):
+    data = generate.full_data(10, dim=2)
+    sizes = []
+    for i in range(10):
+        filename = str(tmpdir.join('test.h5.' + str(i)))
+        h5f.Writer(filename, compression=i).write(data, 'group')
+        sizes.append(os.path.getsize(filename))
+
+    assert sizes[::-1] == sorted(sizes)
+
+
+@pytest.mark.parametrize('compression', ['zip', 'spam', 1.0, -1, 15])
+def test_compression_bad(tmpdir, compression):
+    filename = str(tmpdir.join('test.h5'))
+    with pytest.raises(IOError):
+        h5f.Writer(filename, compression=compression)

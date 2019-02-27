@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -34,12 +34,18 @@ def cumindex(features):
     return np.cumsum([x.shape[0] for x in features.data])
 
 
-def create_index(group, chunk_size):
+def create_index(group, chunk_size, compression=None, compression_opts=None):
     """Create an empty index dataset in the given group."""
     dtype = np.int64
-    chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
-    group.create_dataset('index', (0,), dtype=dtype,
-                         chunks=chunks, maxshape=(None,))
+    if chunk_size == 'auto':
+        chunks = True
+    else:
+        chunks = (nb_per_chunk(np.dtype(dtype).itemsize, 1, chunk_size),)
+
+    group.create_dataset(
+        'index', (0,), dtype=dtype,
+        chunks=chunks, maxshape=(None,),
+        compression=compression, compression_opts=compression_opts)
 
 
 def write_index(data, group, append):

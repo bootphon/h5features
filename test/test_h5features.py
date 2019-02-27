@@ -8,11 +8,17 @@ import h5features.h5features as h5f
 from aux import generate
 from aux.utils import remove
 
+
 def test_raise_on_write_sparse():
     a, b, c = generate.full(1)
     with pytest.raises(NotImplementedError) as ioerror:
         h5f.write('test.h5', 'group', a, b, c, dformat='sparse')
     assert 'sparse' in str(ioerror.value)
+
+
+def test_raise_with_index():
+    with pytest.raises(NotImplementedError):
+        h5f.read('test.h5', index=0)
 
 
 class TestH5FeaturesWrite:

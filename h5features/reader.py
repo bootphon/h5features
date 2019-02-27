@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -24,6 +24,7 @@ import numpy as np
 from .data import Data
 from .items import read_items
 from .index import read_index
+from .properties import read_properties
 from .version import read_version
 
 
@@ -68,6 +69,10 @@ class Reader(object):
         self.version = read_version(self.group)
         self.items = read_items(self.group, self.version)
         self._index = read_index(self.group, self.version)
+        try:
+            self.properties = read_properties(self.group)
+        except KeyError:
+            self.properties = None
 
         # access to the labels group according to version
         self._labels_group = (self.group['labels'] if self.version >= '1.1'
@@ -157,8 +162,13 @@ class Reader(object):
             labels = np.split(labels, item_ends, axis=0)
 
         items = self.items.data[from_idx:to_idx + 1]
+        if self.properties is None:
+            properties = None
+        else:
+            properties = self.properties[from_idx:to_idx + 1]
 
-        return Data(items, labels, features, check=False)
+        return Data(
+            items, labels, features, properties=properties, check=False)
 
     def _get_item_position(self, idx):
         """Return a tuple of (start, end) indices of an item from its index."""

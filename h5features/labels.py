@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -121,13 +121,19 @@ class Labels(Entry):
     def _dim_tuple(self, value):
         return (value,) if self.dim == 1 else (value, self.dim)
 
-    def create_dataset(self, group, per_chunk):
+    def create_dataset(
+            self, group, per_chunk, compression=None, compression_opts=None):
         shape = self._dim_tuple(0)
         maxshape = self._dim_tuple(None)
-        chunks = self._dim_tuple(per_chunk)
+        if per_chunk == 'auto':
+            chunks = True
+        else:
+            chunks = self._dim_tuple(per_chunk)
 
-        group.create_dataset(self.name, shape, dtype=self.dtype,
-                             chunks=chunks, maxshape=maxshape)
+        group.create_dataset(
+            self.name, shape, dtype=self.dtype,
+            chunks=chunks, maxshape=maxshape,
+            compression=compression, compression_opts=compression_opts)
 
     def write_to(self, group):
         nb_data = sum([d.shape[0] for d in self.data])

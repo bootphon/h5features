@@ -163,30 +163,31 @@ class TestSortedLabels:
         pass
 
     def test_sort_1D(self):
-        l = [np.array([i for i in range(9)])]
-        Labels.check(l)
+        list_1d = [np.array([i for i in range(9)])]
+        Labels.check(list_1d)
 
-        l[0][[0, 1]] = l[0][[1, 0]]
-        assert_raise(Labels.check, l, 'not sorted')
+        list_1d[0][[0, 1]] = list_1d[0][[1, 0]]
+        assert_raise(Labels.check, list_1d, 'not sorted')
 
-        l.append(np.array([i for i in range(9)]))
-        assert_raise(Labels.check, l, 'not sorted')
+        list_1d.append(np.array([i for i in range(9)]))
+        assert_raise(Labels.check, list_1d, 'not sorted')
 
-        l[0][[1, 0]] = l[0][[0, 1]]
-        Labels.check(l)
+        list_1d[0][[1, 0]] = list_1d[0][[0, 1]]
+        Labels.check(list_1d)
 
     def test_sorted_2D(self):
         # dont use generate.labels to ensure 2 elements.
-        l = [np.array([[0., 1.],
-                       [0.33333333, 1.33333333],
-                       [0.66666667, 1.66666667],
-                       [1., 2.]]),
-             np.array([[0., 1.],
-                       [1., 2.]])]
+        list_2d = [
+            np.array([[0., 1.],
+                      [0.33333333, 1.33333333],
+                      [0.66666667, 1.66666667],
+                      [1., 2.]]),
+            np.array([[0., 1.],
+                      [1., 2.]])]
 
         # sorted, pass
-        Labels.check(l)
+        Labels.check(list_2d)
 
         # unsorted, fails
-        l[0][[0, 1], :] = l[0][[1, 0], :]
-        assert_raise(Labels.check, l, 'not sorted')
+        list_2d[0][[0, 1], :] = list_2d[0][[1, 0], :]
+        assert_raise(Labels.check, list_2d, 'not sorted')

@@ -1,9 +1,9 @@
 License and copyright
 =====================
 
-This package is developed whithin the `Bootphon project`_.
+This package is developed whithin the `CoML team`_.
 
-Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere.
+Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere.
 
 h5features is free software: you can redistribute it and/or modify
 it under the terms of the **GNU General Public License** as published by
@@ -18,4 +18,4 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with h5features.  If not, see http://www.gnu.org/licenses/.
 
-.. _Bootphon project: http://www.lscp.net/persons/dupoux/bootphon/
+.. _CoML team: https://coml.lscp.ens.fr

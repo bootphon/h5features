@@ -291,7 +291,7 @@ def write(filename, group, files, times, features, features_format='dense',
                                  chunk_size * 1000))
                 g.create_dataset(
                     'features', (0, dim), dtype=features_type, chunks=(
-                    nb_frames_by_chunk, dim), maxshape=(None, dim))
+                        nb_frames_by_chunk, dim), maxshape=(None, dim))
             g.create_dataset('times', (0,), dtype=np.float64, chunks=(
                 nb_frames_by_chunk,), maxshape=(None,))
             str_dtype = h5py.special_dtype(vlen=str)
@@ -330,7 +330,7 @@ def write(filename, group, files, times, features, features_format='dense',
             raise IOError('writing sparse features not yet implemented')
             # put them in right format if they aren't already
             # FIXME implement this
-            #are_sparse = [x.isspmatrix_coo() for x in features]
+            # are_sparse = [x.isspmatrix_coo() for x in features]
             # if not(all(are_sparse)):
             #    for x in features:
             #        if not(x.isspmatrix_coo()):
@@ -343,14 +343,14 @@ def write(filename, group, files, times, features, features_format='dense',
         # Step 4: writing data
         if features_format == 'sparse':
             raise IOError('writing sparse features not yet implemented')
-            #nb, = g['features'].shape
+            # nb, = g['features'].shape
             # g['feature'].resize((nb+features.shape[0],))
-            #g['features'][nb:] = features
+            # g['features'][nb:] = features
             # g['coordinates'].resize((nb+features.shape[0],2))
-            #g['coordinates'][nb:,:] = coordinates
-            #nb, = g['frames'].shape
+            # g['coordinates'][nb:,:] = coordinates
+            # nb, = g['frames'].shape
             # g['frames'].resize((nb+frames.shape[0],))
-            #g['frames'][nb:] = frames
+            # g['frames'][nb:] = frames
         else:
             nb, d = g['features'].shape
             g['features'].resize((nb + features.shape[0], d))

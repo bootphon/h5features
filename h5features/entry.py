@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -90,20 +90,25 @@ class Entry(object):
             raise ValueError('entry not appendable')
         self.data += entry.data
 
-    def _create_dataset(self, group, chunk_size):
+    def _create_dataset(
+            self, group, chunk_size, compression, compression_opts):
         """Create an empty dataset in a group."""
-        # if dtype is a variable str, guess representative size is 20 bytes
-        per_chunk = (
-            nb_per_chunk(20, self.dim, chunk_size)
-            if self.dtype == np.dtype('O') else
-            nb_per_chunk(np.dtype(self.dtype).itemsize,
-                         self.dim, chunk_size))
+        if chunk_size == 'auto':
+            chunks = True
+        else:
+            # if dtype is a variable str, guess representative size is 20 bytes
+            per_chunk = (
+                nb_per_chunk(20, self.dim, chunk_size)
+                if self.dtype == np.dtype('O') else
+                nb_per_chunk(np.dtype(self.dtype).itemsize,
+                             self.dim, chunk_size))
+            chunks = (per_chunk, self.dim)
 
         shape = (0, self.dim)
         maxshape = (None, self.dim)
-        chunks = (per_chunk, self.dim)
 
         # raise if per_chunk >= 4 Gb, this is requested by h5py
         group.create_dataset(
             self.name, shape, dtype=self.dtype,
-            chunks=chunks, maxshape=maxshape)
+            chunks=chunks, maxshape=maxshape, compression=compression,
+            compression_opts=compression_opts)

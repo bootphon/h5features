@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
+# Copyright 2014-2019 Thomas Schatz, Mathieu Bernard, Roland Thiolliere
 #
 # This file is part of h5features.
 #
@@ -21,14 +21,22 @@ from .items import Items
 from .labels import Labels
 from .features import Features, SparseFeatures
 from .index import create_index, write_index
+from .properties import Properties
 
 
 class Data(object):
     """This class manages h5features data."""
-    def __init__(self, items, labels, features, sparsity=None, check=True):
-        if check and not (len(items) == len(labels) == len(features)):
-            raise ValueError('all entries must have the same length ({} {} {})'
-                             .format(len(items), len(labels), len(features)))
+    def __init__(self, items, labels, features, properties=None,
+                 sparsity=None, check=True):
+        if check:
+            if not (len(items) == len(labels) == len(features)):
+                raise ValueError(
+                    'all entries must have the same length ({} {} {})'
+                    .format(len(items), len(labels), len(features)))
+            if properties and not len(properties) == len(items):
+                raise ValueError(
+                    'properties must have the same length than other entries '
+                    '({} {})'.format(len(properties), len(items)))
 
         self._entries = {}
         self._entries['items'] = Items(items, check)
@@ -36,6 +44,9 @@ class Data(object):
         self._entries['features'] = (
             Features(features, check) if not sparsity else
             SparseFeatures(features, sparsity, check))
+
+        if properties:
+            self._entries['properties'] = Properties(properties, check)
 
     def __eq__(self, other):
         return self._entries == other._entries
@@ -48,6 +59,10 @@ class Data(object):
 
     def is_empty(self):
         return len(self.items()) == 0
+
+    def has_properties(self):
+        """Returns True if data has attached properties, False otherwise"""
+        return 'properties' in self._entries
 
     def clear(self):
         """Erase stored data"""
@@ -71,6 +86,13 @@ class Data(object):
         """Returns the stored features as a list of numpy arrays."""
         return self._data('features')
 
+    def properties(self):
+        """Returns the stored properties as a list of dictionaries."""
+        try:
+            return self._data('properties')
+        except KeyError:
+            return []
+
     def dict_features(self):
         """Returns a items/features dictionary."""
         return self._dict_entry('features')
@@ -79,7 +101,15 @@ class Data(object):
         """Returns a items/labels dictionary."""
         return self._dict_entry('labels')
 
-    def init_group(self, group, chunk_size):
+    def dict_properties(self):
+        """Returns an item/properties dictionary"""
+        try:
+            return self._dict_entry('properties')
+        except KeyError:
+            return {}
+
+    def init_group(self, group, chunk_size,
+                   compression=None, compression_opts=None):
         """Initializes a HDF5 group compliant with the stored data.
 
         This method creates the datasets 'items', 'labels', 'features'
@@ -87,14 +117,27 @@ class Data(object):
 
         :param h5py.Group group: The group to initializes.
         :param float chunk_size: The size of a chunk in the file (in MB).
+        :param str compression: Optional compression, see
+            :class:`h5features.writer` for details
+        :param str compression: Optional compression options, see
+            :class:`h5features.writer` for details
 
         """
         create_index(group, chunk_size)
-        self._entries['items'].create_dataset(group, chunk_size)
-        self._entries['features'].create_dataset(group, chunk_size)
+
+        self._entries['items'].create_dataset(
+            group, chunk_size, compression=compression,
+            compression_opts=compression_opts)
+
+        self._entries['features'].create_dataset(
+            group, chunk_size, compression=compression,
+            compression_opts=compression_opts)
+
         # chunking the labels depends on features chunks
         self._entries['labels'].create_dataset(
-            group, self._entries['features'].nb_per_chunk)
+            group, self._entries['features'].nb_per_chunk,
+            compression=compression,
+            compression_opts=compression_opts)
 
     def is_appendable_to(self, group):
         """Returns True if the data can be appended in a given group."""
@@ -127,3 +170,5 @@ class Data(object):
         self._entries['items'].write_to(group)
         self._entries['features'].write_to(group, append)
         self._entries['labels'].write_to(group)
+        if self.has_properties():
+            self._entries['properties'].write_to(group)

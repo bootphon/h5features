@@ -4,7 +4,7 @@ clean:
 	python setup.py clean
 
 dev:
-	python setup.py develop 
+	python setup.py develop
 
 conda:
 	rm -rf conda_build
