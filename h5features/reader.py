@@ -71,7 +71,7 @@ class Reader(object):
         self._index = read_index(self.group, self.version)
         try:
             self.properties = read_properties(self.group)
-        except OSError:
+        except (IOError, OSError):
             self.properties = None
 
         # access to the labels group according to version
