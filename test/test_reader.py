@@ -79,8 +79,8 @@ def test_read_tofromtimes(tmpdir, dim):
     data3 = h5f.Reader(filename, groupname).read(from_time=0, to_time=1)
     assert data3 == data
 
-    data4 = h5f.Reader(filename, groupname).read(from_time=0.4, to_time=0.5)
-    assert data4.labels()[0][0] >= 0.4
+    data4 = h5f.Reader(filename, groupname).read(from_time=0.2, to_time=0.5)
+    assert data4.labels()[0][0] >= 0.2
     assert data4.labels()[0][-1] <= 0.5
 
 

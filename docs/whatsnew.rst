@@ -5,6 +5,15 @@
 What's new ?
 ============
 
+h5features-1.3.1
+================
+
+* Bugfix: properties are now appendable to an existing group.
+
+* Bugfix: fixed issue
+  [#5](https://github.com/bootphon/h5features/issues/5).
+
+
 h5features-1.3
 ==============
 
@@ -19,9 +28,9 @@ h5features-1.3
 h5features-1.2.2
 ================
 
-* bugfix: broken test on python-3.6.3.
+* Bugfix: broken test on python-3.6.3.
 
-* bugfix: missing files in MANIFEST.in for installation with `pip
+* Bugfix: missing files in MANIFEST.in for installation with `pip
   install h5features`.
 
 
