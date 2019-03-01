@@ -8,14 +8,14 @@ import h5features as h5f
 from aux import generate
 from aux.utils import remove, assert_raise
 from h5features.writer import Writer
-from h5features.reader import Reader
+from h5features.properties import read_properties
 from h5features.data import Data
 
 
 def test_create_a_file():
     name = 'azecqgxqsdqxws.eztcqezxf'
     assert not os.path.exists(name)
-    with Writer(name) as writer:
+    with Writer(name):
         pass
     assert os.path.exists(name)
     remove(name)
@@ -131,10 +131,12 @@ class TestWrite:
 
     @pytest.mark.parametrize('dim', [1, 2, 10])
     def test_append(self, dim):
-        data1 = generate.full_data(10, dim=dim)
+        data1 = generate.full_data(
+            10, dim=dim, properties=True)
         h5f.Writer(self.filename).write(data1, self.group, append=False)
 
-        data2 = generate.full_data(10, dim=dim, items_root='items_bis')
+        data2 = generate.full_data(
+            10, dim=dim, items_root='items_bis', properties=True)
         h5f.Writer(self.filename).write(data2, self.group, append=True)
 
         with h5py.File(self.filename, 'r') as f:
@@ -143,7 +145,8 @@ class TestWrite:
             assert len(items) == 20
             assert all('bis' not in i for i in items[:10])
             assert all('bis' in i for i in items[10:])
-            assert not all([(l == 0).all() for l in g['features'][...]])
+            assert not all([(feat == 0).all() for feat in g['features'][...]])
+            assert len(read_properties(g)) == 20
 
 
 @pytest.mark.parametrize('compression', [None, 'gzip', 'lzf'])

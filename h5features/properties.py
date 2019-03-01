@@ -21,8 +21,11 @@ import pickle
 
 
 def read_properties(group):
-    data = group.attrs['properties'].tostring()
-    return pickle.loads(data)
+    """Returns properties loaded from a group"""
+    if 'properties' not in group.attrs.keys():
+        raise IOError('no properties in group')
+
+    return pickle.loads(group.attrs['properties'].tostring())
 
 
 class Properties(object):
@@ -66,6 +69,15 @@ class Properties(object):
                     return False
         return True
 
-    def write_to(self, group):
-        data = pickle.dumps(self.data)
-        group.attrs['properties'] = np.void(data)
+    def is_appendable_to(self, group):
+        return 'properties' in group.attrs.keys()
+
+    def write_to(self, group, append=False):
+        """Writes the properties to a `group`, or append it"""
+        data = self.data
+        if append:
+            # concatenate original and new properties in a single list
+            original = read_properties(group)
+            data = original + data
+
+        group.attrs['properties'] = np.void(pickle.dumps(data))

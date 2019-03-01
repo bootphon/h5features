@@ -142,7 +142,10 @@ class Data(object):
     def is_appendable_to(self, group):
         """Returns True if the data can be appended in a given group."""
         # First check only the names
-        if not all([k in group for k in self._entries.keys()]):
+        if not all([k in group for k in self._entries.keys()
+                    if k != 'properties']):
+            return False
+        if self.has_properties() and 'properties' not in group.attrs.keys():
             return False
 
         # If names are matching, check the contents
@@ -171,4 +174,4 @@ class Data(object):
         self._entries['features'].write_to(group, append)
         self._entries['labels'].write_to(group)
         if self.has_properties():
-            self._entries['properties'].write_to(group)
+            self._entries['properties'].write_to(group, append=append)

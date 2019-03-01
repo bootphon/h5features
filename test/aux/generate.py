@@ -55,12 +55,13 @@ def features(nitems, dim=2, max_frames=3):
     return [np.random.randn(_nframes(max_frames), dim) for _ in range(nitems)]
 
 
-def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
+def full(nitems, dim=2, max_frames=3, tformat=1,
+         items_root='item', properties=False):
     """Random (items, features, times) generator.
 
-    Generate a random tuple of (items, features, times) for a set of
-    items, given the features dimension, the maximum number of
-    frames in items and the time format (either 1 or 2).
+    Generate a random tuple of (items, features, times,[, properties])
+    for a set of items, given the features dimension, the maximum
+    number of frames in items and the time format (either 1 or 2).
 
     Return
     ------
@@ -68,6 +69,7 @@ def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
     items : list of item names associated with generated features
     times : list of timestamps for each file
     features : list of feature vectors for each file
+    properties : list of dictionnaires, one per item
 
     We have len(files) == len(times) == len(features) == n_items
 
@@ -77,26 +79,40 @@ def full(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
         nframes = _nframes(max_frames)
         feat.append(np.random.randn(nframes, dim))
         times.append(_times_value(nframes, tformat))
-    return items(nitems, items_root), times, feat
+    if properties:
+        props = [{'n': n} for n in range(nitems)]
+        return items(nitems, items_root), times, feat, props
+    else:
+        return items(nitems, items_root), times, feat
 
 
-def full_dict(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
+def full_dict(nitems, dim=2, max_frames=3, tformat=1,
+              items_root='item', properties=False):
     """Return a data dictionary"""
     from h5features.items import Items
     from h5features.labels import Labels
     from h5features.features import Features
+    from h5features.properties import Properties
 
-    data = full(nitems, dim, max_frames, tformat, items_root)
-    return {'items': Items(data[0]),
-            'labels': Labels(data[1]),
-            'features': Features(data[2])}
+    data = full(nitems, dim, max_frames, tformat,
+                items_root=items_root, properties=properties)
+
+    d = {'items': Items(data[0]),
+         'labels': Labels(data[1]),
+         'features': Features(data[2])}
+    if properties:
+        d['properties'] = Properties(data[3])
+    return d
 
 
-def full_data(nitems, dim=2, max_frames=3, tformat=1, items_root='item'):
+def full_data(nitems, dim=2, max_frames=3, tformat=1,
+              items_root='item', properties=False):
     """Return a h5features.Data instance"""
     from h5features.data import Data
-    data = full(nitems, dim, max_frames, tformat, items_root)
-    return Data(data[0], data[1], data[2], check=True)
+    data = full(nitems, dim, max_frames, tformat,
+                items_root=items_root, properties=properties)
+    return Data(data[0], data[1], data[2], check=True,
+                properties=data[3] if properties else None)
 
 
 def npz(directory='./npz', nfiles=100,
