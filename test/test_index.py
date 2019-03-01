@@ -2,8 +2,8 @@
 
 import h5py
 import pytest
-from aux import generate
-from aux.utils import remove
+from .aux import generate
+from .aux.utils import remove
 from h5features import Data, index
 
 

@@ -5,8 +5,8 @@ import os
 import pytest
 import h5features as h5f
 
-from aux import generate
-from aux.utils import remove, assert_raise
+from .aux import generate
+from .aux.utils import remove, assert_raise
 from h5features.writer import Writer
 from h5features.properties import read_properties
 from h5features.data import Data

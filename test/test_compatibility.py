@@ -3,9 +3,9 @@
 import h5py
 import os
 
-from aux.utils import remove, h5cmp
-from aux import generate
-from aux import h5features_v1_0 as h5f_1_0
+from .aux.utils import remove, h5cmp
+from .aux import generate
+from .aux import h5features_v1_0 as h5f_1_0
 import h5features as h5f_1_1
 
 

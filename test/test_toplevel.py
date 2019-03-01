@@ -5,7 +5,7 @@ import os
 import pytest
 import h5features as h5f
 
-from aux import generate
+from .aux import generate
 
 
 def test_from_exemple(tmpdir):

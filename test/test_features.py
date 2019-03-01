@@ -4,8 +4,8 @@ import h5py
 import numpy as np
 import pytest
 
-from aux import generate
-from aux.utils import remove, assert_raise
+from .aux import generate
+from .aux.utils import remove, assert_raise
 from h5features.features import (
     Features, SparseFeatures,
     contains_empty, parse_dformat, parse_dtype, parse_dim)

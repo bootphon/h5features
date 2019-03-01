@@ -11,8 +11,8 @@ import numpy as np
 import pytest
 import tempfile
 
-from aux import generate
-from aux.utils import remove
+from .aux import generate
+from .aux.utils import remove
 import h5features as h5f
 
 

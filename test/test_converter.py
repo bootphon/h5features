@@ -3,8 +3,8 @@
 import h5features as h5f
 import h5py
 
-from aux.utils import remove
-from aux import generate
+from .aux.utils import remove
+from .aux import generate
 
 import scipy.io as sio
 import numpy as np

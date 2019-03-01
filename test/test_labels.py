@@ -5,8 +5,8 @@ from numpy.random import randn
 import pytest
 import numpy as np
 
-from aux import generate
-from aux.utils import assert_raise, remove
+from .aux import generate
+from .aux.utils import assert_raise, remove
 from h5features import write, read
 from h5features.labels import Labels
 

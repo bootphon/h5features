@@ -5,8 +5,8 @@ import h5py
 import pytest
 
 import h5features.h5features as h5f
-from aux import generate
-from aux.utils import remove
+from .aux import generate
+from .aux.utils import remove
 
 
 def test_raise_on_write_sparse():
