@@ -16,16 +16,18 @@
 # along with h5features.  If not, see <http://www.gnu.org/licenses/>.
 """Provides the Properties class to the h5features package."""
 
+import h5py
 import numpy as np
 import pickle
 
 
 def read_properties(group):
     """Returns properties loaded from a group"""
-    if 'properties' not in group.attrs.keys():
+    if 'properties' not in group:
         raise IOError('no properties in group')
 
-    return pickle.loads(group.attrs['properties'].tostring())
+    data = group['properties'][...][0].replace(b'__NULL__', b'\x00')
+    return pickle.loads(data)
 
 
 class Properties(object):
@@ -69,15 +71,26 @@ class Properties(object):
                     return False
         return True
 
-    def is_appendable_to(self, group):
-        return 'properties' in group.attrs.keys()
+    def is_appendable_to(self, entry):
+        return True
+
+    def create_dataset(self, group, compression=None, compression_opts=None):
+        group.create_dataset(
+            'properties', (1,), dtype=h5py.special_dtype(vlen=bytes),
+            chunks=True, compression=compression,
+            compression_opts=compression_opts)
 
     def write_to(self, group, append=False):
         """Writes the properties to a `group`, or append it"""
         data = self.data
-        if append:
-            # concatenate original and new properties in a single list
-            original = read_properties(group)
-            data = original + data
+        if append is True:
+            try:
+                # concatenate original and new properties in a single list
+                original = read_properties(group)
+                data = original + data
+            except EOFError:
+                pass  # no former data to append on
 
-        group.attrs['properties'] = np.void(pickle.dumps(data))
+        # h5py does not support embedded NULLs in strings ('\x00')
+        data = pickle.dumps(data).replace(b'\x00', b'__NULL__')
+        group['properties'][...] = np.void(data)

@@ -139,13 +139,15 @@ class Data(object):
             compression=compression,
             compression_opts=compression_opts)
 
+        if self.has_properties():
+            self._entries['properties'].create_dataset(
+                group, compression=compression,
+                compression_opts=compression_opts)
+
     def is_appendable_to(self, group):
         """Returns True if the data can be appended in a given group."""
         # First check only the names
-        if not all([k in group for k in self._entries.keys()
-                    if k != 'properties']):
-            return False
-        if self.has_properties() and 'properties' not in group.attrs.keys():
+        if not all([k in group for k in self._entries.keys()]):
             return False
 
         # If names are matching, check the contents

@@ -4,6 +4,8 @@ import copy
 import h5py
 import numpy as np
 import pytest
+import random
+import string
 import h5features.properties
 
 
@@ -45,12 +47,29 @@ def test_equality():
     assert P(p) != P(p2)
 
 
-@pytest.mark.parametrize('props', [[{}], [{1: 0}], [{'a': {'a': 'a'}}]])
+@pytest.mark.parametrize(
+    'props', [[{}], [{1: 0}], [{'a': {'a': 'a'}}], [{'a': 0, 'b': 'b'}]])
 def test_rw(props, tmpdir):
     f = h5py.File(tmpdir.join('spam.hdf5'), 'w')
     g = f.create_group('spam')
     p = h5features.properties.Properties(props)
 
+    p.create_dataset(g)
     p.write_to(g)
     p2 = h5features.properties.read_properties(g)
     assert p2 == props
+
+
+@pytest.mark.parametrize('N', [int(1e3), int(1e5)])
+def test_rw_huge(N, tmpdir):
+    data = ''.join(
+        random.choice(string.ascii_uppercase + string.digits)
+        for _ in range(N))
+    f = h5py.File(tmpdir.join('spam.hdf5'), 'w')
+    g = f.create_group('spam')
+    p = h5features.properties.Properties([{'props': data}])
+
+    p.create_dataset(g)
+    p.write_to(g)
+    p2 = h5features.properties.read_properties(g)
+    assert p2[0]['props'] == data
