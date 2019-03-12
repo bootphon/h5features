@@ -56,8 +56,8 @@ class TestH5FeaturesWrite:
         self.features_0 = np.random.randn(30, 20)
         self.times_0 = np.linspace(0, 2, 30)
 
-        h5f.simple_write(self.filename, 'f',
-                         self.times_0, self.features_0)
+        h5f.simple_write(
+            self.filename, 'f', self.times_0, self.features_0)
 
         with h5py.File(self.filename, 'r') as f:
             assert ['f'] == list(f.keys())
@@ -99,13 +99,28 @@ class TestH5FeaturesReadWrite:
     def teardown(self):
         remove(self.filename)
 
-    def test_write_simple(self):
+    @pytest.mark.parametrize('properties', [False, True])
+    def test_write_simple(self, properties):
         """write/read a file with a single item of 30 frames"""
         nframes = 30
         f = np.random.randn(nframes, self.dim)
         t = np.linspace(0, 2, nframes)
-        h5f.simple_write(self.filename, 'group1', t, f, 'item')
-        tr, fr = h5f.read(self.filename, 'group1')
+        if properties:
+            props = {'a': 0, 'b': 'b'}
+        else:
+            props = None
+
+        h5f.simple_write(
+            self.filename, 'group1', t, f,
+            properties=props, item='item', mode='w')
+
+        if properties:
+            tr, fr, pr = h5f.read(self.filename, 'group1')
+            assert list(pr.keys()) == ['item']
+            assert pr['item'] == props
+        else:
+            tr, fr = h5f.read(self.filename, 'group1')
+
         assert list(tr.keys()) == ['item']
         assert list(fr.keys()) == ['item']
         assert len(tr['item']) == 30

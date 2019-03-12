@@ -1,9 +1,9 @@
 """Test the labels module of h5features package."""
 
 import h5py
-from numpy.random import randn
 import pytest
 import numpy as np
+from numpy.random import randn
 
 from .aux import generate
 from .aux.utils import assert_raise, remove
@@ -23,6 +23,37 @@ def test_label_one_frame_2D():
     assert test.ndim == gold.ndim
     assert test.shape == gold.shape
     assert (test == gold).all()
+
+
+def test_check_bad():
+    with pytest.raises(IOError) as err:
+        Labels({'foo', 'bar'})
+    assert 'not in a list' in str(err)
+
+    with pytest.raises(IOError) as err:
+        Labels([])
+    assert 'list is empty' in str(err)
+
+    with pytest.raises(IOError) as err:
+        Labels([{0, 1}])
+    assert 'must be numpy arrays' in str(err)
+
+    with pytest.raises(IOError) as err:
+        Labels([np.random.random((2, 2)), np.random.random((2, 3))])
+    assert 'must have same shape on 2nd dim' in str(err)
+
+
+def test_equality():
+    t1 = generate.labels(10, tformat=2)
+    l1 = Labels(t1)
+    l2 = Labels(generate.labels(10, tformat=2))
+    l3 = Labels(t1)
+    l3.name = 'newname'
+
+    assert l1 == l1
+    assert l1 != l2
+    assert l1 != np.random.random((5, 2))
+    assert l1 != l3
 
 
 class TestParseLabels:

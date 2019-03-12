@@ -6,6 +6,7 @@
 
 """
 
+import h5py
 import os
 import numpy as np
 import pytest
@@ -14,6 +15,21 @@ import tempfile
 from .aux import generate
 from .aux.utils import remove
 import h5features as h5f
+
+
+def test_read_version(tmpdir):
+    with h5py.File(str(tmpdir.join('foo.h5'))) as f:
+        g = f.create_group('g')
+        g.attrs['version'] = '0.1'
+        assert h5f.version.read_version(g) == '0.1'
+
+        g.attrs['version'] = b'0.1'
+        assert h5f.version.read_version(g) == '0.1'
+
+        g.attrs['version'] = '125'
+        with pytest.raises(IOError) as err:
+            h5f.version.read_version(g)
+        assert 'version 125 is not supported' in str(err)
 
 
 class TestReader:

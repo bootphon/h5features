@@ -54,16 +54,20 @@ def read(filename, groupname=None, from_item=None, to_item=None,
     :param float to_time: Optional. (defaults to the ending time in
         to_item) the specified times are included in the output
 
-    :param int index: Optional. For faster access. TODO Document and
-        test this.
+    :param int index: Not implemented, raise if used.
 
-    :return: A tuple (times, features) such as:
+    :return: A tuple (times, features) or (times, features,
+        properties) such as:
 
         * time is a dictionary of 1D arrays values (keys are items).
 
-        * features: A dictionary of 2D arrays values (keys are
-          items) with the 'feature' dimension along the columns and the
+        * features: A dictionary of 2D arrays values (keys are items)
+          with the 'features' dimension along the columns and the
           'time' dimension along the lines.
+
+        * properties: A dictionnary of dictionnaries (keys are items)
+          with the corresponding properties. If there is no properties
+          recorded, this value is not returned.
 
     .. note:: Note that all the files that are present on disk between
         to_item and from_item will be loaded and returned. It's the
@@ -78,11 +82,14 @@ def read(filename, groupname=None, from_item=None, to_item=None,
     reader = Reader(filename, groupname)
     data = (reader.read(from_item, to_item, from_time, to_time)
             if index is None else reader.index_read(index))
-    return data.dict_labels(), data.dict_features()
+    if data.has_properties():
+        return data.dict_labels(), data.dict_features(), data.dict_properties()
+    else:
+        return data.dict_labels(), data.dict_features()
 
 
-def write(filename, groupname, items, times, features,
-          dformat='dense', chunk_size=0.1, sparsity=0.1, mode='a'):
+def write(filename, groupname, items, times, features, properties=None,
+          dformat='dense', chunk_size='auto', sparsity=0.1, mode='a'):
     """Write h5features data in a HDF5 file.
 
     This function is a wrapper to the Writer class. It has three purposes:
@@ -115,12 +122,19 @@ def write(filename, groupname, items, times, features,
         (accomodating row-major storage in hdf5 files).
     :type features: list of 2D numpy arrays
 
+    :param properties: Optional. Properties associated with each
+        item. Properties describe the features associated with each
+        item in a dictionnary. It can store parameters or fields
+        recorded by the user.
+    :type properties: list of dictionnaries
+
     :param str dformat: Optional. Which format to store the features
         into (sparse or dense). Default is dense.
 
     :param float chunk_size: Optional. In Mo, tuning parameter
-        corresponding to the size of a chunk in the h5file. Ignored if
-        the file already exists.
+        corresponding to the size of a chunk in the h5file. By default
+        the chunk size is guessed automatically. Tis parameter is
+        ignored if the file already exists.
 
     :param float sparsity: Optional. Tuning parameter corresponding to
         the expected proportion (in [0, 1]) of non-zeros elements on
@@ -137,12 +151,15 @@ def write(filename, groupname, items, times, features,
     """
     # Prepare the data, raise on error
     sparsity = sparsity if dformat == 'sparse' else None
-    data = Data(items, times, features, sparsity=sparsity, check=True)
+    data = Data(items, times, features, properties=properties,
+                sparsity=sparsity, check=True)
 
     # Write all that stuff in the HDF5 file's specified group
     Writer(filename, chunk_size=chunk_size).write(data, groupname, append=True)
 
 
-def simple_write(filename, group, times, features, item='item', mode='a'):
+def simple_write(filename, group, times, features,
+                 properties=None, item='item', mode='a'):
     """Simplified version of `write()` when there is only one item."""
-    write(filename, group, [item], [times], [features], mode=mode)
+    write(filename, group, [item], [times], [features], mode=mode,
+          properties=[properties] if properties is not None else None)

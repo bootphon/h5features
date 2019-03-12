@@ -19,7 +19,8 @@ class TestReadWriteCompatibility:
 
         items, times, features = generate.full(20, 10)
         h5f_1_0.write(self.file_v1, 'features', items, times, features)
-        h5f_1_1.write(self.file_v2, 'features', items, times, features)
+        h5f_1_1.write(self.file_v2, 'features', items, times, features,
+                      chunk_size=0.1)
 
     def teardown(self):
         remove(self.file_v1)

@@ -21,6 +21,12 @@ def test_create_a_file():
     remove(name)
 
 
+def test_bas_version():
+    with pytest.raises(IOError) as err:
+        Writer('a.b', version='a')
+    assert 'version a is not supported' in str(err)
+
+
 class TestInit:
     """Test of Writer.__init__"""
     def setup(self):
@@ -127,7 +133,7 @@ class TestWrite:
         with h5py.File(self.filename, 'r') as f:
             g = f[self.group]
             assert len(g['items'][...]) == 10
-            assert not all([(l == 0).all() for l in g['features'][...]])
+            assert not all([(h == 0).all() for h in g['features'][...]])
 
     @pytest.mark.parametrize('dim', [1, 2, 10])
     def test_append(self, dim):
@@ -138,6 +144,12 @@ class TestWrite:
         data2 = generate.full_data(
             10, dim=dim, items_root='items_bis', properties=True)
         h5f.Writer(self.filename).write(data2, self.group, append=True)
+
+        # cannot append to incompatible versions
+        with pytest.raises(IOError) as err:
+            h5f.Writer(self.filename, version='0.1').write(
+                data2, self.group, append=True)
+        assert 'versions are different' in str(err)
 
         with h5py.File(self.filename, 'r') as f:
             g = f[self.group]

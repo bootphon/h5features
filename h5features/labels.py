@@ -107,7 +107,7 @@ class Labels(Entry):
                 return False
             # check big data
             for i in range(len(self.data)):
-                if not (self.data[i] == other.data[i]).all():
+                if not np.array_equal(self.data[i], other.data[i]):
                     return False
             return True
         except AttributeError:
