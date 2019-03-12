@@ -5,6 +5,15 @@
 What's new ?
 ============
 
+h5features-1.3.2
+================
+
+* Bugfix: no more size limitation on properties.
+
+* properties are now exposed at the top-level (legacy)
+  ``h5features.write`` and ``h5features.read`` functions.
+
+
 h5features-1.3.1
 ================
 
