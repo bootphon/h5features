@@ -10,6 +10,9 @@
     :target: https://codecov.io/gh/bootphon/h5features
     :alt: Coverage status
 
+.. image:: https://anaconda.org/coml/h5features/badges/version.svg
+   :target: https://anaconda.org/coml/h5features
+   :alt: Anaconda
 
 ==========
 h5features
