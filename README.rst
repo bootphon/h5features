@@ -19,10 +19,24 @@ The h5features **python package** provides easy to use and efficient
 storage of **large features data** on the HDF5 binary file format.
 
 
-Installation
-------------
+Installation from conda
+-----------------------
 
-* **dependancies**
+::
+   conda install -c coml h5features
+
+
+Installation from pip
+---------------------
+
+::
+   pip install h5features
+
+
+Installation from sources
+-------------------------
+
+* **dependencies**
 
   The package depends on *numpy*, *scipy* and *h5py*. They can be
   automatically installed by the setup script but it takes a long time

@@ -1,9 +1,18 @@
+{% set data = load_setup_py_data() %}
+
 package:
   name: h5features
-  version: "1.3"
+  version: {{ data.get('version') }}
 
 source:
   path: .
+
+build:
+  noarch: python
+  entry_points:
+   {% for entry in data.get('entry_points')['console_scripts'] %}
+     - {{ entry }}
+   {% endfor %}
 
 requirements:
   build:
@@ -14,3 +23,18 @@ requirements:
     - h5py >=2.3.0
     - numpy >=1.8.0
     - scipy >=0.13.0
+
+test:
+  imports:
+    - h5features
+  requires:
+    - pytest
+  source_files:
+    - test
+  commands:
+    - pytest -vx
+
+about:
+  home: {{ data.get('url') }}
+  license: {{ data.get('license') }}
+  summary: {{ data.get('description') }}
