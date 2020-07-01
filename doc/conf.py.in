@@ -1,0 +1,22 @@
+project = '@PROJECT_NAME@'
+copyright = '@PROJECT_COPYRIGHT@'
+author = '@PROJECT_AUTHOR@'
+release = '@PROJECT_VERSION@'
+
+extensions = ['breathe']
+breathe_projects = {'@PROJECT_NAME@': '@CMAKE_CURRENT_BINARY_DIR@/xml/'}
+breathe_default_project = '@PROJECT_NAME@'
+breathe_default_members = ('members', 'undoc-members')
+
+html_theme = 'sphinx_rtd_theme'
+templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/templates']
+html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/static']
+
+html_theme_options = {
+    'logo_only': False,
+    'display_version': True,
+    'navigation_depth': 4,
+    'collapse_navigation': False
+}
+
+rst_epilog = '.. |copyright| replace:: %s' % copyright
