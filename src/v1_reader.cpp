@@ -47,7 +47,7 @@ h5features::item h5features::v1::reader::read_item(const std::string& name, bool
    const auto item_iterator = std::find(m_items.begin(), m_items.end(), name);
    if(item_iterator == m_items.end())
    {
-      throw h5features::exception("the requested item does not exist");
+      throw h5features::exception("the requested item does not exist: " + name);
    }
 
    // warn user if proerties are present
@@ -76,7 +76,7 @@ h5features::item h5features::v1::reader::read_item(
    const auto item_iterator = std::find(m_items.begin(), m_items.end(), name);
    if(item_iterator == m_items.end())
    {
-      throw h5features::exception("the requested item does not exist");
+      throw h5features::exception("the requested item does not exist: " + name);
    }
 
    // warn user if proerties are present
@@ -107,11 +107,11 @@ std::pair<std::size_t, std::size_t> h5features::v1::reader::get_item_position(
    const auto index = std::distance(m_items.begin(), iterator);
    if(index != 0)
    {
-      return {m_index[index - 1] + 1, m_index[index] + 1};
+      return {m_index[index - 1] + 1, m_index[index]};
    }
    else
    {
-      return {0, m_index[0] + 1};
+      return {0, m_index[0]};
    }
 }
 

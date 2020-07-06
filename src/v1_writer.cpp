@@ -65,14 +65,14 @@ void h5features::v1::writer::lazy_init(const std::size_t& dim_features, const st
 {
    try
    {
+      // "format" attribute is required by v1.1, despite only "dense" value is
+      // supported (a planned "sparse" format has never been implemented)
+      m_group.createAttribute<std::string>("format", "dense");
+
       init_index();
-      std::cout << "done init index" << std::endl;
       init_items();
-      std::cout << "done init items" << std::endl;
       init_features(dim_features);
-      std::cout << "done init features" << std::endl;
       init_times(dim_times);
-      std::cout << "done init times" << std::endl;
    }
    catch(const hdf5::Exception& e)
    {
@@ -98,7 +98,7 @@ void h5features::v1::writer::init_index()
 
    const std::vector<std::size_t> size{0};
    const std::vector<std::size_t> max_size{hdf5::DataSpace::UNLIMITED};
-   m_group.createDataSet<std::size_t>("index", hdf5::DataSpace{size, max_size}, props);
+   m_group.createDataSet<long long>("index", hdf5::DataSpace{size, max_size}, props);
 }
 
 
@@ -138,19 +138,18 @@ void h5features::v1::writer::init_features(const std::size_t& dim)
       props.add(hdf5::Deflate{9});
    }
 
-   m_group.createDataSet<double>(
-      "features",
-      hdf5::DataSpace{std::vector<std::size_t>{0, dim}, std::vector<std::size_t>{hdf5::DataSpace::UNLIMITED, dim}},
-      props);
+   const std::vector<std::size_t> size{0, dim};
+   const std::vector<std::size_t> max_size{hdf5::DataSpace::UNLIMITED, dim};
+   m_group.createDataSet<double>("features", hdf5::DataSpace{size, max_size}, props);
 }
 
 
 void h5features::v1::writer::init_times(const std::size_t& dim)
 {
-   // ensure the dataset "times" does not exist in the group
-   if(m_group.exist("times"))
+   // ensure the dataset "labels" does not exist in the group
+   if(m_group.exist("labels"))
    {
-      throw h5features::exception("object 'times' already exists in the group");
+      throw h5features::exception("object 'labels' already exists in the group");
    }
 
    hdf5::DataSetCreateProps props;
@@ -160,8 +159,9 @@ void h5features::v1::writer::init_times(const std::size_t& dim)
       props.add(hdf5::Deflate{9});
    }
 
-   m_group.createDataSet<double>(
-      "times", hdf5::DataSpace{std::vector<std::size_t>{0, dim}, std::vector<std::size_t>{hdf5::DataSpace::UNLIMITED, dim}}, props);
+   const std::vector<std::size_t> size{0, dim};
+   const std::vector<std::size_t> max_size{hdf5::DataSpace::UNLIMITED, dim};
+   m_group.createDataSet<double>("labels", hdf5::DataSpace{size, max_size}, props);
 }
 
 
@@ -174,13 +174,13 @@ void h5features::v1::writer::check_appendable(const h5features::item& item) cons
    }
 
    // check dimension for times
-   if(m_group.getDataSet("times").getDimensions()[0] != item.times().dim())
+   if(m_group.getDataSet("labels").getDimensions()[1] != item.times().dim())
    {
       throw h5features::exception("times dimension mismatch");
    }
 
    // check dimension for features
-   if(m_group.getDataSet("features").getDimensions()[0] != item.features().dim())
+   if(m_group.getDataSet("features").getDimensions()[1] != item.features().dim())
    {
       throw h5features::exception("features dimension mismatch");
    }
@@ -204,15 +204,17 @@ void h5features::v1::writer::write_index(const h5features::item& item)
    // resize the dataset (one more element)
    const auto size = resize_dataset(dataset, 1)[0];
 
-   // get the current index
-   std::size_t index = 0;
+   // get the current index and append it to the dataset
    if(size > 1)
    {
+      std::size_t index;
       dataset.select(hdf5::ElementSet{size - 2}).read(index);
+      dataset.select(hdf5::ElementSet{size - 1}).write(item.size() + index);
    }
-
-   // append the updated index to the dataset
-   dataset.select(hdf5::ElementSet{size - 1}).write(index + item.size());
+   else
+   {
+      dataset.select(hdf5::ElementSet{size - 1}).write(item.size() - 1);
+   }
 }
 
 
@@ -238,7 +240,8 @@ void h5features::v1::writer::write_times(const h5features::item& item)
    const auto size = resize_dataset(dataset, item.size());
 
    // append the times to the dataset
-   dataset.select({size[0] - item.size(), 0}, {item.size(), item.dim()}).write(item.times().data().data());
+   dataset.select({size[0] - item.size(), 0}, {item.size(), item.times().dim()}).write_raw(
+      item.times().data().data());
 }
 
 
@@ -249,5 +252,6 @@ void h5features::v1::writer::write_features(const h5features::item& item)
    const auto size = resize_dataset(dataset, item.size());
 
    // append the features to the dataset
-   dataset.select({size[0] - item.size(), 0}, {item.size(), item.dim()}).write(item.features().data().data());
+   dataset.select({size[0] - item.size(), 0}, {item.size(), item.dim()}).write_raw(
+      item.features().data().data());
 }

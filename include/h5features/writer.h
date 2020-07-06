@@ -100,7 +100,7 @@ private:
    // The name of the group to write on in the file
    const std::string m_groupname;
 
-   // The concrete reader used depends on the h5features version of the file
+   // The concrete writer used depends on the h5features version of the file
    std::unique_ptr<h5features::details::writer_interface> m_writer;
 };
 }
