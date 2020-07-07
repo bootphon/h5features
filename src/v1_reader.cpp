@@ -30,7 +30,10 @@ h5features::v1::reader::reader(hdf5::Group&& group, h5features::version version)
    }
    catch(const hdf5::Exception& e)
    {
-      throw h5features::exception(std::string("failed to read features: ") + e.what());
+      // failed to load the datasets, assumes the group is empty (this is
+      // required to have a behavior consistent with version 2.0)
+      m_items.clear();
+      m_index.clear();
    }
 }
 

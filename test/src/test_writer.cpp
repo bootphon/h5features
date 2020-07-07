@@ -5,29 +5,10 @@
 #include <h5features/writer.h>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
-#include <boost/test/data/monomorphic.hpp>
-#include <boost/test/tools/output_test_stream.hpp>
 
+#include "test_utils_capture.h"
 #include "test_utils_tmpdir.h"
 #include "test_utils_ostream.hpp"
-
-
-
-class cerr_redirect
-{
-public:
-   cerr_redirect(std::streambuf * new_buffer)
-      : m_old(std::cerr.rdbuf(new_buffer))
-   {}
-
-   ~cerr_redirect()
-   {
-      std::cerr.rdbuf(m_old);
-   }
-
-private:
-   std::streambuf* m_old;
-};
 
 
 auto version_dataset = boost::unit_test::data::make({
@@ -69,25 +50,21 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
 
    {
       // write to root group (empty)
-      {
-         boost::test_tools::output_test_stream cerr;
-         cerr_redirect guard(cerr.rdbuf());
-         BOOST_CHECK_NO_THROW(h5features::writer(filename, "/", true, true, vers).write(item));
-      }
+      utils::capture_stream captured(std::cerr);
+      BOOST_CHECK_NO_THROW(h5features::writer(filename, "/", true, true, vers).write(item));
       BOOST_CHECK_EQUAL(h5features::writer(filename, "/", true, true, vers).version(), vers);
    }
 
    {
       h5features::writer writer(filename, "group", true, true, vers);
 
-      boost::test_tools::output_test_stream cerr;
-      cerr_redirect guard(cerr.rdbuf());
+      utils::capture_stream captured(std::cerr);
       writer.write(item);
 
       if(vers != h5features::version::v2_0)
       {
          BOOST_CHECK(
-            cerr.is_equal("WARNING h5features v1.1: ignoring properties while writing item test\n", false));
+            captured.is_equal("WARNING h5features v1.1: ignoring properties while writing item test\n", false));
       }
    }
 
