@@ -41,6 +41,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 option(BUILD_SHARED_LIBS "Builds shared libraries" ON)
+option(H5FEATURES_BUILD_PYTHON "Builds the Python wrapper" ON)
 option(H5FEATURES_BUILD_TEST "Builds the test suite" ON)
 option(H5FEATURES_BUILD_DOC "Builds the documentation" ON)
 
@@ -88,6 +89,10 @@ target_link_libraries(h5features HighFive)
 add_executable(basic ${PROJECT_SOURCE_DIR}/src/basic.cpp)
 target_link_libraries(basic h5features)
 
+
+if(H5FEATURES_BUILD_PYTHON)
+  add_subdirectory(python)
+endif()
 
 # execute the tests with "make test"
 if(H5FEATURES_BUILD_TEST)
