@@ -88,7 +88,7 @@ public:
       \param name The name of the item to read
       \param start The start time to read the item from
       \param stop The stop time to read the item from
-      \param ignore_properties When true, do not read the item'sproperties
+      \param ignore_properties When true, do not read the item's properties
 
       \throw h5features::exception If the `name` group does not exist or
       if the read operation failed.

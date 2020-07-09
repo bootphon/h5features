@@ -46,21 +46,8 @@ std::vector<std::string> h5features::v1::reader::items() const
 
 h5features::item h5features::v1::reader::read_item(const std::string& name, bool ignore_properties) const
 {
-   // ensure the item exists
-   const auto item_iterator = std::find(m_items.begin(), m_items.end(), name);
-   if(item_iterator == m_items.end())
-   {
-      throw h5features::exception("the requested item does not exist: " + name);
-   }
-
-   // warn user if proerties are present
-   if(m_group.exist("properties") and not ignore_properties)
-   {
-      std::cerr << "WARNING h5features v1.1: ignoring properties while reading item " << name << std::endl;
-   }
-
    // retrieve the start and stop indices of the item in the index
-   const auto position = get_item_position(item_iterator);
+   const auto position = get_item_position(name, ignore_properties);
 
    // read the item
    return {
@@ -75,6 +62,25 @@ h5features::item h5features::v1::reader::read_item(const std::string& name, bool
 h5features::item h5features::v1::reader::read_item(
    const std::string& name, double start, double stop, bool ignore_properties) const
 {
+   // retrieve the start and stop indices of the item in the index
+   const auto position = get_item_position(name, ignore_properties);
+
+   // retrieve the sub-position from times
+   const auto times = read_times(position);
+   const auto subposition = times.get_indices(start, stop);
+
+   return {
+      name,
+      read_features({position.first + subposition.first, position.first + subposition.second}),
+      times.select(subposition.first, subposition.second),
+      {},
+      false};
+}
+
+
+std::pair<std::size_t, std::size_t> h5features::v1::reader::get_item_position(
+   const std::string& name, bool ignore_properties) const
+{
    // ensure the item exists
    const auto item_iterator = std::find(m_items.begin(), m_items.end(), name);
    if(item_iterator == m_items.end())
@@ -88,33 +94,14 @@ h5features::item h5features::v1::reader::read_item(
       std::cerr << "WARNING h5features v1.1: ignoring properties while reading item " << name << std::endl;
    }
 
-   // retrieve the start and stop indices of the item in the index
-   const auto position = get_item_position(item_iterator);
-
-   // retrieve the sub-position from times
-   const auto times = read_times(position);
-   const auto subposition = times.get_indices(start, stop);
-
-   return {
-      name,
-      read_features({position.first + subposition.first, position.second + subposition.first}),
-      times.select(subposition.first, subposition.second),
-      {},
-      false};
-}
-
-
-std::pair<std::size_t, std::size_t> h5features::v1::reader::get_item_position(
-   std::vector<std::string>::const_iterator iterator) const
-{
-   const auto index = std::distance(m_items.begin(), iterator);
+   const auto index = std::distance(m_items.begin(), item_iterator);
    if(index != 0)
    {
-      return {m_index[index - 1] + 1, m_index[index]};
+      return {m_index[index - 1] + 1, m_index[index] +1};
    }
    else
    {
-      return {0, m_index[0]};
+      return {0, m_index[0] + 1};
    }
 }
 

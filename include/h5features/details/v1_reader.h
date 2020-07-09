@@ -34,7 +34,7 @@ private:
    std::vector<std::size_t> m_index;
 
    // Retrieve position of an item in the index
-   std::pair<std::size_t, std::size_t> get_item_position(std::vector<std::string>::const_iterator iterator) const;
+   std::pair<std::size_t, std::size_t> get_item_position(const std::string& name, bool ignore_properties) const;
 
    // Loads features from its index position
    h5features::features read_features(const std::pair<std::size_t, std::size_t>& position) const;

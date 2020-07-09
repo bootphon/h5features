@@ -101,7 +101,7 @@ public:
    bool operator!=(const item& other) const noexcept;
 
    /**
-      \brief Returns true if the item has a valid state
+      \brief Ensures the item has a valid state
 
       An item is valid if an only if:
       - It's name is not empty

@@ -114,6 +114,46 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
          BOOST_CHECK(not group.exist("item3/properties"));
       }
    }
+
+   {
+      // write another item with a different features dimension
+      h5features::item item2{
+         "test2",
+         {{0, 1, 2, 3}, 2},
+         {{0, 0.2, 0.4, 0.6}, h5features::times::format::interval}};
+
+      h5features::writer writer(filename, "group", false, true, vers);
+
+      // in v1_1 this is not possible
+      if(vers == h5features::version::v1_1)
+      {
+         BOOST_CHECK_THROW(writer.write(item2), h5features::exception);
+      }
+      else
+      {
+         BOOST_CHECK_NO_THROW(writer.write(item2));
+      }
+   }
+
+   {
+      // write another item with a different times dimension
+      h5features::item item2{
+         "test3",
+         {{0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0}, 4},
+         {{0, 0.2, 0.4}, h5features::times::format::simple}};
+
+      h5features::writer writer(filename, "group", false, true, vers);
+
+      // in v1_1 this is not possible
+      if(vers == h5features::version::v1_1)
+      {
+         BOOST_CHECK_THROW(writer.write(item2), h5features::exception);
+      }
+      else
+      {
+         BOOST_CHECK_NO_THROW(writer.write(item2));
+      }
+   }
 }
 
 
@@ -197,7 +237,8 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_version, version_dat
    // cannot write: bad version (0.1 is "version" is absent, which is currently
    // unsupported)
    {
-      BOOST_CHECK_THROW(h5features::writer(filename, "group", false, false, vers), h5features::exception);
+      BOOST_CHECK_THROW(h5features::writer(filename, "group", false, false, vers),
+                        h5features::exception);
       BOOST_CHECK_NO_THROW(h5features::writer(filename, "group", true));
    }
 }
