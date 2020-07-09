@@ -42,6 +42,7 @@ endif()
 
 option(BUILD_SHARED_LIBS "Builds shared libraries" ON)
 option(H5FEATURES_BUILD_PYTHON "Builds the Python wrapper" ON)
+option(H5FEATURES_BUILD_BENCHMARK "Builds the benchmark" OFF)
 option(H5FEATURES_BUILD_TEST "Builds the test suite" ON)
 option(H5FEATURES_BUILD_DOC "Builds the documentation" ON)
 
@@ -104,4 +105,11 @@ endif()
 # build the documentation with "make doc"
 if(H5FEATURES_BUILD_DOC)
   add_subdirectory(doc)
+endif()
+
+
+# build the benchmark with "make benchmark"
+if(H5FEATURES_BUILD_BENCHMARK)
+  add_executable(benchmark ${PROJECT_SOURCE_DIR}/test/utils/src/benchmark.cpp)
+  target_link_libraries(benchmark h5features)
 endif()
