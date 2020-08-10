@@ -10,7 +10,7 @@ void init_reader(pybind11::module& m);
 void init_writer(pybind11::module& m);
 
 
-PYBIND11_MODULE(h5features, m)
+PYBIND11_MODULE(py_h5features, m)
 {
    init_features(m);
    init_times(m);
