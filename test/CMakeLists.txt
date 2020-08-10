@@ -2,7 +2,7 @@
 # build the tests
 #######################################################################
 
-find_package(Boost 1.55 COMPONENTS unit_test_framework filesystem)
+find_package(Boost 1.55 REQUIRED COMPONENTS unit_test_framework filesystem)
 
 # compile the test utils library
 
