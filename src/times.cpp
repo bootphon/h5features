@@ -1,6 +1,7 @@
 #include <h5features/times.h>
 #include <h5features/exception.h>
 #include <algorithm>
+#include <sstream>
 
 
 namespace details
@@ -326,7 +327,9 @@ std::pair<std::size_t, std::size_t> h5features::times::get_indices(double start,
    // ensure the indices are valid
    if(indices.first >= indices.second)
    {
-      throw h5features::exception("no valid indices");
+      std::stringstream msg;
+      msg << "no valid indices for time interval (" << start << ", " << stop << ")";
+      throw h5features::exception(msg.str());
    }
 
    return indices;
