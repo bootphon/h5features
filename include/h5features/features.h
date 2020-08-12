@@ -20,13 +20,6 @@ public:
    /// Destructor
    virtual ~features() = default;
 
-   /**
-      \brief Default constructor
-
-      \warning Builds an invalid (empty) `features` instance
-   */
-   features() = default;
-
    /// Copy constructor
    features(const features&) = default;
 
@@ -92,6 +85,8 @@ public:
    const std::vector<double>& data() const noexcept;
 
 private:
+   features() = delete;
+
    // The stored features
    std::vector<double> m_features;
 

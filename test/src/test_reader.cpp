@@ -7,54 +7,16 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 
-#include <algorithm>
-#include <random>
-
 #include "test_utils_capture.h"
-#include "test_utils_tmpdir.h"
+#include "test_utils_data.h"
 #include "test_utils_ostream.hpp"
+#include "test_utils_tmpdir.h"
 
 
 auto version_dataset = boost::unit_test::data::make({
       h5features::version::v1_1,
       h5features::version::v2_0});
 
-
-std::vector<double> generate_vector(std::size_t size)
-{
-   std::mt19937 engine;
-   auto dist = std::uniform_real_distribution<double>{0, 1};
-
-   std::vector<double> vec(size);
-   std::generate(vec.begin(), vec.end(), [&](){return dist(engine);});
-   return vec;
-}
-
-
-std::vector<double> generate_range(double start, double stop)
-{
-   std::vector<double> vec(stop - start);
-   std::iota(vec.begin(), vec.end(), start);
-   return vec;
-}
-
-
-h5features::item generate_item(const std::string& name, std::size_t size, std::size_t dim, bool properties=true)
-{
-   auto feats = generate_vector(size * dim);
-   auto start = generate_range(0, size);
-   auto stop = generate_range(0.5, size + 0.5);
-
-   h5features::properties props;
-   if(properties)
-   {
-      props.set<int>("int", 1);
-      props.set<std::string>("string", "string");
-      props.set<std::vector<double>>("start", start);
-   }
-
-   return {name, {feats, dim}, {start, stop}, props};
-}
 
 
 BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_simple, version_dataset, vers)
@@ -85,8 +47,8 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_rw, version_dataset,
 {
    const std::string filename = (tmpdir / "test.h5").string();
    const std::vector<h5features::item> items{
-      generate_item("item1", 10, 5),
-      generate_item("item2", 7, 5, false)};
+      utils::generate_item("item1", 10, 5),
+      utils::generate_item("item2", 7, 5, false)};
 
    {
       utils::capture_stream captured(std::cerr);

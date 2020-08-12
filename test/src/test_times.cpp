@@ -76,11 +76,27 @@ BOOST_AUTO_TEST_CASE(test_validate_5)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_get_format)
+{
+   BOOST_CHECK_EQUAL(h5features::times::get_format(1), h5features::times::format::simple);
+   BOOST_CHECK_EQUAL(h5features::times::get_format(2), h5features::times::format::interval);
+
+   for( std::size_t s : {0, 3, 4, 5})
+   {
+      BOOST_CHECK_EXCEPTION(
+         h5features::times::get_format(s), h5features::exception,
+         [&](const auto& e){
+            return std::string(e.what()) == "invalid times dimension";});
+   }
+}
+
+
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
    const h5features::times t1{{0, 1, 2}, {0, 1, 2}};
    BOOST_CHECK_EQUAL(3, t1.size());
    BOOST_CHECK_EQUAL(2, t1.dim());
+
    {
       auto data = std::vector<double>{0, 0, 1, 1, 2, 2};
       BOOST_CHECK_EQUAL(data, t1.data());
@@ -228,57 +244,3 @@ BOOST_AUTO_TEST_CASE(test_select_interval)
       BOOST_CHECK_EQUAL(t2, t);
    }
 }
-
-
-// BOOST_FIXTURE_TEST_CASE(test_read_write, utils::fixture::temp_directory)
-// {
-//    const h5features::times times{
-//       {0, 1, 2, 3, 4, 5},
-//       {2, 3, 4, 5, 6, 7}};
-
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::Create | hdf5::File::ReadWrite);
-//       hdf5::Group group = file.createGroup("item");
-//       h5features::v2::write_times(times, group, true);
-//    }
-
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       hdf5::Group group = file.getGroup("item");
-//       auto times2 = h5features::v2::read_times(group);
-//       BOOST_CHECK_EQUAL(times, times2);
-//    }
-// }
-
-
-// BOOST_FIXTURE_TEST_CASE(test_write_bad, utils::fixture::temp_directory)
-// {
-//    const h5features::times times{
-//       {0, 1, 2, 3, 4, 5},
-//       {2, 3, 4, 5, 6, 7}};
-
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::Create | hdf5::File::ReadWrite);
-//       hdf5::Group group = file.createGroup("item");
-//       h5features::v2::write_times(times, group, true);
-//       BOOST_CHECK_THROW(h5features::v2::write_times(times, group, true), h5features::exception);
-//       hdf5::Group group2 = file.createGroup("item2");
-//       BOOST_CHECK_NO_THROW(h5features::v2::write_times(times, group2, true));
-//    }
-// }
-
-
-// BOOST_FIXTURE_TEST_CASE(test_read_bad, utils::fixture::temp_directory)
-// {
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::Create | hdf5::File::ReadWrite);
-//       file.createGroup("item_bad");
-//       file.createGroup("item_bad_2").createGroup("times");
-//    }
-
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       BOOST_CHECK_THROW(h5features::v2::read_times(file.getGroup("item_bad")), h5features::exception);
-//       BOOST_CHECK_THROW(h5features::v2::read_times(file.getGroup("item_bad_2")), h5features::exception);
-//    }
-// }

@@ -4,6 +4,7 @@
 #include <h5features/item.h>
 #include <boost/test/included/unit_test.hpp>
 
+#include "test_utils_data.h"
 #include "test_utils_tmpdir.h"
 #include "test_utils_ostream.hpp"
 
@@ -23,61 +24,46 @@ BOOST_AUTO_TEST_CASE(test_simple)
 }
 
 
-// BOOST_FIXTURE_TEST_CASE(test_rw, utils::fixture::temp_directory)
-// {
-//    h5features::properties p;
-//    p.set("int", 1);
-//    p.set("vector_str", std::vector<std::string>{"a", "b", "c"});
-//    const h5features::features f{{0, 1, 2, 2, 0, 0, 2, 0, 2}, 3};
-//    const h5features::times t{{0, 1, 2}, {1, 2, 3}};
+BOOST_AUTO_TEST_CASE(test_comp)
+{
+   const auto item1 = utils::generate_item("item1", 20, 7, true);
+   const auto item2 = utils::generate_item("item2", 30, 7, false);
 
-//    const h5features::item item{"item", f, t, p};
-//    BOOST_CHECK_EQUAL(item.features(), f);
-//    BOOST_CHECK_EQUAL(item.times(), t);
-//    BOOST_CHECK_EQUAL(item.properties(), p);
+   BOOST_CHECK_EQUAL(item1.has_properties(), true);
+   BOOST_CHECK_EQUAL(item2.has_properties(), false);
 
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::Create | hdf5::File::ReadWrite);
-//       auto group = file.createGroup("group");
-//       h5features::v2::write_item(item, group, true);
-//    }
+   BOOST_CHECK_EQUAL(item1.dim(), 7);
+   BOOST_CHECK_EQUAL(item1.size(), 20);
+   BOOST_CHECK_EQUAL(item1.name(), "item1");
 
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       auto item2 = h5features::v2::read_item(file.getGroup("group"), "item", false);
-//       BOOST_CHECK_EQUAL(item, item2);
-//    }
+   BOOST_CHECK(item1 == item1);
+   BOOST_CHECK(item1 != item2);
+}
 
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       auto item2 = h5features::v2::read_item(file.getGroup("group"), "item", true);
-//       BOOST_CHECK_NE(item, item2);
-//       BOOST_CHECK_EQUAL(item2.features(), f);
-//       BOOST_CHECK_EQUAL(item2.times(), t);
-//       BOOST_CHECK_EQUAL(item2.has_properties(), false);
-//    }
 
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       auto item2 = h5features::v2::read_item(file.getGroup("group"), "item", 0, 3, false);
-//       BOOST_CHECK_EQUAL(item, item2);
-//    }
+BOOST_AUTO_TEST_CASE(test_validate)
+{
+   // empty name
+   {
+      h5features::item bad("", utils::generate_features(3, 2), utils::generate_times(3), {}, false);
+      BOOST_CHECK_THROW(bad.validate(), h5features::exception);
+   }
 
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       BOOST_CHECK_THROW(
-//          h5features::v2::read_item(file.getGroup("group"), "item", 1, 1, false), h5features::exception);
-//       BOOST_CHECK_THROW(
-//          h5features::v2::read_item(file.getGroup("group"), "item", 1, 1.1, false), h5features::exception);
-//    }
+   // empty features
+   {
+      h5features::item bad("bad", {{}, 3, false}, utils::generate_times(3), {}, false);
+      BOOST_CHECK_THROW(bad.validate(), h5features::exception);
+   }
 
-//    {
-//       hdf5::File file((tmpdir / "test.h5").string(), hdf5::File::ReadOnly);
-//       auto item2 = h5features::v2::read_item(file.getGroup("group"), "item", 1, 2.5, false);
-//       BOOST_CHECK_EQUAL(item2.size(), 1);
-//       BOOST_CHECK_EQUAL(item2.times().start(), 1);
-//       BOOST_CHECK_EQUAL(item2.times().stop(), 2);
-//       BOOST_CHECK_EQUAL(item2.properties(), item.properties());
-//       item2.validate(true);
-//    }
-// }
+   // empty times
+   {
+      h5features::item bad("bad", utils::generate_features(3, 2), {{}, {}, false}, {}, false);
+      BOOST_CHECK_THROW(bad.validate(), h5features::exception);
+   }
+
+   // incompatible times and features
+   {
+      h5features::item bad("", utils::generate_features(3, 2), utils::generate_times(7), {}, false);
+      BOOST_CHECK_THROW(bad.validate(), h5features::exception);
+   }
+}

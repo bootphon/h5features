@@ -69,6 +69,24 @@ std::ostream& boost_test_print_type(std::ostream& ostr, const h5features::times&
 }
 
 
+std::ostream& boost_test_print_type(std::ostream& ostr, const h5features::times::format& v)
+{
+   switch(v)
+   {
+      case h5features::times::format::simple:
+         ostr << "[format: simple]";
+         break;
+      case h5features::times::format::interval:
+         ostr << "[format: interval]";
+         break;
+      default:
+         ostr << "[format: UNKNOWN]";
+         break;
+   }
+   return ostr;
+}
+
+
 std::ostream& boost_test_print_type(std::ostream& ostr, const h5features::features& v)
 {
    ostr << "features (" << v.size() << " x " << v.dim() << ")";

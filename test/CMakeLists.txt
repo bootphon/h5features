@@ -8,6 +8,7 @@ find_package(Boost 1.55 REQUIRED COMPONENTS unit_test_framework filesystem)
 
 add_library(h5features-test
   utils/src/test_utils_capture.cpp
+  utils/src/test_utils_data.cpp
   utils/src/test_utils_tmpdir.cpp)
 target_include_directories(
   h5features-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils/include)
