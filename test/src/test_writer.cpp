@@ -35,10 +35,10 @@ BOOST_FIXTURE_TEST_CASE(test_bad, utils::fixture::temp_directory)
 BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_dataset, vers)
 {
    h5features::properties p;
-   p.set("bool", false);
-   p.set("zero", 0);
-   p.set("pi", 3.14);
-   p.set("name", std::string{"hello"});
+   p.set<bool>("bool", false);
+   p.set<int>("zero", 0);
+   p.set<double>("pi", 3.14);
+   p.set<std::string>("name", "hello");
 
    h5features::item item{
       "test",

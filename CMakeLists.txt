@@ -51,7 +51,13 @@ option(H5FEATURES_BUILD_DOC "Builds the documentation" ON)
 # find dependencies
 #######################################################################
 
-# HighFive (includes Boost and HDF5)
+# HDF5 (require 1.10 minimum, after
+# ${HIGHFIVE_SOURCE_DIR}/CMake/HighFiveTargetDeps.cmake)
+set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)  # Consistency
+set(HDF5_PREFER_PARALLEL ${HIGHFIVE_PARALLEL_HDF5})
+find_package(HDF5 1.10 REQUIRED)
+
+# HighFive (include Boost)
 set(HIGHFIVE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/HighFive)
 list(APPEND CMAKE_MODULE_PATH
   ${HIGHFIVE_SOURCE_DIR}/CMake

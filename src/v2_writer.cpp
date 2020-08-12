@@ -77,7 +77,7 @@ void write_times(const h5features::times& times, hdf5::Group& group, bool compre
    Write a property to a given HDF5 group
 
    Internally the scalar properties (bool, int, double and string) are stored as
-   attribute within the HDF5 group. The vector prpoerties are stored as dataset
+   attribute within the HDF5 group. The vector properties are stored as dataset
    (optionnally compressed).
 
  */
@@ -93,7 +93,7 @@ public:
    template<class T>
    void operator()(const T& value) const
    {
-      m_group.createAttribute(m_name, value);
+      m_group.createAttribute<T>(m_name, value);
    }
 
    // write a vector
@@ -142,9 +142,11 @@ void write_properties(const h5features::properties& props, hdf5::Group& group, b
             properties_writer_visitor(props_group, prop.first, compress), prop.second);
       }
    }
-   catch(...)
+   catch(const std::exception& e)
    {
-      throw h5features::exception("failed to write properties");
+      std::stringstream msg;
+      msg << "failed to write properties: " << e.what();
+      throw h5features::exception(msg.str());
    }
 }
 
