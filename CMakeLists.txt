@@ -98,6 +98,7 @@ target_link_libraries(basic h5features)
 
 
 if(H5FEATURES_BUILD_PYTHON)
+  add_subdirectory(external/pybind11)
   add_subdirectory(python)
 endif()
 

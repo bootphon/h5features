@@ -1,4 +1,3 @@
-find_package(pybind11 REQUIRED)
 
 pybind11_add_module(py_h5features THIN_LTO
   ${CMAKE_CURRENT_SOURCE_DIR}/py_h5features.cpp
