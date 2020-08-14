@@ -10,7 +10,6 @@
 
 namespace utils
 {
-
 /// Generate a random vector with values in [0, 1]
 std::vector<double> generate_vector(
    std::size_t size);
@@ -25,7 +24,8 @@ h5features::times generate_times(
    std::size_t size, h5features::times::format format=h5features::times::format::interval);
 
 h5features::item generate_item(
-   const std::string& name, std::size_t size, std::size_t dim, bool properties=true);
+   const std::string& name, std::size_t size, std::size_t dim, bool properties=true,
+   h5features::times::format format=h5features::times::format::interval);
 }
 
 #endif

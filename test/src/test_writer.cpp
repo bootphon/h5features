@@ -7,6 +7,7 @@
 #include <boost/test/data/test_case.hpp>
 
 #include "test_utils_capture.h"
+#include "test_utils_data.h"
 #include "test_utils_tmpdir.h"
 #include "test_utils_ostream.hpp"
 
@@ -28,25 +29,15 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_simple, version_data
 
 BOOST_FIXTURE_TEST_CASE(test_bad, utils::fixture::temp_directory)
 {
+   // trying to open a directory
    BOOST_CHECK_THROW(h5features::writer(tmpdir.string(), "group"), h5features::exception);
 }
 
 
 BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_dataset, vers)
 {
-   h5features::properties p;
-   p.set<bool>("bool", false);
-   p.set<int>("zero", 0);
-   p.set<double>("pi", 3.14);
-   p.set<std::string>("name", "hello");
-
-   h5features::item item{
-      "test",
-      {{0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0}, 4},
-      {{0, 0.2, 0.4}, {0.3, 0.5, 0.7}},
-      p};
-
    const auto filename = (tmpdir / "test.h5").string();
+   const auto item = utils::generate_item("test", 3, 5, true, h5features::times::format::interval);
 
    {
       // write to root group (empty)
@@ -90,13 +81,14 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
    }
 
    // write a second item
-
    {
       h5features::writer writer(filename, "group", false, true, vers);
 
+      // cannot write another item with the same name
       h5features::item item2{item};
       BOOST_CHECK_THROW(writer.write(item2), h5features::exception);
 
+      // a different name is OK
       h5features::item item3{"item3", item.features(), item.times()};
       writer.write(item3);
    }
@@ -114,70 +106,69 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
          BOOST_CHECK(not group.exist("item3/properties"));
       }
    }
-
-   {
-      // write another item with a different features dimension
-      h5features::item item2{
-         "test2",
-         {{0, 1, 2, 3}, 2},
-         {{0, 0.2, 0.4, 0.6}, h5features::times::format::interval}};
-
-      h5features::writer writer(filename, "group", false, true, vers);
-
-      // in v1_1 this is not possible
-      if(vers == h5features::version::v1_1)
-      {
-         BOOST_CHECK_THROW(writer.write(item2), h5features::exception);
-      }
-      else
-      {
-         BOOST_CHECK_NO_THROW(writer.write(item2));
-      }
-   }
-
-   {
-      // write another item with a different times dimension
-      h5features::item item2{
-         "test3",
-         {{0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0}, 4},
-         {{0, 0.2, 0.4}, h5features::times::format::simple}};
-
-      h5features::writer writer(filename, "group", false, true, vers);
-
-      // in v1_1 this is not possible
-      if(vers == h5features::version::v1_1)
-      {
-         BOOST_CHECK_THROW(writer.write(item2), h5features::exception);
-      }
-      else
-      {
-         BOOST_CHECK_NO_THROW(writer.write(item2));
-      }
-   }
 }
 
 
+BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write_bad, version_dataset, vers)
+{
+   const auto filename = (tmpdir / "test.h5").string();
+   const auto item = utils::generate_item("test", 3, 5, false, h5features::times::format::interval);
+
+   h5features::writer writer(filename, "group", true, true, vers);
+   writer.write(item);
+
+   // try to write another item with a different features dimension... but this
+   // is not allowed
+   {
+      const auto item2 = utils::generate_item(
+         "test2", 3, item.dim() + 1, true, h5features::times::format::interval);
+
+      BOOST_CHECK_THROW(
+         writer.write(item2),
+         h5features::exception);
+
+      BOOST_CHECK_THROW(
+         h5features::writer(filename, "group", false, true, vers).write(item2),
+         h5features::exception);
+   }
+
+   // try to write another item with a different times dimension... again this
+   // is not allowed
+   {
+      const auto item2 = utils::generate_item(
+         "test2", 3, item.dim(), true, h5features::times::format::simple);
+
+      BOOST_CHECK_THROW(
+         writer.write(item2),
+         h5features::exception);
+
+      BOOST_CHECK_THROW(
+         h5features::writer(filename, "group", false, true, vers).write(item2),
+         h5features::exception);
+   }
+}
+
 BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_flag, version_dataset, vers)
 {
-   const h5features::item item{
-      "item",
-      {{0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0}, 4},
-      {{0, 0.2, 0.4}, {0.3, 0.5, 0.7}}};
-
    const auto filename = (tmpdir / "test.h5").string();
+   const auto item = utils::generate_item("item", 3, 4);
 
    // write the item a first time
    {
+      utils::capture_stream captured(std::cerr);
       h5features::writer(filename, "group", false, false, vers).write(item);
    }
 
    // write the same item in a 2nd group
    {
+      utils::capture_stream captured(std::cerr);
       h5features::writer(filename, "group2", false, false, vers).write(item);
    }
 
    // cannot write twice the same item
-   BOOST_CHECK_THROW(h5features::writer(filename, "group", false, false, vers).write(item), h5features::exception);
+   BOOST_CHECK_THROW(
+      h5features::writer(filename, "group", false, false, vers).write(item),
+      h5features::exception);
 
    // overwrite the file
    {
@@ -192,6 +183,7 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_flag, version_datase
       }
 
       BOOST_CHECK(not hdf5::File(filename, hdf5::File::ReadOnly).exist(groupname));
+      utils::capture_stream captured(std::cerr);
       writer.write(item);
       BOOST_CHECK(hdf5::File(filename, hdf5::File::ReadOnly).exist(groupname));
    }
@@ -200,15 +192,12 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_flag, version_datase
 
 BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_version, version_dataset, vers)
 {
-   const h5features::item item{
-      "item",
-      {{0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0}, 4},
-      {{0, 0.2, 0.4}, {0.3, 0.5, 0.7}}};
-
    const auto filename = (tmpdir / "test.h5").string();
+   const auto item = utils::generate_item("item", 3, 4);
 
    // write an item
    {
+      utils::capture_stream captured(std::cerr);
       h5features::writer(filename, "group", true, true, vers).write(item);
 
       std::string groupname = "group/item";
@@ -234,11 +223,12 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_version, version_dat
       BOOST_CHECK_EQUAL(h5features::version::v0_1, h5features::read_version(group));
    }
 
-   // cannot write: bad version (0.1 is "version" is absent, which is currently
+   // cannot write: bad version (0.1 if "version" is absent, which is currently
    // unsupported)
    {
-      BOOST_CHECK_THROW(h5features::writer(filename, "group", false, false, vers),
-                        h5features::exception);
+      BOOST_CHECK_THROW(
+         h5features::writer(filename, "group", false, false, vers),
+         h5features::exception);
       BOOST_CHECK_NO_THROW(h5features::writer(filename, "group", true));
    }
 }

@@ -48,12 +48,14 @@ h5features::times utils::generate_times(
 
 
 h5features::item utils::generate_item(
-   const std::string& name, std::size_t size, std::size_t dim, bool properties)
+   const std::string& name, std::size_t size, std::size_t dim, bool properties, h5features::times::format format)
 {
    h5features::properties props;
    if(properties)
    {
+      props.set<bool>("bool", false);
       props.set<int>("int", 1);
+      props.set<double>("double", 0);
       props.set<std::string>("string", "string");
       props.set<std::vector<double>>("vector", generate_vector(10));
    }
@@ -61,6 +63,6 @@ h5features::item utils::generate_item(
    return {
       name,
       generate_features(size, dim),
-      generate_times(size, h5features::times::format::interval),
+      generate_times(size, format),
       props};
 }

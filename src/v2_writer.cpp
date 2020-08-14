@@ -152,8 +152,23 @@ void write_properties(const h5features::properties& props, hdf5::Group& group, b
 
 
 h5features::v2::writer::writer(hdf5::Group&& group, bool compress, h5features::version version)
-   : h5features::details::writer_interface{std::move(group), compress, version}
-{}
+   : h5features::details::writer_interface{std::move(group), compress, version},
+     m_dim_features{}, m_dim_times{}
+{
+   if(m_group.hasAttribute("dim_features"))
+   {
+      std::size_t dim;
+      m_group.getAttribute("dim_features").read(dim);
+      m_dim_features.emplace(dim);
+   }
+
+   if(m_group.hasAttribute("dim_times"))
+   {
+      std::size_t dim;
+      m_group.getAttribute("dim_times").read(dim);
+      m_dim_times.emplace(dim);
+   }
+}
 
 
 void h5features::v2::writer::write(const h5features::item& item)
@@ -164,6 +179,10 @@ void h5features::v2::writer::write(const h5features::item& item)
       throw h5features::exception("item already exists in the group");
    }
 
+   // ensure the features and times have consistent dimension in the group
+   check_dim_features(item);
+   check_dim_times(item);
+
    // write the item to file
    hdf5::Group item_group = m_group.createGroup(item.name());
    write_times(item.times(), item_group, m_compress);
@@ -171,5 +190,49 @@ void h5features::v2::writer::write(const h5features::item& item)
    if(item.properties().size() != 0)
    {
       write_properties(item.properties(), item_group, m_compress);
+   }
+}
+
+
+void h5features::v2::writer::check_dim_features(const h5features::item& item)
+{
+   if(m_dim_features.has_value())
+   {
+      if(m_dim_features.value() != item.dim())
+      {
+         std::stringstream msg;
+         msg << "dimension of existing features is " << m_dim_features.value()
+             << ", cannot write features of dimension " << item.dim();
+         throw h5features::exception(msg.str());
+      }
+   }
+   else
+   {
+      // first item, setup the features dimension and write them as attribute in
+      // the group
+      m_dim_features.emplace(item.dim());
+      m_group.createAttribute("dim_features", item.dim());
+   }
+}
+
+
+void h5features::v2::writer::check_dim_times(const h5features::item& item)
+{
+   if(m_dim_times.has_value())
+   {
+      if(m_dim_times.value() != item.times().dim())
+      {
+         std::stringstream msg;
+         msg << "dimension of existing times is " << m_dim_times.value()
+             << ", cannot write times of dimension " << item.times().dim();
+         throw h5features::exception(msg.str());
+      }
+   }
+   else
+   {
+      // first item, setup the timesdimension and write them as attribute in
+      // the group
+      m_dim_times.emplace(item.times().dim());
+      m_group.createAttribute("dim_times", item.times().dim());
    }
 }

@@ -79,7 +79,9 @@ std::unique_ptr<h5features::details::writer_interface> init_writer(
 
 h5features::writer::writer(
    const std::string& filename, const std::string& group, bool overwrite, bool compress, h5features::version version)
-   : m_filename{filename}, m_groupname{group}, m_writer{init_writer(filename, group, overwrite, compress, version)}
+   : m_filename{filename},
+     m_groupname{group},
+     m_writer{init_writer(filename, group, overwrite, compress, version)}
 {}
 
 

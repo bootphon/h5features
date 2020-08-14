@@ -44,10 +44,19 @@ customize build options) and finally compile the project::
     cd build
     cmake ..
     make  # or "make -j4" to speed up compilation using 4 CPU cores
+    make install
+
+.. note::
+
+   By default *h5features* is installed to ``/usr/local`` on UNIX and
+   ``C://Program Files/h5features`` on Windows. To install it in another
+   directory use the following option to cmake::
+
+        cmake -DCMAKE_INSTALL_PREFIX=<installation path> ..
 
 
-Test suite
-~~~~~~~~~~
+Run the Test (optional)
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The compilation of the test suite is not included by default in the cmake
 configuration. To enable it, run it with the ``-DH5FEATURES_BUILD_TEST=ON``
@@ -58,8 +67,8 @@ option, then compile the project and execute the tests with ``make test``::
     make test
 
 
-Documentation
-~~~~~~~~~~~~~
+Build the documentation (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The compilation of the documentation (the one you are currently reading) is not
 included by default in the cmake configuration. To enable it, tun it with the
