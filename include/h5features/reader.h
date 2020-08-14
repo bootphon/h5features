@@ -14,7 +14,7 @@ namespace h5features
 /**
    \brief The reader class reads `h5features::item` from a HDF5 file
 
-   A writer is non-copyable and is attached to an HDF5 file and a group within
+   A reader is non-copyable and is attached to an HDF5 file and a group within
    this file.
  */
 class reader
