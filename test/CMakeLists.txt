@@ -21,7 +21,7 @@ function(add_h5features_test name)
   set(src_file ${CMAKE_CURRENT_SOURCE_DIR}/src/${name}.cpp)
 
   # inhibate an error in boost-1.71: -Werror=sign-compare
-  if(${Boost_VERSION_MINOR} EQUAL 71)
+  if(${Boost_VERSION_MINOR} GREATER_EQUAL 71)
     set_source_files_properties(
       ${src_file} PROPERTIES COMPILE_OPTIONS "-Wno-sign-compare")
   endif()
