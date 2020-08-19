@@ -15,9 +15,9 @@ namespace h5features
    An item is made of three components:
    - the features (`h5features::features`) consist a suite of vectors of
      constant dimension
-   - the timestamps (`h5features::times`) associates a start end stop time to
+   - the timestamps (`h5features::times`) associates a start and stop time to
      each features vector
-   - optionnal properties (`h5features::properties`) aached to the features,
+   - optionnal properties (`h5features::properties`) attached to the features,
      e.g. algorithm parameters or other attributes
 
      This class interfaces such an item between user code and an *h5features*
@@ -109,7 +109,7 @@ public:
       - The features and timestamps have the same size
 
       \param deep When true ensure that the features and timestamps are valid as
-      well
+      well by calling item.features().validate() and item.times().validate().
 
       \throw h5features::exception If the item is not valid
 
