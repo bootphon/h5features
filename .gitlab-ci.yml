@@ -1,0 +1,23 @@
+variables:
+  GIT_STRATEGY: fetch
+  GIT_SUBMODULE_STRATEGY: normal
+
+before_script:
+  - scl enable devtoolset-9 bash
+  - source /opt/rh/devtoolset-9/enable
+  - module load boost/1.73.0 hdf5/1.12.0
+  - mkdir -p build
+  - cd build
+
+test-linux:
+  stage: test
+  script:
+    - cmake3 -DH5FEATURES_BUILD_TEST=ON -DH5FEATURES_BUILD_DOC=OFF  -DH5FEATURES_BUILD_PYTHON=OFF ..
+    - make -j6
+    - make test
+
+documentation:
+  stage: deploy
+  script:
+    - cmake3 -DH5FEATURES_BUILD_DOC=ON ..
+    - make doc
