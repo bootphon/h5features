@@ -56,6 +56,7 @@ set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)  # Consistency
 set(HDF5_PREFER_PARALLEL ${HIGHFIVE_PARALLEL_HDF5})
 find_package(HDF5 1.10 REQUIRED)
 
+
 # HighFive (include Boost)
 set(HIGHFIVE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/HighFive)
 list(APPEND CMAKE_MODULE_PATH
@@ -100,6 +101,7 @@ if(H5FEATURES_BUILD_PYTHON)
   add_subdirectory(external/pybind11)
   add_subdirectory(python)
 endif()
+
 
 # execute the tests with "make" and run them with "make test"
 if(H5FEATURES_BUILD_TEST)

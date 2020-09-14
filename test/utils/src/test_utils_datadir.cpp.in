@@ -1,0 +1,14 @@
+#include "test_utils_datadir.h"
+#include <boost/filesystem.hpp>
+
+
+const std::string utils::data_directory("@H5FEATURES_TEST_DATA_DIR@");
+
+std::vector<std::string> utils::data_files()
+{
+   const auto directory = boost::filesystem::path(data_directory);
+   return {
+      (directory / "data.1.0.h5f").string(),
+      (directory / "data.1.1.h5f").string(),
+      (directory / "data.2.0.h5f").string()};
+}

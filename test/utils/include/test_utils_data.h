@@ -28,4 +28,4 @@ h5features::item generate_item(
    h5features::times::format format=h5features::times::format::interval);
 }
 
-#endif
+#endif  // H5FEATURES_TEST_UTILS_DATA_H

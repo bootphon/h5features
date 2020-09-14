@@ -4,12 +4,20 @@
 
 find_package(Boost 1.55 REQUIRED COMPONENTS unit_test_framework filesystem)
 
+# configure test data directory as test/data
+
+set(H5FEATURES_TEST_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/src/test_utils_datadir.cpp.in
+  ${CMAKE_CURRENT_BINARY_DIR}/utils/src/test_utils_datadir.cpp)
+
 # compile the test utils library
 
 add_library(h5features-test
-  utils/src/test_utils_capture.cpp
-  utils/src/test_utils_data.cpp
-  utils/src/test_utils_tmpdir.cpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/src/test_utils_capture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/src/test_utils_data.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/utils/src/test_utils_datadir.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/src/test_utils_tmpdir.cpp)
 target_include_directories(
   h5features-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils/include)
 target_link_libraries(
