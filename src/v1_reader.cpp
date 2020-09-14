@@ -5,6 +5,47 @@
 #include <sstream>
 
 
+/*
+ * Because of a bug in HighFive when reading string datasets wrote from h5py, we
+ * need a custom low-level function to read that. Here we assume the dataset has
+ * a single dimension.
+ */
+std::vector<std::string> read_string_dataset(const hdf5::DataSet dataset)
+{
+   // retrive the ID of the dataset
+   hid_t dataset_id = dataset.getId();
+
+   // retrieve the type of items
+   hid_t datatype_id = H5Tcopy(dataset.getDataType().getId());
+
+   // read the number of items stored (assuming a single dimension)
+   hsize_t nitems;
+   hid_t space_id = H5Dget_space(dataset_id);
+   H5Sget_simple_extent_dims(space_id, &nitems, NULL);
+
+   // allocate memory to store the items and read them
+   char** raw_data = new char*[nitems];
+   H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, raw_data);
+
+   // convert it to a vector of strings
+   std::vector<std::string> items(nitems);
+   for(size_t i = 0; i < nitems; ++i)
+   {
+      items[i] = std::string(raw_data[i]);
+   }
+
+   // deallocate raw data
+   H5Dvlen_reclaim(datatype_id, space_id, H5P_DEFAULT, raw_data);
+   delete[] raw_data;
+
+   H5Dclose(dataset_id);
+   H5Sclose(space_id);
+   H5Tclose(datatype_id);
+
+   return items;
+}
+
+
 h5features::v1::reader::reader(hdf5::Group&& group, h5features::version version)
    : h5features::details::reader_interface{std::move(group), version}
 {
@@ -25,7 +66,7 @@ h5features::v1::reader::reader(hdf5::Group&& group, h5features::version version)
 
    try
    {
-      m_group.getDataSet(items_dataset_name).read(m_items);
+      m_items = read_string_dataset(m_group.getDataSet(items_dataset_name));
       m_group.getDataSet(index_dataset_name).read(m_index);
    }
    catch(const hdf5::Exception& e)
