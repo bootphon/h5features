@@ -157,7 +157,7 @@ h5features::features h5features::v1::reader::read_features(const std::pair<std::
       dataset.select({position.first, 0}, {position.second - position.first, dim}).read(data.data());
       return {data, dim, false};
    }
-   catch(const hdf5::Exception& e)
+   catch(const std::exception& e)
    {
       throw h5features::exception(std::string("failed to read features: ") + e.what());
    }
@@ -166,22 +166,27 @@ h5features::features h5features::v1::reader::read_features(const std::pair<std::
 
 h5features::times h5features::v1::reader::read_times(const std::pair<std::size_t, std::size_t>& position) const
 {
-   std::string times_name = "times";
-   if(m_version == h5features::version::v1_1)
+   // retrieve the name of the times dataset according to file version
+   std::string times_name;
+   switch(m_version)
    {
-      times_name = "labels";
+      case h5features::version::v1_1:
+         times_name = "labels";
+         break;
+      default:
+         times_name = "times";
    }
 
    try
    {
       const auto dataset = m_group.getDataSet(times_name);
-      const auto dim = dataset.getDimensions()[1];
+      const auto dim = dataset.getDimensions().size();
       const auto size = position.second - position.first;
       std::vector<double> data(dim * size);
       dataset.select({position.first, 0}, {size, dim}).read(data.data());
       return {data, h5features::times::get_format(dim), false};
    }
-   catch(const hdf5::Exception& e)
+   catch(const std::exception& e)
    {
       throw h5features::exception(std::string("failed to read times: ") + e.what());
    }
