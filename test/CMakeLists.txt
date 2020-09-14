@@ -6,7 +6,18 @@ find_package(Boost 1.55 REQUIRED COMPONENTS unit_test_framework filesystem)
 
 # configure test data directory as test/data
 
-set(H5FEATURES_TEST_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+set(H5FEATURES_TEST_DATA_DIR ${CMAKE_CURRENT_BINARY_DIR}/data)
+
+file(
+  COPY "${CMAKE_CURRENT_SOURCE_DIR}/data/data.1.0.h5f"
+  DESTINATION ${H5FEATURES_TEST_DATA_DIR})
+file(
+  COPY "${CMAKE_CURRENT_SOURCE_DIR}/data/data.1.1.h5f"
+  DESTINATION ${H5FEATURES_TEST_DATA_DIR})
+file(
+  COPY "${CMAKE_CURRENT_SOURCE_DIR}/data/data.2.0.h5f"
+  DESTINATION ${H5FEATURES_TEST_DATA_DIR})
+
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/src/test_utils_datadir.cpp.in
   ${CMAKE_CURRENT_BINARY_DIR}/utils/src/test_utils_datadir.cpp)
