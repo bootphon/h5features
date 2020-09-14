@@ -220,11 +220,10 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_version, version_dat
       auto group = hdf5::File(filename, hdf5::File::ReadWrite).getGroup("group");
       BOOST_CHECK_THROW(h5features::read_version(group), h5features::exception);
       group.deleteAttribute("version");
-      BOOST_CHECK_EQUAL(h5features::version::v0_1, h5features::read_version(group));
+      BOOST_CHECK_THROW(h5features::read_version(group), h5features::exception);
    }
 
-   // cannot write: bad version (0.1 if "version" is absent, which is currently
-   // unsupported)
+   // cannot write: no version
    {
       BOOST_CHECK_THROW(
          h5features::writer(filename, "group", false, false, vers),

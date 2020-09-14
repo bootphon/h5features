@@ -57,6 +57,10 @@ h5features::v1::reader::reader(hdf5::Group&& group, h5features::version version)
          items_dataset_name = "items";
          index_dataset_name = "index";
          break;
+      case h5features::version::v1_0:
+         items_dataset_name = "files";
+         index_dataset_name = "file_index";
+         break;
       default:
          std::stringstream msg;
          msg << "unsupported h5features format version " << m_version;
