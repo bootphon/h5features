@@ -133,7 +133,7 @@ std::pair<std::size_t, std::size_t> h5features::v1::reader::get_item_position(
       throw h5features::exception("the requested item does not exist: " + name);
    }
 
-   // warn user if proerties are present
+   // warn user if properties are present
    if(m_group.exist("properties") and not ignore_properties)
    {
       std::cerr << "WARNING h5features v1.1: ignoring properties while reading item " << name << std::endl;

@@ -86,7 +86,9 @@ add_library(h5features
   ${PROJECT_SOURCE_DIR}/src/writer.cpp
   ${PROJECT_SOURCE_DIR}/src/writer_interface.cpp
   ${PROJECT_SOURCE_DIR}/src/v1_writer.cpp
-  ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp)
+  ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp
+  ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
+  ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp)
 target_include_directories(h5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
