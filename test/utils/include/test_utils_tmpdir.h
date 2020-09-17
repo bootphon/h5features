@@ -8,7 +8,7 @@ namespace utils
 {
 namespace fixture
 {
-/// A fixture to create and delete a temprary directory
+// A fixture to create and delete a temporary directory
 struct temp_directory
 {
    temp_directory();

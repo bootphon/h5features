@@ -9,7 +9,6 @@
 
 #include "test_utils_capture.h"
 #include "test_utils_data.h"
-#include "test_utils_datadir.h"
 #include "test_utils_ostream.hpp"
 #include "test_utils_tmpdir.h"
 
@@ -182,19 +181,4 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_rw_partial, version_
       BOOST_CHECK_EQUAL(item.features().data(), std::vector<double>({4, 5, 2, 1}));
       BOOST_CHECK_NO_THROW(item.validate());
    }
-}
-
-
-BOOST_AUTO_TEST_CASE(test_read_files)
-{
-   // std::vector<std::vector<h5features::item>> data;
-   // for(const auto file : utils::data_files())
-   // {
-   //    h5features::reader reader = h5features::reader(file, "features");
-   //    data.push_back(reader.read_all());
-   // }
-
-   // // make sure all files contains the same data
-   // BOOST_CHECK(std::equal(data.begin() + 1, data.end(), data.begin()));
-   BOOST_CHECK(true);
 }
