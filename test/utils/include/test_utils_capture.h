@@ -8,7 +8,8 @@
 namespace utils
 {
 /**
-   A helper class to capture std::cout or std::cerr during tests
+   A helper class to capture std::cout or std::cerr during tests and run checks
+   on their content.
 
  */
 class capture_stream
@@ -18,6 +19,7 @@ public:
    ~capture_stream();
 
    bool is_equal(const std::string& message, bool flush=true);
+   bool contains(const std::string& message, bool flush=true);
    bool is_empty(bool flush=true);
 
 private:
