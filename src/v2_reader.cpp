@@ -170,14 +170,15 @@ public:
 protected:
    bool m_ignore_properties;
 
-   h5features::properties read_props(const hdf5::Group& group) const
+   h5features::properties read_properties(const hdf5::Group& group) const
    {
-      h5features::properties props;
+      h5features::properties properties;
       if(not m_ignore_properties and group.exist("properties"))
       {
-         props = h5features::details::read_properties(group);
+         hdf5::Group properties_group = group.getGroup("properties");
+         properties = h5features::details::read_properties(properties_group);
       }
-      return props;
+      return properties;
    }
 
    virtual h5features::item concrete_read(const hdf5::Group& group, const std::string& name) const
@@ -186,7 +187,7 @@ protected:
          name,
          std::move(features_reader().read(group)),
          std::move(read_times(group)),
-         std::move(read_props(group)),
+         std::move(read_properties(group)),
          false};
    }
 };
@@ -214,7 +215,7 @@ private:
             name,
             std::move(features_partial_reader(indices).read(group)),
             std::move(times.select(indices.first, indices.second)),
-            std::move(read_props(group)),
+            std::move(read_properties(group)),
             false};
       }
       catch(const h5features::exception&)

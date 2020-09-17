@@ -34,6 +34,7 @@ private:
    void write_name(const h5features::item& item);
    void write_times(const h5features::item& item);
    void write_features(const h5features::item& item);
+   void write_properties(const h5features::item& item);
 };
 }
 }

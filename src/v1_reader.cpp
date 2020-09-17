@@ -1,4 +1,5 @@
 #include <h5features/details/v1_reader.h>
+#include <h5features/details/properties_reader.h>
 #include <h5features/exception.h>
 #include <algorithm>
 #include <iostream>
@@ -54,6 +55,7 @@ h5features::v1::reader::reader(hdf5::Group&& group, h5features::version version)
    switch(m_version)
    {
       case h5features::version::v1_1:
+      case h5features::version::v1_2:
          items_dataset_name = "items";
          index_dataset_name = "index";
          break;
@@ -92,14 +94,14 @@ std::vector<std::string> h5features::v1::reader::items() const
 h5features::item h5features::v1::reader::read_item(const std::string& name, bool ignore_properties) const
 {
    // retrieve the start and stop indices of the item in the index
-   const auto position = get_item_position(name, ignore_properties);
+   const auto position = get_item_position(name);
 
    // read the item
    return {
       name,
       {read_features(position)},
       {read_times(position)},
-      {},
+      {read_properties(name, ignore_properties)},
       false};
 }
 
@@ -108,7 +110,7 @@ h5features::item h5features::v1::reader::read_item(
    const std::string& name, double start, double stop, bool ignore_properties) const
 {
    // retrieve the start and stop indices of the item in the index
-   const auto position = get_item_position(name, ignore_properties);
+   const auto position = get_item_position(name);
 
    // retrieve the sub-position from times
    const auto times = read_times(position);
@@ -118,25 +120,18 @@ h5features::item h5features::v1::reader::read_item(
       name,
       read_features({position.first + subposition.first, position.first + subposition.second}),
       times.select(subposition.first, subposition.second),
-      {},
+      {read_properties(name, ignore_properties)},
       false};
 }
 
 
-std::pair<std::size_t, std::size_t> h5features::v1::reader::get_item_position(
-   const std::string& name, bool ignore_properties) const
+std::pair<std::size_t, std::size_t> h5features::v1::reader::get_item_position(const std::string& name) const
 {
    // ensure the item exists
    const auto item_iterator = std::find(m_items.begin(), m_items.end(), name);
    if(item_iterator == m_items.end())
    {
       throw h5features::exception("the requested item does not exist: " + name);
-   }
-
-   // warn user if properties are present
-   if(m_group.exist("properties") and not ignore_properties)
-   {
-      std::cerr << "WARNING h5features v1.1: ignoring properties while reading item " << name << std::endl;
    }
 
    const auto index = std::distance(m_items.begin(), item_iterator);
@@ -175,6 +170,7 @@ h5features::times h5features::v1::reader::read_times(const std::pair<std::size_t
    switch(m_version)
    {
       case h5features::version::v1_1:
+      case h5features::version::v1_2:
          times_name = "labels";
          break;
       default:
@@ -194,4 +190,27 @@ h5features::times h5features::v1::reader::read_times(const std::pair<std::size_t
    {
       throw h5features::exception(std::string("failed to read times: ") + e.what());
    }
+}
+
+
+h5features::properties h5features::v1::reader::read_properties(const std::string& name, bool ignore_properties) const
+{
+   // warn user if properties are present but not readable
+   if(m_version <= h5features::version::v1_1 and m_group.exist("properties") and not ignore_properties)
+   {
+      std::cerr << "WARNING h5features version " << m_version
+                << ": ignoring properties while reading item " << name << std::endl;
+   }
+
+   else if(m_group.exist("properties") and not ignore_properties)
+   {
+      const hdf5::Group properties_group = m_group.getGroup("properties");
+      if(properties_group.exist(name))
+      {
+         const hdf5::Group item_group = properties_group.getGroup(name);
+         return h5features::details::read_properties(item_group);
+      }
+   }
+
+   return {};
 }

@@ -81,42 +81,29 @@ void read_properties_vector(h5features::properties& props, const std::string& na
 
 h5features::properties h5features::details::read_properties(const hdf5::Group& group)
 {
-   // ensure the group "properties" exists in the group
-   if(not group.exist("properties"))
-   {
-      throw h5features::exception("object 'properties' does not exist in the group");
-   }
-   if(hdf5::ObjectType::Group != group.getObjectType("properties"))
-   {
-      throw h5features::exception("object 'properties' is not a subgroup in the group");
-   }
-
    // fill it with the read properties
-   h5features::properties props;
-
-   // the properties group to read
-   auto props_group = group.getGroup("properties");
+   h5features::properties properties;
 
    // read all the attributes (correspond to scalar values (bool, int, double) or strings)
-   for(const auto& name : props_group.listAttributeNames())
+   for(const auto& name : group.listAttributeNames())
    {
-      read_properties_scalar(props, name, props_group.getAttribute(name));
+      read_properties_scalar(properties, name, group.getAttribute(name));
    }
 
-   for(const auto& name : props_group.listObjectNames())
+   for(const auto& name : group.listObjectNames())
    {
-      switch(props_group.getObjectType(name))
+      switch(group.getObjectType(name))
       {
          // read dataset (corresponds to vector of int or double)
          case hdf5::ObjectType::Dataset:
          {
-            read_properties_vector(props, name, props_group.getDataSet(name));
+            read_properties_vector(properties, name, group.getDataSet(name));
             break;
          }
          // recusrsive read of nested properties
          case hdf5::ObjectType::Group:
          {
-            props.set(name, read_properties(props_group.getGroup(name)));
+            properties.set(name, read_properties(group.getGroup(name)));
             break;
          }
          default:
@@ -127,5 +114,5 @@ h5features::properties h5features::details::read_properties(const hdf5::Group& g
       }
    }
 
-   return props;
+   return properties;
 }

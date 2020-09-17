@@ -34,13 +34,16 @@ private:
    std::vector<std::size_t> m_index;
 
    // Retrieve position of an item in the index
-   std::pair<std::size_t, std::size_t> get_item_position(const std::string& name, bool ignore_properties) const;
+   std::pair<std::size_t, std::size_t> get_item_position(const std::string& name) const;
 
    // Loads features from its index position
    h5features::features read_features(const std::pair<std::size_t, std::size_t>& position) const;
 
    // Loads times from its index position
    h5features::times read_times(const std::pair<std::size_t, std::size_t>& position) const;
+
+   // Loads properties of an item from its name
+   h5features::properties read_properties(const std::string& name, bool ignore_properties) const;
 };
 }
 }

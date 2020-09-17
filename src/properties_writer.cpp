@@ -46,19 +46,18 @@ private:
 
 void h5features::details::write_properties(const h5features::properties& props, hdf5::Group& group, bool compress)
 {
-   // ensure the dataset "properties" does not exist in the group
-   if(group.exist("properties"))
+   // ensure the group is empty
+   if(group.getNumberObjects() != 0)
    {
-      throw h5features::exception("object 'properties' already exists in the group");
+      throw h5features::exception("the group is not empty");
    }
 
    try
    {
-      auto props_group = group.createGroup("properties");
       for(const auto& prop : props)
       {
          boost::apply_visitor(
-            properties_writer_visitor(props_group, prop.first, compress), prop.second);
+            properties_writer_visitor(group, prop.first, compress), prop.second);
       }
    }
    catch(const std::exception& e)

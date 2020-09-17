@@ -74,6 +74,16 @@ void write_times(const h5features::times& times, hdf5::Group& group, bool compre
 }
 
 
+void write_properties(const h5features::properties& properties, hdf5::Group& group, bool compress)
+{
+   if(properties.size() != 0)
+   {
+      hdf5::Group properties_group = group.createGroup("properties");
+      h5features::details::write_properties(properties, properties_group, compress);
+   }
+}
+
+
 h5features::v2::writer::writer(hdf5::Group&& group, bool compress, h5features::version version)
    : h5features::details::writer_interface{std::move(group), compress, version},
      m_dim_features{}, m_dim_times{}
@@ -110,10 +120,7 @@ void h5features::v2::writer::write(const h5features::item& item)
    hdf5::Group item_group = m_group.createGroup(item.name());
    write_times(item.times(), item_group, m_compress);
    write_features(item.features(), item_group, m_compress);
-   if(item.properties().size() != 0)
-   {
-      h5features::details::write_properties(item.properties(), item_group, m_compress);
-   }
+   write_properties(item.properties(), item_group, m_compress);
 }
 
 
