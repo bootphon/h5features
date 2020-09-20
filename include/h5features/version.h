@@ -7,7 +7,13 @@
 
 namespace h5features
 {
-/// The different h5features format versions
+/**
+   \brief The different h5features format versions
+
+   This is **not** the version of the h5features library but the available
+   versions of the underlying file format.
+
+ */
 enum class version{v1_0, v1_1, v1_2, v2_0};
 
 /// Returns the current (latest) version
@@ -15,14 +21,10 @@ constexpr version current_version = version::v2_0;
 
 
 /**
-   \brief Returns the version read from a given HDF5 `group`
+   \brief Look for a "version" attribute in the `group` and return its value.
 
-   Look for a "version" attribute in the `group` and return its value.
-
-   \param group The HDF5 group to read version from
-
-   \throw h5features::exception If the "version" attribute is not found or if it
-   is not a valid h5features file format version.
+   \throw h5features::exception If the "version" attribute is not found or is
+   not valid.
 
 */
 version read_version(const hdf5::Group& group);

@@ -12,13 +12,14 @@ namespace h5features
 /**
    \brief Handles the features of a single item (e.g. a speech signal)
 
-   An item is made of three components:
+   An item is made of 4 components:
+   - Its name,
    - the features (`h5features::features`) consist a suite of vectors of
-     constant dimension
+     constant dimension,
    - the timestamps (`h5features::times`) associates a start and stop time to
-     each features vector
+     each features vector,
    - optionnal properties (`h5features::properties`) attached to the features,
-     e.g. algorithm parameters or other attributes
+     e.g. algorithm parameters or other attributes.
 
      This class interfaces such an item between user code and an *h5features*
      file, supporting read and write operations.
@@ -76,7 +77,7 @@ public:
    /// Returns the dimension of the features
    std::size_t dim() const;
 
-   /// Returns the bumber of vectors in the features
+   /// Returns the number of vectors in the features
    std::size_t size() const noexcept;
 
    /// Returns the item's name

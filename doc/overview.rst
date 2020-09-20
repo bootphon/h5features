@@ -39,16 +39,61 @@ defined by the user. This can be used for instance to store metadata on the
 stored features (author, parameters, origin of the data, preprocessing, etc).
 
 
+The *h5features* file format
+----------------------------
+
+This section explains the structure of a h5features file as written by the
+library, and the difference between the implemented versions.
+
+.. note::
+
+   This is usual to use ``.h5f`` as extension for *h5features* files, but this
+   is not required by the library.
+
+
+HDF5 library
+~~~~~~~~~~~~
+
+The ``h5features`` library is built on the `HDF5 library and file format
+<https://www.hdfgroup.org/solutions/hdf5>`_. In few words, the HDF5 format is
+structured as a filesystem and is made of *groups* (similar to folders),
+*datasets* (similar to files) and *attributes* (metadata attached to groups and
+datasets). It allows efficient input/output operations on large datasets. In top
+of HDF5, we use the `HighFive C++ library
+<https://github.com/BlueBrain/HighFive>`_ which provides a high level and friendly
+interface to HDF5.
+
+
 File structure
---------------
+~~~~~~~~~~~~~~
 
-The HDF5 file format is structured as a filesystem and is made of *groups*
-(similar to folders), *datasets* (similar to files) and *attributes* (metadata
-attached to groups and datasets).
-
-Data stored in the ``h5features`` format is a *group* within a HDF5 file.
+The following diagram details the internal structure of a *h5features* file.
 
 .. figure:: static/file_format.png
-   :scale: 75%
+   :scale: 90%
 
-   The h5features format internal organization.
+   The h5features file format internal structure for 2.x version (left) and 1.x version (right).
+
+
+File format versions
+~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   Do not be confused between **library version** and **file format version**.
+   The details of library changes and versions are available in the *ChangeLog*
+   section.
+
+The compatibility grid below details for each *library* version which *file*
+version is supported for read and write operations.
+
+==================== =================== ====================
+*h5features* version file version (read) file version (write)
+==================== =================== ====================
+0.1                  0.1                 0.1
+1.0                  0.1, 1.0            0.1, 1.0
+1.1                  0.1, 1.0            1.0
+1.2.x                0.1, 1.0            1.0
+1.3.x                0.1, 1.0, 1.1       1.0, 1.1
+2.0.x                1.0, 1.1*, 1.2, 2.0 1.1*, 1.2, 2.0
+==================== =================== ====================

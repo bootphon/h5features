@@ -38,7 +38,8 @@ public:
       \param overwrite If true erase the file content if it is already existing.
       If false it will append new items to the existing group.
       \param compress When true, compress the data
-      \param version The version format to write
+      \param version The version of the file to write. Version 1.0 is **not
+      available** to write, only read.
 
       \throw h5features::exception When `overwrite` is true, if the `group`
       already exists in the file and the version is not supported. Or if the

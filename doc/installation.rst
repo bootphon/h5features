@@ -11,6 +11,8 @@ The following dependencies need to be installed in order to install ``h5features
 
 * `git <https://www.git-scm.com/>`_ to clone the source code.
 
+* The `cmake>=3.10 <https://cmake.org>`_ build system.
+
 * A recent C++ compiler supporting the ``C++17`` standard (tested with *gcc-9*).
 
 * The `hdf5>=1.10 <https://www.hdfgroup.org/solutions/hdf5>`_ library.
@@ -18,8 +20,6 @@ The following dependencies need to be installed in order to install ``h5features
 * The `boost>=1.55 <https://www.boost.org>`_ library.
 
 * A ``python3`` interpreter (to build the documentation and the Python API).
-
-* The `cmake>=3.10 <https://cmake.org>`_ build system.
 
 
 On Ubuntu install those dependencies with::
