@@ -1,4 +1,5 @@
 #include <h5features/details/v1_writer.h>
+#include <h5features/details/properties_writer.h>
 #include <algorithm>
 #include <iostream>
 
@@ -39,11 +40,12 @@ void h5features::v1::writer::write(const h5features::item& item)
       }
    }
 
-   // warn if properties because they cannot be wrote
-   if(item.has_properties())
+   // on v1_0 or v1.1 warn if properties because they cannot be wrote
+   if(m_version <= h5features::version::v1_1 and item.has_properties())
    {
-      std::cerr << "WARNING h5features v" << m_version << ": ignoring properties while writing item "
-                << item.name() << std::endl;
+      std::cerr << "WARNING h5features version " << m_version
+                << ": ignoring properties while writing item " << item.name()
+                << " (use version 1.2 or greater to save properties)" << std::endl;
    }
 
    // finally append the item to existing data
@@ -53,6 +55,7 @@ void h5features::v1::writer::write(const h5features::item& item)
       write_name(item);
       write_times(item);
       write_features(item);
+      write_properties(item);
    }
    catch(const hdf5::Exception& e)
    {
@@ -254,4 +257,24 @@ void h5features::v1::writer::write_features(const h5features::item& item)
    // append the features to the dataset
    dataset.select({size[0] - item.size(), 0}, {item.size(), item.dim()}).write_raw(
       item.features().data().data());
+}
+
+
+void h5features::v1::writer::write_properties(const h5features::item& item)
+{
+   if (item.has_properties())
+   {
+      // retrieve the "properties" group, creating it if not existing
+      if(not m_group.exist("properties"))
+      {
+         m_group.createGroup("properties");
+      }
+      hdf5::Group properties_group = m_group.getGroup("properties");
+
+      // create the properties group for that item
+      hdf5::Group item_group = properties_group.createGroup(item.name());
+
+      // write its properties within it
+      h5features::details::write_properties(item.properties(), item_group, m_compress);
+   }
 }

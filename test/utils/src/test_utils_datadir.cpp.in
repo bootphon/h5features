@@ -1,0 +1,17 @@
+#include "test_utils_datadir.h"
+#include <boost/filesystem.hpp>
+
+
+utils::fixture::data_directory::data_directory()
+   // this is configured by cmake during the build process, points to test/data
+   : data_dir{"@H5FEATURES_TEST_DATA_DIR@"}
+{
+   const auto directory = boost::filesystem::path(data_dir);
+   data_files.push_back((directory / "data.1.0.h5f").string());
+   data_files.push_back((directory / "data.1.1.h5f").string());
+   data_files.push_back((directory / "data.2.0.h5f").string());
+}
+
+
+utils::fixture::data_directory::~data_directory()
+{}

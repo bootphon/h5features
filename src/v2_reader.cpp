@@ -1,5 +1,5 @@
 #include <h5features/details/v2_reader.h>
-
+#include <h5features/details/properties_reader.h>
 
 
 class features_reader
@@ -124,137 +124,6 @@ h5features::times read_times(const hdf5::Group& group)
 }
 
 
-
-void read_properties_scalar(h5features::properties& props, const std::string& name, const hdf5::Attribute& attribute)
-{
-   switch(attribute.getDataType().getClass())
-   {
-      case hdf5::DataTypeClass::Integer:
-      {
-         // boolean are stored as 8 bits integers
-         if(attribute.getDataType().getSize() == 1)
-         {
-            bool value;
-            attribute.read(value);
-            props.set(name, value);
-         }
-         else
-         {
-            int value;
-            attribute.read(value);
-            props.set(name, value);
-         }
-         break;
-      }
-      case hdf5::DataTypeClass::Float:
-      {
-         double value;
-         attribute.read(value);
-         props.set(name, value);
-         break;
-      }
-      case hdf5::DataTypeClass::String:
-      {
-         std::string value;
-         attribute.read(value);
-         props.set(name, value);
-         break;
-      }
-      default:
-      {
-         throw h5features::exception("failed to read properties");
-         break;
-      }
-   }
-}
-
-
-void read_properties_vector(h5features::properties& props, const std::string& name, const hdf5::DataSet& dataset)
-{
-   switch(dataset.getDataType().getClass())
-   {
-      case hdf5::DataTypeClass::Integer:
-      {
-         std::vector<int> value;
-         dataset.read(value);
-         props.set(name, value);
-         break;
-      }
-      case hdf5::DataTypeClass::Float:
-      {
-         std::vector<double> value;
-         dataset.read(value);
-         props.set(name, value);
-         break;
-      }
-      case hdf5::DataTypeClass::String:
-      {
-         std::vector<std::string> value;
-         dataset.read(value);
-         props.set(name, value);
-         break;
-      }
-      default:
-      {
-         throw h5features::exception("failed to read properties");
-         break;
-      }
-   }
-}
-
-
-h5features::properties read_properties(const hdf5::Group& group)
-{
-   // ensure the group "properties" exists in the group
-   if(not group.exist("properties"))
-   {
-      throw h5features::exception("object 'properties' does not exist in the group");
-   }
-   if(hdf5::ObjectType::Group != group.getObjectType("properties"))
-   {
-      throw h5features::exception("object 'properties' is not a subgroup in the group");
-   }
-
-   // fill it with the read properties
-   h5features::properties props;
-
-   // the properties group to read
-   auto props_group = group.getGroup("properties");
-
-   // read all the attributes (correspond to scalar values (bool, int, double) or strings)
-   for(const auto& name : props_group.listAttributeNames())
-   {
-      read_properties_scalar(props, name, props_group.getAttribute(name));
-   }
-
-   for(const auto& name : props_group.listObjectNames())
-   {
-      switch(props_group.getObjectType(name))
-      {
-         // read dataset (corresponds to vector of int or double)
-         case hdf5::ObjectType::Dataset:
-         {
-            read_properties_vector(props, name, props_group.getDataSet(name));
-            break;
-         }
-         // recusrsive read of nested properties
-         case hdf5::ObjectType::Group:
-         {
-            props.set(name, read_properties(props_group.getGroup(name)));
-            break;
-         }
-         default:
-         {
-            throw h5features::exception("failed to read properties");
-            break;
-         }
-      }
-   }
-
-   return props;
-}
-
-
 class item_reader
 {
 public:
@@ -301,14 +170,15 @@ public:
 protected:
    bool m_ignore_properties;
 
-   h5features::properties read_props(const hdf5::Group& group) const
+   h5features::properties read_properties(const hdf5::Group& group) const
    {
-      h5features::properties props;
+      h5features::properties properties;
       if(not m_ignore_properties and group.exist("properties"))
       {
-         props = read_properties(group);
+         hdf5::Group properties_group = group.getGroup("properties");
+         properties = h5features::details::read_properties(properties_group);
       }
-      return props;
+      return properties;
    }
 
    virtual h5features::item concrete_read(const hdf5::Group& group, const std::string& name) const
@@ -317,7 +187,7 @@ protected:
          name,
          std::move(features_reader().read(group)),
          std::move(read_times(group)),
-         std::move(read_props(group)),
+         std::move(read_properties(group)),
          false};
    }
 };
@@ -345,7 +215,7 @@ private:
             name,
             std::move(features_partial_reader(indices).read(group)),
             std::move(times.select(indices.first, indices.second)),
-            std::move(read_props(group)),
+            std::move(read_properties(group)),
             false};
       }
       catch(const h5features::exception&)

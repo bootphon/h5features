@@ -24,7 +24,7 @@ h5features documentation
    installation
    api_python
    api_cpp
-
+   changelog
 
 
 Licence and copyright

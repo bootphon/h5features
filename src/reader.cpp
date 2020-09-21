@@ -23,7 +23,9 @@ std::unique_ptr<h5features::details::reader_interface> init_reader(
             return std::make_unique<h5features::v2::reader>(std::move(group), version);
             break;
          }
+         case h5features::version::v1_2:
          case h5features::version::v1_1:
+         case h5features::version::v1_0:
          {
             return std::make_unique<h5features::v1::reader>(std::move(group), version);
             break;
@@ -31,7 +33,7 @@ std::unique_ptr<h5features::details::reader_interface> init_reader(
          default:
          {
             std::stringstream msg;
-            msg << "unsupported h5features version " << version << "(only 1.1 or higher are supported)";
+            msg << "unsupported h5features version " << version;
             throw h5features::exception(msg.str());
             break;
          }

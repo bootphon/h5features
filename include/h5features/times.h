@@ -154,7 +154,7 @@ public:
    std::pair<std::size_t, std::size_t> get_indices(double start, double stop) const;
 
    /**
-      \ brief Returns a subset of those timestamps from `start` to `stop`
+      \brief Returns a subset of those timestamps from `start` to `stop`
 
       \param start The first index of the returned times
       \param stop The last index of the returned times

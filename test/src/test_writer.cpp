@@ -14,7 +14,18 @@
 
 auto version_dataset = boost::unit_test::data::make({
       h5features::version::v1_1,
+      h5features::version::v1_2,
       h5features::version::v2_0});
+
+
+BOOST_FIXTURE_TEST_CASE(test_write_1_0, utils::fixture::temp_directory)
+{
+   // writing v1.0 is not supported
+   const auto filename = (tmpdir / "test.h5").string();
+   BOOST_CHECK_THROW(
+      h5features::writer(filename, "group", false, false, h5features::version::v1_0),
+      h5features::exception);
+}
 
 
 BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_simple, version_dataset, vers)
@@ -52,10 +63,10 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
       utils::capture_stream captured(std::cerr);
       writer.write(item);
 
-      if(vers != h5features::version::v2_0)
+      if(vers == h5features::version::v1_1)
       {
          BOOST_CHECK(
-            captured.is_equal("WARNING h5features v1.1: ignoring properties while writing item test\n", false));
+            captured.is_equal("WARNING h5features version 1.1: ignoring properties while writing item test (use version 1.2 or greater to save properties)\n", false));
       }
    }
 
@@ -64,7 +75,7 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
       auto group = file.getGroup("group");
 
       BOOST_CHECK_EQUAL(h5features::read_version(group), vers);
-      if(vers == h5features::version::v1_1)
+      if(vers < h5features::version::v2_0)
       {
          BOOST_CHECK(group.exist("index"));
          BOOST_CHECK(group.exist("items"));
@@ -98,7 +109,7 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_write, version_datas
       auto group = file.getGroup("group");
 
       BOOST_CHECK_EQUAL(h5features::read_version(group), vers);
-      if(vers != h5features::version::v1_1)
+      if(vers >= h5features::version::v2_0)
       {
          BOOST_CHECK(group.exist("item3"));
          BOOST_CHECK(group.exist("item3/features"));
@@ -177,7 +188,7 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_flag, version_datase
       BOOST_CHECK(not hdf5::File(filename, hdf5::File::ReadOnly).exist("group2"));
 
       std::string groupname = "group/item";
-      if(vers == h5features::version::v1_1)
+      if(vers < h5features::version::v2_0)
       {
          groupname = "group/index";
       }
@@ -201,7 +212,7 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_version, version_dat
       h5features::writer(filename, "group", true, true, vers).write(item);
 
       std::string groupname = "group/item";
-      if(vers == h5features::version::v1_1)
+      if(vers < h5features::version::v2_0)
       {
          groupname = "group/index";
       }
@@ -220,11 +231,10 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_version, version_dat
       auto group = hdf5::File(filename, hdf5::File::ReadWrite).getGroup("group");
       BOOST_CHECK_THROW(h5features::read_version(group), h5features::exception);
       group.deleteAttribute("version");
-      BOOST_CHECK_EQUAL(h5features::version::v0_1, h5features::read_version(group));
+      BOOST_CHECK_THROW(h5features::read_version(group), h5features::exception);
    }
 
-   // cannot write: bad version (0.1 if "version" is absent, which is currently
-   // unsupported)
+   // cannot write: no version
    {
       BOOST_CHECK_THROW(
          h5features::writer(filename, "group", false, false, vers),

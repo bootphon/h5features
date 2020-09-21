@@ -15,6 +15,7 @@
 
 auto version_dataset = boost::unit_test::data::make({
       h5features::version::v1_1,
+      h5features::version::v1_2,
       h5features::version::v2_0});
 
 
@@ -55,10 +56,10 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_rw, version_dataset,
       h5features::writer(filename, "group", true, true, vers).write(
          items.begin(), items.end());
 
-      if(vers != h5features::version::v2_0)
+      if(vers <= h5features::version::v1_1)
       {
          BOOST_CHECK(
-            captured.is_equal("WARNING h5features v1.1: ignoring properties while writing item item1\n", false));
+            captured.contains("ignoring properties while writing item", false));
       }
    }
 
@@ -68,23 +69,49 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_rw, version_dataset,
    BOOST_CHECK_EQUAL(reader.items()[0], "item1");
    BOOST_CHECK_EQUAL(reader.items()[1], "item2");
 
-   BOOST_CHECK_EQUAL(reader.read_item("item2"), items[1]);
-
-   // properties are ignored in v1.1
-   const auto item1 = reader.read_item("item1");
-   if(vers == h5features::version::v1_1)
    {
-      BOOST_CHECK_NE(item1, items[0]);
-      BOOST_CHECK_NE(reader.read_all(), items);
+      utils::capture_stream captured(std::cerr);
+      BOOST_CHECK_EQUAL(reader.read_item("item2"), items[1]);
+      if(vers == h5features::version::v1_1)
+      {
+         BOOST_CHECK(captured.contains("ignoring properties while reading"));
+      }
+      else
+      {
+         BOOST_CHECK(captured.is_empty());
+      }
+   }
 
+   {
+      // read item1 but ignore properties
+      const auto item1 = reader.read_item("item1", true);
+      BOOST_CHECK_NE(item1, items[0]);
       BOOST_CHECK_EQUAL(item1.times(), items[0].times());
       BOOST_CHECK_EQUAL(item1.features(), items[0].features());
-      BOOST_CHECK_NE(item1.properties(), items[0].properties());
+      BOOST_CHECK_EQUAL(false, item1.has_properties());
    }
-   else
+
    {
-      BOOST_CHECK_EQUAL(item1, items[0]);
-      BOOST_CHECK_EQUAL(reader.read_all(), items);
+      // read item1 with properties (properties are ignored in v1.1)
+      utils::capture_stream captured(std::cerr);
+      const auto item1 = reader.read_item("item1", false);
+      if(vers == h5features::version::v1_1)
+      {
+         BOOST_CHECK(captured.contains("ignoring properties while reading item"));
+         BOOST_CHECK_NE(item1, items[0]);
+         BOOST_CHECK_NE(reader.read_all(), items);
+
+         BOOST_CHECK_EQUAL(item1.times(), items[0].times());
+         BOOST_CHECK_EQUAL(item1.features(), items[0].features());
+         BOOST_CHECK_EQUAL(false, item1.has_properties());
+         BOOST_CHECK_NE(item1.properties(), items[0].properties());
+      }
+      else
+      {
+         BOOST_CHECK(captured.is_empty());
+         BOOST_CHECK_EQUAL(item1, items[0]);
+         BOOST_CHECK_EQUAL(reader.read_all(), items);
+      }
    }
 }
 

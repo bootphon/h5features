@@ -17,8 +17,7 @@ namespace h5features
    Properties are a set of `(name, value)` pairs. It can be used to store
    attributes attached to features, such as generation parameters.
 
-   - A `h5features::properties` instance is created empty or using the `read()`
-     static method.
+   - A `h5features::properties` instance is created empty.
    - A `(name, value)` pair is added to it with `set()` and accessed with
      `get()`.
    - The `name` must be a `std::string`.

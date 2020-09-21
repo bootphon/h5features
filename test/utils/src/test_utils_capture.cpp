@@ -20,6 +20,19 @@ bool utils::capture_stream::is_equal(const std::string& message, bool flush)
 }
 
 
+bool utils::capture_stream::contains(const std::string& message, bool flush)
+{
+   const std::string stream = m_test_stream.str();
+
+   if(flush)
+   {
+      m_test_stream.flush();
+   }
+
+   return stream.find(message) != std::string::npos;
+}
+
+
 bool utils::capture_stream::is_empty(bool flush)
 {
    return m_test_stream.is_empty(flush);

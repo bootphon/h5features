@@ -11,6 +11,7 @@ inline std::unique_ptr<h5features::details::writer_interface> get_writer(
    switch(version)
    {
       case h5features::version::v1_1:
+      case h5features::version::v1_2:
          return std::make_unique<h5features::v1::writer>(std::move(group), compress, version);
          break;
       case h5features::version::v2_0:

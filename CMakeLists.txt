@@ -56,6 +56,7 @@ set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)  # Consistency
 set(HDF5_PREFER_PARALLEL ${HIGHFIVE_PARALLEL_HDF5})
 find_package(HDF5 1.10 REQUIRED)
 
+
 # HighFive (include Boost)
 set(HIGHFIVE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/HighFive)
 list(APPEND CMAKE_MODULE_PATH
@@ -85,7 +86,9 @@ add_library(h5features
   ${PROJECT_SOURCE_DIR}/src/writer.cpp
   ${PROJECT_SOURCE_DIR}/src/writer_interface.cpp
   ${PROJECT_SOURCE_DIR}/src/v1_writer.cpp
-  ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp)
+  ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp
+  ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
+  ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp)
 target_include_directories(h5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
@@ -100,6 +103,7 @@ if(H5FEATURES_BUILD_PYTHON)
   add_subdirectory(external/pybind11)
   add_subdirectory(python)
 endif()
+
 
 # execute the tests with "make" and run them with "make test"
 if(H5FEATURES_BUILD_TEST)
