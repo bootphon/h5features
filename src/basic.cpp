@@ -122,25 +122,43 @@ void write_cpp()
    writer.write(item3);
 }
 
+
 int main()
 {
-//   read_v11();
-   //write_cpp();
+   const h5features::item item1{
+      "item1",
+      {{0, 1, 0, 1, 2, 0, 2, 3, 0}, 3},
+      {{0, 1, 1, 2, 2, 3}, h5features::times::format::interval}};
 
-   const auto item = generate_item("toto", 5, 2, false);
+   const h5features::item item2{
+      "item2",
+      {{10.1, 10, 10, 5.2, 5, 5, 1.3, 2, 3}, 3},
+      {{0, 1, 0.5, 1.5, 1, 2}, h5features::times::format::interval}};
+
+   const h5features::item item3{
+      "item3",
+      {{0, 1, 0, 1, 2, 0}, 3},
+      {{0, 1, 1, 2}, h5features::times::format::interval}};
+
+   std::cout << item1.name() << " " << item1.size() << " " << item1.dim() << std::endl;
+   std::cout << item2.name() << " " << item2.size() << " " << item2.dim() << std::endl;
+   std::cout << item3.name() << " " << item3.size() << " " << item3.dim() << std::endl;
 
    {
       h5features::writer writer("./test.h5", "features", true, true, h5features::version::v1_1);
-      writer.write(item);
+      writer.write(item1);
+      writer.write(item2);
+      writer.write(item3);
       std::cout << "wrote test.h5" << std::endl;
    }
 
    {
       auto reader = h5features::reader("./test.h5", "features");
-      std::cout << "get reader: " << reader.items() << std::endl;
+      std::cout << "read test.h5, items are: " << reader.items() << std::endl;
 
-      auto item2 = reader.read_item("toto");
-      std::cout << (item2 == item) << std::endl;
+      auto read1 = reader.read_item("item1", 0, 1);
+      std::cout << read1.times().data() << std::endl;
+      std::cout << read1.features().data() << std::endl;
    }
 
    return 0;
