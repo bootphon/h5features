@@ -51,8 +51,12 @@ library, and the difference between the implemented versions.
    is not required by the library.
 
 
-HDF5 library
-~~~~~~~~~~~~
+.. warning::
+
+   Do not be confused between **library version** and **file format version**.
+   The details of library changes and versions are available in the *ChangeLog*
+   section.
+
 
 The ``h5features`` library is built on the `HDF5 library and file format
 <https://www.hdfgroup.org/solutions/hdf5>`_. In few words, the HDF5 format is
@@ -63,37 +67,49 @@ of HDF5, we use the `HighFive C++ library
 <https://github.com/BlueBrain/HighFive>`_ which provides a high level and friendly
 interface to HDF5.
 
+Several versions of the *h5features* file format have been implemented:
 
-File structure
-~~~~~~~~~~~~~~
+* **file format 0.1**
 
-The following diagram details the internal structure of a *h5features* file.
+  Composed of the following datasets: ``features``, ``times``, ``files``,
+  ``file_index``. All features from differents items are stacked in the same
+  dataset and indexed. There is no ``version`` attribute nor properties support.
+  Timestamps must be 1D.
 
-.. figure:: static/file_format.png
-   :scale: 90%
+* **file format 1.0**
 
-   The h5features file format internal structure for 2.x version (left) and 1.x version (right).
+  Same as 0.1 with a ``version`` attribute added.
 
+* **file format 1.1**
 
-File format versions
-~~~~~~~~~~~~~~~~~~~~
+  The structure evolved from *group/[files, times, features, file_index]* to
+  *group/[items, labels, features, index]*. Support for 2d timestamps. Support
+  for ``properties``, stored as a string attribute (implemented with Python
+  pickle module).
 
-.. note::
+* **file format 1.2**
 
-   Do not be confused between **library version** and **file format version**.
-   The details of library changes and versions are available in the *ChangeLog*
-   section.
+  Same as 1.1 with a new and incompatible implementation of properties, stored
+  as a group.
 
-The compatibility grid below details for each *library* version which *file*
-version is supported for read and write operations.
+* **file format 2.0**
 
-==================== =================== ====================
-*h5features* version file version (read) file version (write)
-==================== =================== ====================
-0.1                  0.1                 0.1
-1.0                  0.1, 1.0            0.1, 1.0
-1.1                  0.1, 1.0            1.0
-1.2.x                0.1, 1.0            1.0
-1.3.x                0.1, 1.0, 1.1       1.0, 1.1
-2.0.x                1.0, 1.1*, 1.2, 2.0 1.1*, 1.2, 2.0
-==================== =================== ====================
+  Complete rewrite of the file structure. Each item is stored in his own group
+  and includes the following datasets and attributes: ``features``, ``times``,
+  ``name`` and ``properties``. This implementation is a little bit slower than
+  the 1.x version (especially for uncompressed data) but the structure is by far
+  more explicit (no more stacked data nor index).
+
+* The compatibility grid below details for each *library* version which *file*
+  version is supported for read and write operations:
+
+  ==================== =================== ====================
+  *h5features* version file version (read) file version (write)
+  ==================== =================== ====================
+  0.1                  0.1                 0.1
+  1.0                  0.1, 1.0            0.1, 1.0
+  1.1                  0.1, 1.0            1.0
+  1.2.x                0.1, 1.0            1.0
+  1.3.x                0.1, 1.0, 1.1       1.0, 1.1
+  2.0.x                1.0, 1.1*, 1.2, 2.0 1.1*, 1.2, 2.0
+  ==================== =================== ====================
