@@ -10,4 +10,4 @@ h5features
 
 * It is implemented in **C++** and exposes **Python bindings**.
 
-* See the complete documentation at https://docs.syntheticlearner.net/h5features.
+* See the complete documentation at https://docs.cognitive-ml.fr/h5features.
