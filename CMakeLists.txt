@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 #######################################################################
@@ -102,6 +102,7 @@ target_link_libraries(basic h5features)
 
 
 if(H5FEATURES_BUILD_PYTHON)
+  message(WARNING "h5features Python wrapper is still in development, do not expect anything functional")
   add_subdirectory(external/pybind11)
   add_subdirectory(python)
 endif()

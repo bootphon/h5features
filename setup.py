@@ -63,7 +63,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
 setuptools.setup(
     name='h5features',
-    setup_requires=['cmake>=3.10'],
+    setup_requires=['cmake>=3.12'],
     ext_modules=[CMakeExtension('h5features')],
     cmdclass={'build_ext': CMakeBuild}
 )

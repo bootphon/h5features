@@ -11,7 +11,7 @@ The following dependencies need to be installed in order to install ``h5features
 
 * `git <https://www.git-scm.com/>`_ to clone the source code.
 
-* The `cmake>=3.10 <https://cmake.org>`_ build system.
+* The `cmake>=3.12 <https://cmake.org>`_ build system.
 
 * A recent C++ compiler supporting the ``C++17`` standard (tested with *gcc-9*).
 
@@ -24,7 +24,7 @@ The following dependencies need to be installed in order to install ``h5features
 
 On Ubuntu install those dependencies with::
 
-    sudo apt install git build-essential libhdf5-dev libboost-dev python3 cmake
+    sudo apt install git build-essential libhdf5-dev libboost-all-dev python3 cmake
 
 
 Compilation and installation
