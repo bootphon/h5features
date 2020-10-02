@@ -50,24 +50,18 @@ option(H5FEATURES_BUILD_DOC "Builds the documentation" OFF)
 # find dependencies
 #######################################################################
 
+
 # HighFive (include Boost)
 if(NOT DEFINED HIGHFIVE_SOURCE_DIR)
+  set(HIGHFIVE_USE_BOOST ON)
+  set(HIGHFIVE_EXAMPLES OFF)
+  set(HIGHFIVE_UNIT_TESTS OFF)
+  set(HIGHFIVE_USE_INSTALL_DEPS YES)
+  set(HIGHFIVE_DOC OFF)
+
   set(HIGHFIVE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/HighFive)
+  add_subdirectory(${HIGHFIVE_SOURCE_DIR})
 endif()
-
-# HDF5 (require 1.10 minimum, after
-# ${HIGHFIVE_SOURCE_DIR}/CMake/HighFiveTargetDeps.cmake)
-set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)  # Consistency
-set(HDF5_PREFER_PARALLEL OFF)
-find_package(HDF5 1.10 REQUIRED)
-
-list(APPEND CMAKE_MODULE_PATH
-  ${HIGHFIVE_SOURCE_DIR}/CMake
-  ${HIGHFIVE_SOURCE_DIR}/CMake/portability
-  ${HIGHFIVE_SOURCE_DIR}/CMake/config)
-set(HIGHFIVE_USE_BOOST ON)
-include(${HIGHFIVE_SOURCE_DIR}/CMake/HighFiveTargetDeps.cmake)
-include(${HIGHFIVE_SOURCE_DIR}/CMake/HighFiveTargetExport.cmake)
 
 
 #######################################################################
@@ -96,13 +90,15 @@ target_include_directories(h5features PUBLIC
   ${HIGHFIVE_SOURCE_DIR}/include)
 target_link_libraries(h5features HighFive)
 
+# install the headers and library
+install(TARGETS h5features
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-add_executable(basic ${PROJECT_SOURCE_DIR}/src/basic.cpp)
-target_link_libraries(basic h5features)
 
-
+# include compilation of Python bindings
 if(H5FEATURES_BUILD_PYTHON)
-  message(WARNING "h5features Python wrapper is still in development, do not expect anything functional")
+  message(STATUS "h5features Python wrapper is in development, do not expect anything usefull")
   add_subdirectory(external/pybind11)
   add_subdirectory(python)
 endif()

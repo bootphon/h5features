@@ -47,7 +47,8 @@ public:
 
     */
    writer(const std::string& filename, const std::string& group="features",
-          bool overwrite=false, bool compress=true, h5features::version version=h5features::current_version);
+          bool overwrite=false, bool compress=true,
+          h5features::version version=h5features::current_version);
 
    /**
       \brief Writes a `h5features::item` to disk
