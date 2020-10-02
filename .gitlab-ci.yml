@@ -22,6 +22,6 @@ documentation:
     - make doc
     - ssh cognitive-ml.fr "rm -rf /var/www/docs.cognitive-mml.fr/h5features/*"
     - scp -r doc/html/* cognitive-ml.fr:/var/www/docs.cognitive-ml.fr/h5features
-  # only:
-  #   refs:
-  #     - master
+  only:
+    refs:
+      - master
