@@ -65,5 +65,7 @@ setuptools.setup(
     name='h5features',
     setup_requires=['cmake>=3.12'],
     ext_modules=[CMakeExtension('h5features')],
-    cmdclass={'build_ext': CMakeBuild}
+    cmdclass={'build_ext': CMakeBuild},
+    zip_safe=False,
+    package_data={'':['h5features.so']}
 )

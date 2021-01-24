@@ -100,7 +100,7 @@ install(TARGETS h5features
 if(H5FEATURES_BUILD_PYTHON)
   message(STATUS "h5features Python wrapper is in development, do not expect anything usefull")
   add_subdirectory(external/pybind11)
-  add_subdirectory(python)
+  add_subdirectory(python_wrapper)
 endif()
 
 

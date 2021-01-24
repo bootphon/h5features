@@ -2,3 +2,6 @@
 *.so
 .eggs
 *.egg-info/
+*/__pycache__
+/.vscode
+/dist
