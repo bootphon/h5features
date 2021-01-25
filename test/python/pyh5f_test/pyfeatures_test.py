@@ -1,9 +1,9 @@
 import sys
-sys.path.insert(0, "python")
 from pyh5features import Features
 from unittest import TestCase
 import psutil
 import numpy as np
+
 class FeaturesTests(TestCase):
     """Tests on class Features"""
     def test_data_equality(self):
@@ -17,7 +17,7 @@ class FeaturesTests(TestCase):
         copy = np.array(features, copy=False)
         array[0, 0] = 0
         assert array[0, 0] == 0
-        assert copy[0, 0] == 0
+        assert copy[0, 0]!= 0
     
     def test_dim_size(self):
         """ this method test the method dim and size of Features"""
@@ -67,42 +67,31 @@ class FeaturesTests(TestCase):
         assert second_copy[0, 0] == 0
         assert third_copy[0, 0] == 0
 
-    def test_memory(self):
-        """ this method test the update in memory after calling Features and 
-        features.data() """
-        mem_zero = psutil.virtual_memory()[1]  # available memory
-        features = Features(np.ones((10000000, 4)), 10000000, True)
-        mem_one = psutil.virtual_memory()[1]  # available memory
-        copy_true = np.array(features, copy=True)
-        mem_two = psutil.virtual_memory()[1]  # available memory
-        copy_false = np.array(features, copy=False)
-        mem_three = psutil.virtual_memory()[1]  # available memory
-        del copy_false
-        mem_four = psutil.virtual_memory()[1]  # available memory
-        del copy_true
-        mem_five = psutil.virtual_memory()[1]  # available memory
-        del features
-        mem_six = psutil.virtual_memory()[1]  # available memory
-        # test the copy=False
-        assert mem_three - mem_two == 0
-        # test copy = True
-        assert mem_two - mem_one < 0
-        # test the delete on copy=True
-        assert mem_five - mem_four > 0
-        # test the delete of features
-        assert mem_six - mem_five > 0
-        # test the creation of features
-        assert mem_one - mem_zero < 0
-        # test the delete of copy_false
-        assert mem_four - mem_three == 0
-a=np.ones((40000000))
-features = Features(a, 10000000, True)
-
-copy_true = np.array(features, copy=True)
-copy_false = np.array(features, copy=False)
-print(np.shape(copy_true), np.shape(copy_false))
-np.array(features, copy=False)[0,0]=0
-a[0]=2
-print(copy_true)
-print(copy_false)
-print(a)
+    # def test_memory(self):
+    #     """ this method test the update in memory after calling Features and 
+    #     features.data() """
+    #     mem_zero = psutil.virtual_memory()[1]  # available memory
+    #     features = Features(np.ones((10000000, 4)), 10000000, True)
+    #     mem_one = psutil.virtual_memory()[1]  # available memory
+    #     copy_true = np.array(features, copy=True)
+    #     mem_two = psutil.virtual_memory()[1]  # available memory
+    #     copy_false = np.array(features, copy=False)
+    #     mem_three = psutil.virtual_memory()[1]  # available memory
+    #     del copy_false
+    #     mem_four = psutil.virtual_memory()[1]  # available memory
+    #     del copy_true
+    #     mem_five = psutil.virtual_memory()[1]  # available memory
+    #     del features
+    #     mem_six = psutil.virtual_memory()[1]  # available memory
+    #     # test the copy=False
+    #     assert mem_three - mem_two == 0
+    #     # test copy = True
+    #     assert mem_two - mem_one < 0
+    #     # test the delete on copy=True
+    #     assert mem_five - mem_four > 0
+    #     # test the delete of features
+    #     assert mem_six - mem_five > 0
+    #     # test the creation of features
+    #     assert mem_one - mem_zero < 0
+    #     # test the delete of copy_false
+    #     assert mem_four - mem_three == 0

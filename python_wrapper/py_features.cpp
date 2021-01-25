@@ -17,8 +17,8 @@ void init_features(pybind11::module& m)
          auto  array = std::vector<double>(p, p+size);
          return h5features::features (array, dim, check);
       }))
-      .def("dim", &h5features::features::dim, "returns the dimension of a feature vector")
-      .def("size", &h5features::features::size, "returns the number of features vectors")
+      // .def("dim", &h5features::features::dim, "returns the dimension of a feature vector")
+      // .def("size", &h5features::features::size, "returns the number of features vectors")
       .def("__eq__", &h5features::features::operator==, pybind11::is_operator(), "returns true if the two features instances are equal")
       .def("__ne__", &h5features::features::operator!=, pybind11::is_operator(), "returns true if the two features instances are not equal")      
       .def_buffer( [](h5features::features &features ) -> pybind11::buffer_info {
