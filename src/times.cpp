@@ -120,7 +120,10 @@ private:
 };
 }
 
-
+h5features::times::format h5features::times::get_ft()
+{
+   return m_format;
+}
 h5features::times::format h5features::times::get_format(const std::size_t& dim)
 {
    switch(dim)

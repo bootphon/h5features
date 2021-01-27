@@ -29,7 +29,7 @@ public:
 
    /// Returns the times format from its dimension
    static format get_format(const std::size_t& dim);
-
+   format get_ft();
    // Lifecyle
 
    /// Copy constructor
