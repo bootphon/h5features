@@ -14,7 +14,7 @@ void init_writer(pybind11::module& m);
 // PYBIND11_MAKE_OPAQUE(vttype)
 // PYBIND11_MAKE_OPAQUE(pybind11::buffer)
 
-PYBIND11_MODULE(pyh5features, m)
+PYBIND11_MODULE(h5features, m)
 {
    init_features(m);
    init_times(m);

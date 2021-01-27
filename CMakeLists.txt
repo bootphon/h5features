@@ -68,40 +68,65 @@ endif()
 # h5features library
 #######################################################################
 
-add_library(h5features
+if(H5FEATURES_BUILD_PYTHON)
+  add_subdirectory(external/pybind11)
+  pybind11_add_module(h5features
+  THIN_LTO
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_h5features.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_features.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_times.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_properties.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_item.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_reader.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/py_writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/item.cpp
+    ${PROJECT_SOURCE_DIR}/src/features.cpp
+    ${PROJECT_SOURCE_DIR}/src/times.cpp
+    ${PROJECT_SOURCE_DIR}/src/properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/version.cpp
+    ${PROJECT_SOURCE_DIR}/src/exception.cpp
+    ${PROJECT_SOURCE_DIR}/src/reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/reader_interface.cpp
+    ${PROJECT_SOURCE_DIR}/src/v1_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/v2_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/writer_interface.cpp
+    ${PROJECT_SOURCE_DIR}/src/v1_writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp
+    )
+    target_link_libraries(h5features PRIVATE pybind11::module)
+
+else()
+ add_library(h5features
   ${PROJECT_SOURCE_DIR}/src/item.cpp
-  ${PROJECT_SOURCE_DIR}/src/features.cpp
-  ${PROJECT_SOURCE_DIR}/src/times.cpp
-  ${PROJECT_SOURCE_DIR}/src/properties.cpp
-  ${PROJECT_SOURCE_DIR}/src/version.cpp
-  ${PROJECT_SOURCE_DIR}/src/exception.cpp
-  ${PROJECT_SOURCE_DIR}/src/reader.cpp
-  ${PROJECT_SOURCE_DIR}/src/reader_interface.cpp
-  ${PROJECT_SOURCE_DIR}/src/v1_reader.cpp
-  ${PROJECT_SOURCE_DIR}/src/v2_reader.cpp
-  ${PROJECT_SOURCE_DIR}/src/writer.cpp
-  ${PROJECT_SOURCE_DIR}/src/writer_interface.cpp
-  ${PROJECT_SOURCE_DIR}/src/v1_writer.cpp
-  ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp
-  ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
-  ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp)
+    ${PROJECT_SOURCE_DIR}/src/features.cpp
+    ${PROJECT_SOURCE_DIR}/src/times.cpp
+    ${PROJECT_SOURCE_DIR}/src/properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/version.cpp
+    ${PROJECT_SOURCE_DIR}/src/exception.cpp
+    ${PROJECT_SOURCE_DIR}/src/reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/reader_interface.cpp
+    ${PROJECT_SOURCE_DIR}/src/v1_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/v2_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/writer_interface.cpp
+    ${PROJECT_SOURCE_DIR}/src/v1_writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp
+    )
+endif()
 target_include_directories(h5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
-target_link_libraries(h5features HighFive)
+target_link_libraries(h5features PRIVATE HighFive)
 
 # install the headers and library
 install(TARGETS h5features
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-
-# include compilation of Python bindings
-if(H5FEATURES_BUILD_PYTHON)
-  message(STATUS "h5features Python wrapper is in development, do not expect anything usefull")
-  add_subdirectory(external/pybind11)
-  add_subdirectory(python_wrapper)
-endif()
 
 
 # execute the tests with "make" and run them with "make test"

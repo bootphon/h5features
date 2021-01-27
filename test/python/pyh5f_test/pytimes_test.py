@@ -1,5 +1,5 @@
 import sys
-from pyh5features import Times
+from h5features import Times
 from unittest import TestCase
 import psutil
 import numpy as np
