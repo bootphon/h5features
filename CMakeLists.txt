@@ -68,6 +68,8 @@ endif()
 # h5features library
 #######################################################################
 if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
+  message(STATUS "Compile H5features and wrapper")
+  
   file(GLOB highfive "${PROJECT_SOURCE_DIR}/external/HighFive/include/*h")
   source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${gihfive})
   add_subdirectory(external/pybind11)
@@ -99,6 +101,7 @@ if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
     ${highfive})
     target_link_libraries(h5features PRIVATE pybind11::module)
 else() #compilation without wrapper
+message(STATUS "Compile H5features only")
   add_library(h5features
     ${PROJECT_SOURCE_DIR}/src/features.cpp
     ${PROJECT_SOURCE_DIR}/src/times.cpp
@@ -119,7 +122,7 @@ endif()
 target_include_directories(h5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
-target_link_libraries(h5features PRIVATE HighFive)
+target_link_libraries(h5features HighFive)
 
 
 # install the headers and library
