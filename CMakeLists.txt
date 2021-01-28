@@ -103,6 +103,7 @@ if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
 else() #compilation without wrapper
 message(STATUS "Compile H5features only")
   add_library(h5features
+    ${PROJECT_SOURCE_DIR}/src/item.cpp
     ${PROJECT_SOURCE_DIR}/src/features.cpp
     ${PROJECT_SOURCE_DIR}/src/times.cpp
     ${PROJECT_SOURCE_DIR}/src/properties.cpp

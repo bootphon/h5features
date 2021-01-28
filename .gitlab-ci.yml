@@ -11,7 +11,7 @@ before_script:
 test-linux:
   stage: test
   script:
-    - cmake3 -DCMAKE_BUILD_TYPE=Debug -DH5FEATURES_BUILD_TEST=ON ..
+    - cmake3 -DCMAKE_BUILD_TYPE=Debug -DH5FEATURES_BUILD_TEST=ON -DH5FEATURES_BUILD_PYTHON=OFF ..
     - make -j6
     - make test
 
