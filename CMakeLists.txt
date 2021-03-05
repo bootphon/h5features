@@ -123,7 +123,7 @@ endif()
 target_include_directories(h5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
-target_link_libraries(h5features HighFive)
+target_link_libraries(h5features PUBLIC HighFive)
 
 
 # install the headers and library

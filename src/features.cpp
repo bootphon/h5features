@@ -1,7 +1,6 @@
 #include <h5features/features.h>
 #include <h5features/exception.h>
 
-
 h5features::features::features(const std::vector<double>& data, std::size_t dim, bool check)
    : m_features{data}, m_dim{dim}
 {

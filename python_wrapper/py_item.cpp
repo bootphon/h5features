@@ -1,8 +1,183 @@
 #include <h5features/item.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+#include <pybind11/stl.h>
+#include <unordered_map>
+#include <iostream>
+#include <boost/variant.hpp>
+#include <variant>
+#include <typeinfo> 
+
+#include <pybind11/embed.h>
 
 
+namespace pybind11::detail {
+      template <>
+   struct type_caster<h5features::properties>  { 
+      PYBIND11_TYPE_CASTER(h5features::properties, "p");
+     bool load(handle src, bool){
+         for (auto item: src)
+               value.set(item.cast<std::string>(), src[item].cast<h5features::properties::value_type>());
+         return true;
+      }};
+   template <>
+   struct type_caster<h5features::properties::value_type> {
+      PYBIND11_TYPE_CASTER(h5features::properties::value_type, "pvt");
+      bool load(handle src, bool) {
+         PyObject* pyob = src.ptr();
+         if (isinstance<pybind11::bool_>(src)){
+            
+            value = handle(pyob).cast<bool>();
+         }
+         else if (isinstance<pybind11::int_>(src)){
+            
+            value = handle(pyob).cast<int>();
+         }
+         else if (isinstance<pybind11::float_>(src)){
+            value = handle(pyob).cast<double>();
+         }
+         else if (isinstance<pybind11::str>(src)){
+            value = handle(pyob).cast<std::string>();
+         }
+         else if (isinstance<pybind11::list>(src)){
+            if (isinstance<pybind11::str>(*src.begin())) {
+               value = handle(pyob).cast<std::vector<std::string>>();
+            }
+            else if (isinstance<pybind11::int_>(*src.begin())) {
+               value = handle(pyob).cast<std::vector<int>>();
+            }
+            else if (isinstance<pybind11::float_>(*src.begin())) {
+               value = handle(pyob).cast<std::vector<double>>();
+            }
+         }
+         else if (isinstance<pybind11::dict>(src)){ 
+
+            value = handle(pyob).cast<h5features::properties>();
+      }
+      return true;
+   }
+   };
+
+   // template <>
+   // struct type_caster<boost::variant<h5features::properties::value_type>> : variant_caster<boost::variant<h5features::properties::value_type>>{};
+   
+}
+
+// bool h5features::item::pbind_contains(const std::string& name)
+// {
+//    return this->properties().contains(name);
+// }
+// void h5features::item::pbind_erase(const std::string& name)
+// {
+//    this->properties().erase(name);
+// }
+//  std::unordered_map<std::string, h5features::properties::value_type> & h5features::item::pbind_properties()
+// {
+ 
+//    return this->m_properties.m_properties;
+// }
+pybind11::dict return_props(h5features::properties src);
+pybind11::dict return_props(h5features::properties src)
+{
+      pybind11::dict to_return;
+      for (auto item : src)
+      {
+         std::cout<<typeid(bool).name()<<" "<<typeid(double).name()<<std::endl;
+         if (item.second.type().name() == typeid(int).name()){
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::int_(boost::get<int>(item.second));}
+         else if (item.second.type().name() == typeid(bool).name())
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::bool_(boost::get<bool>(item.second));
+         else if (item.second.type().name() ==typeid(double).name()){
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::float_(boost::get<double>(item.second));
+            }
+         else if (item.second.type().name() ==typeid(std::string).name()){
+            std::string str = boost::get<std::string>(item.second);
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::str(PyUnicode_DecodeUTF8(str.data(), str.length(), NULL));
+         }
+         else if (item.second.type() ==typeid(std::vector<int>))
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::cast(boost::get<std::vector<int>>(item.second));
+         else if (item.second.type() ==typeid(std::vector<double>))
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::cast(boost::get<std::vector<double>>(item.second));
+         else if (item.second.type() ==typeid(std::vector<std::string>)) {
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::cast(boost::get<std::vector<std::string>>(item.second));
+         }
+         else if  (item.second.type() == typeid(h5features::properties)) {
+            to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = return_props(boost::get<h5features::properties>(item.second));
+         }
+   }
+      return to_return;
+}
+
+template<class T>
+T h5features::item::pbind_properties()
+{
+   std::cout<<"begin"<<std::endl;
+   auto src = this->m_properties;
+   return return_props(src);
+}
+template<class T>
+T h5features::item::pbind_features()
+{
+   double* p=(double*)this->features().data().data();
+         return  T(
+            {this->features().dim(),this->features().size()}, p, pybind11::capsule(
+        new auto(p),  // <- can leak
+        [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
+    ));
+}
+template<class T>
+T h5features::item::pbind_times()
+{
+   double* p=(double*)this->times().data().data();
+         return  T(
+            {this->times().dim(),this->times().size()}, p, pybind11::capsule(
+        new auto(p),  // <- can leak
+        [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
+    ));
+}
 void init_item(pybind11::module& m)
 {
-   pybind11::class_<h5features::item>(m, "Item");
+   pybind11::class_<h5features::item>(m, "Item", pybind11::buffer_protocol())
+      .def(pybind11::init([](
+         const std::string& name,
+            const pybind11::buffer & features,
+            const pybind11::buffer & begin,
+            const pybind11::buffer & end,
+            const pybind11::dict & properties,
+            bool check = true
+         ) {
+            // create features object
+            pybind11::buffer_info info = features.request();
+            double *p = (double*)info.ptr;
+            std::size_t size = info.size;
+            std::size_t shape= info.shape[0];
+            auto  array = std::vector<double>(p, p+size);
+            auto feats = h5features::features(array, shape, check);
+            // create times object
+            info = begin.request();
+            p = (double*)info.ptr;
+            size = info.size;
+            auto begs = std::vector<double>(p, p+size);
+            info = end.request();
+            p = (double*)info.ptr;
+            auto ens = std::vector<double>(p, p+size);
+            auto tims = h5features::times(begs, ens, check);
+
+            // auto props = h5features::properties();
+            std::cout<<"essai1"<<std::endl;
+            auto props = pybind11::handle(properties).cast<h5features::properties>();
+            return h5features::item(name, feats, tims, props, check);
+         }))
+      .def("__eq__", &h5features::item::operator==, pybind11::is_operator(), "returns true if the two items instances are equal")
+      .def("__ne__", &h5features::item::operator!=, pybind11::is_operator(), "returns true if the two items instances are not equal")      
+      .def("name", &h5features::item::name, "returns the dimension of a feature vector")
+      .def("has_properties", &h5features::item::has_properties, "Returns true if the item has attached properties, false otherwise")
+      .def("dim", &h5features::item::dim, "returns the dimension of a feature vector")
+      .def("size", &h5features::item::size, "returns the number of features vectors")
+      // .def("features",&h5features::item::pbind_features<pybind11::array_t<double>>)
+      // .def("times",&h5features::item::pbind_times<pybind11::array_t<double>>)
+      .def("properties", &h5features::item::pbind_properties<pybind11::dict>)
+      // .def("properties_contains", &h5features::item::pbind_contains)
+      // .def("properties_erase", &h5features::item::pbind_erase)
+      ;
 }

@@ -10,6 +10,7 @@ class FeaturesTests(TestCase):
         array = np.asarray([[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]], dtype=np.float64)
         features = Features(array, 4, True)
         assert np.all(array == np.array(features))
+
     def test_update_from_init(self):
         """ test if np.array is copied or passed by reference to c++ """
         array = np.ones((10000000, 4))
@@ -17,8 +18,8 @@ class FeaturesTests(TestCase):
         copy = np.array(features, copy=False)
         array[0, 0] = 0
         assert array[0, 0] == 0
-        assert copy[0, 0]!= 0
-    
+        assert copy[0, 0] != 0
+        
     def test_dim_size(self):
         """ this method test the method dim and size of Features"""
         features = Features(np.ones((10000000, 4)), 10000000, True)

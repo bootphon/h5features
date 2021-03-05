@@ -5,7 +5,7 @@
 #include <h5features/properties.h>
 #include <h5features/times.h>
 #include <string>
-
+#include <unordered_map>
 
 namespace h5features
 {
@@ -28,6 +28,17 @@ namespace h5features
 class item
 {
 public:
+   template<class T>
+   T pbind_features();
+
+   template<class T>
+   T pbind_times();
+   
+   template < class T>
+   T pbind_properties();
+
+   // bool pbind_contains(const std::string& name);
+   // void pbind_erase(const std::string& name);
    /// Destructor
    virtual ~item() = default;
 

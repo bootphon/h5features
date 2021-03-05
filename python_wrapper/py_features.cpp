@@ -13,7 +13,7 @@ void init_features(pybind11::module& m)
          ){
          pybind11::buffer_info info = features.request();
          double *p = (double*)info.ptr;
-         std::size_t size = features.request().size;
+         std::size_t size = info.size;
          auto  array = std::vector<double>(p, p+size);
          return h5features::features (array, dim, check);
       }))
