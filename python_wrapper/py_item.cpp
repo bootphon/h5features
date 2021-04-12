@@ -194,10 +194,12 @@ T h5features::item::pbind_times()
 {
    double* p=(double*)this->times().data().data();
          return  T(
-            {this->times().dim(),this->times().size()}, p, pybind11::capsule(
-        new auto(p),
-        [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
-    ));
+            {this->times().dim(),this->times().size()}, p
+   //          , pybind11::capsule(
+   //      new auto(p),
+   //      [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
+   //  )
+    );
 }
 void init_item(pybind11::module& m)
 {
