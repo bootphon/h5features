@@ -90,10 +90,10 @@ public:
    template<class T>
    void set(const std::string& name, const T& value)
    {
-      if(contains(name))
-      {
-         throw h5features::exception("property name already exists");
-      }
+      // if(contains(name))
+      // {
+      //    throw h5features::exception("property name already exists");
+      // }
 
       m_properties[name] = value;
    }

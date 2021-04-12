@@ -55,3 +55,35 @@ class ItemTests(TestCase):
                             "list of double" : [1., 2., 3.],
         }
 
+        assert item.properties_contains("int")
+        assert not item.properties_contains("tni")
+        item.properties_erase("int")
+        assert not item.properties_contains("int")
+        item.properties_set("int", {
+                            "int " : 1,
+                            "double" : 1.,
+                            "bool" : True,
+                            "string" : "str",
+                            "list of string" : ["str1", "str2"],
+                            "list of int" : [1, 2, 3],
+                            "list of double" : [1., 2., 3.],
+        })
+        assert item.properties_contains("int")
+        props = item.properties()
+        assert props["int"] == {
+                            "int " : 1,
+                            "double" : 1.,
+                            "bool" : True,
+                            "string" : "str",
+                            "list of string" : ["str1", "str2"],
+                            "list of int" : [1, 2, 3],
+                            "list of double" : [1., 2., 3.],
+        }
+        item.properties_set("test", "test")
+        assert item.properties_contains("test")
+        props = item.properties()
+        assert props["test"] == "test"
+        item.properties_set("test", "tset")
+        props = item.properties()
+        assert props["test"] == "tset"
+        assert item.properties_get("test") == "tset"

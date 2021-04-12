@@ -63,14 +63,67 @@ namespace pybind11::detail {
    
 }
 
-// bool h5features::item::pbind_contains(const std::string& name)
-// {
-//    return this->properties().contains(name);
-// }
-// void h5features::item::pbind_erase(const std::string& name)
-// {
-//    this->properties().erase(name);
-// }
+bool h5features::item::pbind_contains(const std::string& name)
+{
+   return this->properties().contains(name);
+}
+void h5features::item::pbind_erase(const std::string& name)
+{
+   h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+   ref.erase(name);
+}
+
+template<class T>
+void h5features::item::pbind_set_props(const std::string& name, T src)
+{
+   PyObject* pyob = src.ptr();
+      if (pybind11::isinstance<pybind11::bool_>(src)){
+         
+         bool value = pybind11::handle(pyob).cast<bool>();
+         h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+         ref.set<decltype(value)>(name, value);
+      }
+      else if (pybind11::isinstance<pybind11::int_>(src)){
+         
+         int value = pybind11::handle(pyob).cast<int>();
+         h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+         ref.set<decltype(value)>(name, value);
+      }
+      else if (pybind11::isinstance<pybind11::float_>(src)){
+         double value = pybind11::handle(pyob).cast<double>();
+         h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+         ref.set<decltype(value)>(name, value);
+      }
+      else if (pybind11::isinstance<pybind11::str>(src)){
+         std::string value = pybind11::handle(pyob).cast<std::string>();
+         h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+         ref.set<decltype(value)>(name, value);
+      }
+      else if (pybind11::isinstance<pybind11::list>(src)){
+         if (pybind11::isinstance<pybind11::str>(*src.begin())) {
+            std::vector<std::string> value = pybind11::handle(pyob).cast<std::vector<std::string>>();
+            h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+            ref.set<decltype(value)>(name, value);
+         }
+         else if (pybind11::isinstance<pybind11::int_>(*src.begin())) {
+            std::vector<int> value = pybind11::handle(pyob).cast<std::vector<int>>();
+            h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+            ref.set<decltype(value)>(name, value);
+         }
+         else if (pybind11::isinstance<pybind11::float_>(*src.begin())) {
+            std::vector<double> value = pybind11::handle(pyob).cast<std::vector<double>>();
+            h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+            ref.set<decltype(value)>(name, value);
+         }
+      }
+      else if (pybind11::isinstance<pybind11::dict>(src)){ 
+
+         h5features::properties value = pybind11::handle(pyob).cast<h5features::properties>();
+         h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
+         ref.set<decltype(value)>(name, value);
+   }
+   
+}
 //  std::unordered_map<std::string, h5features::properties::value_type> & h5features::item::pbind_properties()
 // {
  
@@ -106,6 +159,13 @@ pybind11::dict return_props(h5features::properties src)
          }
    }
       return to_return;
+}
+template <class T>
+T h5features::item::pbind_get_properties(const std::string& name)
+{
+   auto src = this->m_properties;
+   auto dict = return_props(src);
+   return dict[pybind11::str(name)];
 }
 
 template<class T>
@@ -170,14 +230,16 @@ void init_item(pybind11::module& m)
          }))
       .def("__eq__", &h5features::item::operator==, pybind11::is_operator(), "returns true if the two items instances are equal")
       .def("__ne__", &h5features::item::operator!=, pybind11::is_operator(), "returns true if the two items instances are not equal")      
-      .def("name", &h5features::item::name, "returns the dimension of a feature vector")
+      .def("name", &h5features::item::name, "returns the name of the item")
       .def("has_properties", &h5features::item::has_properties, "Returns true if the item has attached properties, false otherwise")
       .def("dim", &h5features::item::dim, "returns the dimension of a feature vector")
       .def("size", &h5features::item::size, "returns the number of features vectors")
       // .def("features",&h5features::item::pbind_features<pybind11::array_t<double>>)
       // .def("times",&h5features::item::pbind_times<pybind11::array_t<double>>)
       .def("properties", &h5features::item::pbind_properties<pybind11::dict>)
-      // .def("properties_contains", &h5features::item::pbind_contains)
-      // .def("properties_erase", &h5features::item::pbind_erase)
+      .def("properties_contains", &h5features::item::pbind_contains)
+      .def("properties_erase", &h5features::item::pbind_erase)
+      .def("properties_set", &h5features::item::pbind_set_props<const pybind11::handle&>)
+      .def("properties_get", &h5features::item::pbind_get_properties<pybind11::handle>)
       ;
 }
