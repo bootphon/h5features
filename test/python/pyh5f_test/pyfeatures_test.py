@@ -1,44 +1,58 @@
 import sys
-from h5features import Features
+from h5features import Item
 from unittest import TestCase
 import psutil
 import numpy as np
 
 class FeaturesTests(TestCase):
-    """Tests on class Features"""
+    """Tests on features"""
     def test_data_equality(self):
         array = np.asarray([[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]], dtype=np.float64)
-        features = Features(array, 4, True)
+        begin = np.asarray([0, 1, 2])
+        end = np.asarray([1, 2, 3])
+        name = "Test"
+        properties = {}
+        item = Item(name, array, begin, end, properties, True)
+        features = item.features()
         assert np.all(array == np.array(features))
 
     def test_update_from_init(self):
         """ test if np.array is copied or passed by reference to c++ """
         array = np.ones((10000000, 4))
-        features = Features(np.array(array, copy=False), 10000000, True)
+        begin = np.asarray([0, 1, 2, 3])
+        end = np.asarray([1, 2, 3, 4])
+        name = "Test"
+        properties = {}
+        item = Item(name, array, begin, end, properties, True)
+        features = item.features()
         copy = np.array(features, copy=False)
         array[0, 0] = 0
         assert array[0, 0] == 0
         assert copy[0, 0] != 0
         
-    def test_dim_size(self):
-        """ this method test the method dim and size of Features"""
-        features = Features(np.ones((10000000, 4)), 10000000, True)
-        assert features.dim() == 10000000
-        assert features.size() == 4
+
 
     def test_in_equality(self):
         """ test oprator== and operator!="""
-        f1 = Features(np.ones((10000000, 4)), 10000000, True)
-        f2 = Features(np.ones((10000000, 4)), 10000000, True)
-        f3 = Features(np.zeros((10000000, 4)), 10000000, True)
-        assert f1 == f2
-        assert f1 != f3
-        assert f2 != f3
+        begin = np.asarray([0, 1, 2, 3])
+        end = np.asarray([1, 2, 3, 4])
+        name = "Test"
+        properties = {}
+        f1 = Item(name, np.ones((10000000, 4)), begin, end, properties, True).features()
+        f2 = Item(name, np.ones((10000000, 4)), begin, end, properties, True).features()
+        f3 = Item(name, np.zeros((10000000, 4)), begin, end, properties, True).features()
+        assert np.all(f1 == f2)
+        assert np.all(1 != f3)
+        assert np.all(f2 != f3)
 
     def test_copy_true(self):
         """ this method test the updates of severals call of features.data()
          when udpdate the numpy array with copy=true"""
-        features = Features(np.ones((10000000, 4)), 10000000, True)
+        begin = np.asarray([0, 1, 2, 3])
+        end = np.asarray([1, 2, 3, 4])
+        name = "Test"
+        properties = {}
+        features = Item(name, np.ones((10000000, 4)), begin, end, properties, True).features()
         first_copy = np.array(features, copy=True)
         second_copy = np.array(features, copy=True)
         third_copy = np.array(features, copy=False)
@@ -58,7 +72,11 @@ class FeaturesTests(TestCase):
     def test_copy_false(self):
         """ this method test the updates of severals call of features.data()
          when udpdate the numpy array with copy=false"""
-        features = Features(np.ones((10000000, 4)), 10000000, True)
+        begin = np.asarray([0, 1, 2, 3])
+        end = np.asarray([1, 2, 3, 4])
+        name = "Test"
+        properties = {}
+        features = Item(name, np.ones((10000000, 4)), begin, end, properties, True).features()
         first_copy = np.array(features, copy=False)
         first_copy[0, 0] = 0
         second_copy = np.array(features, copy=True)

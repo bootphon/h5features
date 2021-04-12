@@ -5,85 +5,15 @@ import psutil
 import numpy as np
 
 class ItemTests(TestCase):
-    """Tests on class Features"""
-    def test_properties(self):
+    """Tests on Items"""
+   
+    def test_item(self):
         features = np.ones((100,4))
         begin = np.asarray([0, 1, 2, 3])
         end = np.asarray([1, 2, 3, 4])
         name = "Test"
-        properties = {
-            "int" : 1,
-            "double" : 1.,
-            "bool" : True,
-            "string" : "str",
-            "list of string" : ["str1", "str2"],
-            "list of int" : [1, 2, 3],
-            "list of double" : [1., 2., 3.],
-            "dict": {
-                "int " : 1,
-                "double" : 1.,
-                "bool" : True,
-                "string" : "str",
-                "list of string" : ["str1", "str2"],
-                "list of int" : [1, 2, 3],
-                "list of double" : [1., 2., 3.],
-        }}
+        properties = {}
         item = Item(name, features, begin, end, properties, True)
-        props = item.properties()
-        assert props.get("int", None) is not None
-        assert props.get("double", None) is not None
-        assert props.get("bool", None) is not None
-        assert props.get("string", None) is not None
-        assert props.get("list of int", None) is not None
-        assert props.get("list of double", None) is not None
-        assert props.get("list of string", None) is not None
-        assert props.get("dict", None) is not None
-        assert props["int"] == 1
-        assert props["bool"]
-        assert props["double"] == 1.
-        assert props["string"] == "str"
-        assert props["list of string"] == ["str1", "str2"]
-        assert props["list of int"] == [1, 2, 3]
-        assert props["list of double"] == [1., 2., 3.]
-        assert props["dict"] == {
-                            "int " : 1,
-                            "double" : 1.,
-                            "bool" : True,
-                            "string" : "str",
-                            "list of string" : ["str1", "str2"],
-                            "list of int" : [1, 2, 3],
-                            "list of double" : [1., 2., 3.],
-        }
-
-        assert item.properties_contains("int")
-        assert not item.properties_contains("tni")
-        item.properties_erase("int")
-        assert not item.properties_contains("int")
-        item.properties_set("int", {
-                            "int " : 1,
-                            "double" : 1.,
-                            "bool" : True,
-                            "string" : "str",
-                            "list of string" : ["str1", "str2"],
-                            "list of int" : [1, 2, 3],
-                            "list of double" : [1., 2., 3.],
-        })
-        assert item.properties_contains("int")
-        props = item.properties()
-        assert props["int"] == {
-                            "int " : 1,
-                            "double" : 1.,
-                            "bool" : True,
-                            "string" : "str",
-                            "list of string" : ["str1", "str2"],
-                            "list of int" : [1, 2, 3],
-                            "list of double" : [1., 2., 3.],
-        }
-        item.properties_set("test", "test")
-        assert item.properties_contains("test")
-        props = item.properties()
-        assert props["test"] == "test"
-        item.properties_set("test", "tset")
-        props = item.properties()
-        assert props["test"] == "tset"
-        assert item.properties_get("test") == "tset"
+        assert item.name() == "Test"
+        assert item.dim() == 100
+        assert item.size() == 4

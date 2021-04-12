@@ -180,10 +180,14 @@ T h5features::item::pbind_features()
 {
    double* p=(double*)this->features().data().data();
          return  T(
-            {this->features().dim(),this->features().size()}, p, pybind11::capsule(
-        new auto(p),  // <- can leak
-        [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
-    ));
+            {this->features().dim(),this->features().size()}, p
+            // , 
+   //          pybind11::capsule(
+   //      new auto(p)
+   //      ,
+   //      [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
+   //  )
+    );
 }
 template<class T>
 T h5features::item::pbind_times()
@@ -191,7 +195,7 @@ T h5features::item::pbind_times()
    double* p=(double*)this->times().data().data();
          return  T(
             {this->times().dim(),this->times().size()}, p, pybind11::capsule(
-        new auto(p),  // <- can leak
+        new auto(p),
         [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
     ));
 }
@@ -234,8 +238,8 @@ void init_item(pybind11::module& m)
       .def("has_properties", &h5features::item::has_properties, "Returns true if the item has attached properties, false otherwise")
       .def("dim", &h5features::item::dim, "returns the dimension of a feature vector")
       .def("size", &h5features::item::size, "returns the number of features vectors")
-      // .def("features",&h5features::item::pbind_features<pybind11::array_t<double>>)
-      // .def("times",&h5features::item::pbind_times<pybind11::array_t<double>>)
+      .def("features",&h5features::item::pbind_features<pybind11::array_t<double>>)
+      .def("times",&h5features::item::pbind_times<pybind11::array_t<double>>)
       .def("properties", &h5features::item::pbind_properties<pybind11::dict>)
       .def("properties_contains", &h5features::item::pbind_contains)
       .def("properties_erase", &h5features::item::pbind_erase)
