@@ -47,6 +47,12 @@ class TestReadWriteCompatibility:
     def test_read_works(self):
         fname = self.file_v1
         t1, f1 = h5f_1_0.read(fname, 'features')
+        # keys read as bytes instead of str because of h5py>=3.0
+        t1 = {k.decode() if isinstance(k, bytes) else k: v
+              for k, v in t1.items()}
+        f1 = {k.decode() if isinstance(k, bytes) else k: v
+              for k, v in f1.items()}
+
         t2, f2 = h5f_1_1.read(fname, 'features')
 
         for tt1, tt2 in zip(t1, t2):

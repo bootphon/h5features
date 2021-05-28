@@ -49,7 +49,8 @@ class TestCreate:
 
     def test_create_on_existing_group(self):
         self.group.create_dataset('items', (0,))
-        with pytest.raises(RuntimeError):
+        # Exception is OSError for h5py<3.0 and ValueError for h5py>=3.0
+        with pytest.raises(Exception):
             self.items.create_dataset(self.group, 10)
 
 
@@ -58,7 +59,7 @@ def wrapper_is_compat(l1, l2):
     i1 = Items(l1)
     i2 = Items(l2)
     remove('test.h5.tmp')
-    with h5py.File('test.h5.tmp') as h5file:
+    with h5py.File('test.h5.tmp', 'w') as h5file:
         g = h5file.create_group('deleteme')
         i2.create_dataset(g, 10)
         i2.write_to(g)
@@ -74,7 +75,7 @@ class TestIsAppendableTo:
     def setup(self):
         self.filename = 'test.h5'
         self.items = Items(generate.items(10))
-        self.h5file = h5py.File(self.filename)
+        self.h5file = h5py.File(self.filename, 'w')
 
     def teardown(self):
         remove(self.filename)
@@ -124,11 +125,11 @@ class TestWrite:
     def test_write(self):
         self.items.create_dataset(self.group, 10)
         self.items.write_to(self.group)
-        writed = self.group['items'][...]
+        wrote = self.group['items'][...].astype(str)
 
-        assert len(writed) == 10
-        assert self.items.data == list(writed)
-        assert self.items == Items(list(writed))
+        assert len(wrote) == 10
+        assert self.items.data == list(wrote)
+        assert self.items == Items(list(wrote))
 
     def test_init_by_copy(self):
         """creating items copy data"""

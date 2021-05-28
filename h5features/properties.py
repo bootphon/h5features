@@ -93,4 +93,4 @@ class Properties(object):
 
         # h5py does not support embedded NULLs in strings ('\x00')
         data = pickle.dumps(data).replace(b'\x00', b'__NULL__')
-        group['properties'][...] = np.void(data)
+        group['properties'][...] = data

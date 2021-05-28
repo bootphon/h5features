@@ -238,10 +238,10 @@ def write(filename, group, files, times, features, features_format='dense',
     # Step 2: preparing target file
     append = False
     if os.path.isfile(filename):
-        with h5py.File(filename) as fh:
+        with h5py.File(filename, 'w') as fh:
             if group in fh:
                 append = True
-    with h5py.File(filename) as fh:
+    with h5py.File(filename, 'w') as fh:
         if append:  # check existing h5 file
             g = fh[group]  # raise KeyError if group not in file
             assert g.attrs['version'] == version, (

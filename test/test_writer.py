@@ -153,7 +153,7 @@ class TestWrite:
 
         with h5py.File(self.filename, 'r') as f:
             g = f[self.group]
-            items = g['items'][...]
+            items = g['items'][...].astype(str)
             assert len(items) == 20
             assert all('bis' not in i for i in items[:10])
             assert all('bis' in i for i in items[10:])

@@ -25,15 +25,13 @@ storage of **large features data** on the HDF5 binary file format.
 Installation from conda
 -----------------------
 
-::
-   conda install -c coml h5features
+``conda install -c coml h5features``
 
 
 Installation from pip
 ---------------------
 
-::
-   pip install h5features
+``pip install h5features``
 
 
 Installation from sources
@@ -59,10 +57,6 @@ Installation from sources
   Install it from the sources with::
 
     python setup.py build && python setup.py install
-
-  Or you can install it with pip::
-
-    pip install h5features
 
 
 Documentation

@@ -174,7 +174,7 @@ class TestFeatures:
     def setup(self):
         self.filename = 'test.h5'
         remove(self.filename)
-        self.group = h5py.File(self.filename).create_group('group')
+        self.group = h5py.File(self.filename, 'w').create_group('group')
         self.data = generate.features(10, 5, 100)
         self.feat = Features(self.data)
 

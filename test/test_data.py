@@ -39,8 +39,7 @@ class TestData:
         'mode, append',
         [(m, a) for m in ('a', 'w') for a in (True, False)])
     def test_const_on_write(self, tmpdir, mode, append):
-        # A Data instance must not change before/after writing it to a
-        # group
+        # A Data instance must not change before/after writing it to a group
         h5file = os.path.join(str(tmpdir) + 'test.h5')
 
         # first write

@@ -18,7 +18,7 @@ import h5features as h5f
 
 
 def test_read_version(tmpdir):
-    with h5py.File(str(tmpdir.join('foo.h5'))) as f:
+    with h5py.File(str(tmpdir.join('foo.h5')), 'w') as f:
         g = f.create_group('g')
         g.attrs['version'] = '0.1'
         assert h5f.version.read_version(g) == '0.1'
@@ -82,9 +82,6 @@ class TestReader:
         assert reader.read(from_time=0, to_time=1) == reader.read()
 
 
-# may fail if no labels are >= 0.2 because of random generation, so we
-# authorize 10 successive runs
-@pytest.mark.flaky(reruns=10)
 @pytest.mark.parametrize('dim', [1, 2, 10])
 def test_read_tofromtimes(tmpdir, dim):
     filename = os.path.join(str(tmpdir), 'test.h5f')

@@ -114,7 +114,8 @@ class TestLabels1D:
     def test_create(self):
         t1 = Labels(self.data)
         # we can't create an existing group
-        with pytest.raises(RuntimeError) as err:
+        # Exception is OSError for h5py<3.0 and ValueError for h5py>=3.0
+        with pytest.raises(Exception) as err:
             t1.create_dataset(self.group, 10)
         assert 'create' in str(err.value)
 
@@ -136,7 +137,7 @@ class TestLabels2D:
     """Test of the Labels class for 2D labels vectors."""
     def setup(self):
         self.filename = 'test.h5'
-        self.group = h5py.File(self.filename).create_group('group')
+        self.group = h5py.File(self.filename, 'w').create_group('group')
         self.data = generate.labels(2, 5, 2)
 
     def teardown(self):

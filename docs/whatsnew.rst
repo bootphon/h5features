@@ -5,6 +5,14 @@
 What's new ?
 ============
 
+h5features-1.4
+==============
+
+* This minor release is the first to be compatible with ``h5py>=3.0``.
+
+* No more tested on ``python2``.
+
+
 h5features-1.3.2
 ================
 

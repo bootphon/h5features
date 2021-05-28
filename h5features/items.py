@@ -19,7 +19,7 @@
 
 import numpy as np
 
-from h5py import special_dtype
+from h5py import string_dtype
 from .entry import Entry, nb_per_chunk
 
 
@@ -55,15 +55,20 @@ class Items(Entry):
             if not len(set(data)) == len(data):
                 raise IOError('all items must have different names.')
 
+        data = [d.decode() if isinstance(d, bytes) else d for d in data]
+
         super(Items, self).__init__(
-            'items', data, 1, special_dtype(vlen=str), check)
+            'items', data, 1, string_dtype(), check)
 
     def create_dataset(
             self, group, chunk_size, compression=None, compression_opts=None):
         self._create_dataset(group, chunk_size, compression, compression_opts)
 
     def is_appendable_to(self, group):
-        return not set(group[self.name][...]).intersection(self.data)
+        group_data = [
+            d.decode() if isinstance(d, bytes) else d
+            for d in group[self.name][...]]
+        return not set(group_data).intersection(self.data)
 
     def write_to(self, group):
         """Write stored items to the given HDF5 group.
