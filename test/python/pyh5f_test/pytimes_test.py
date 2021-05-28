@@ -1,5 +1,5 @@
 import sys
-from h5features import Item
+from pyh5features import Item
 from unittest import TestCase
 import psutil
 import numpy as np
@@ -14,10 +14,10 @@ class TimesTests(TestCase):
         end = np.asarray([1, 2, 3, 4])
         name = "Test"
         properties = {}
-        times = Item(name, features, begin, end, properties, True).times()
-        copy_true = copy.deepcopy(np.array(times, dtype=np.int8))
-        copy_false = np.array(times, copy=False)
-        np.array(times, copy=False)[0][0] = -1
-        assert np.array(times, copy=True).shape == (2,4)
+        times = Item(name, features, begin, end, properties, True)
+        copy_true = copy.deepcopy(np.asarray(times.times(), dtype=np.int8))
+        copy_false = np.array(times.times(), copy=False)
+        np.array(times.times(), copy=False)[0][0] = -1
+        assert copy.deepcopy(np.asarray(times.times(), dtype=np.int8)).shape == (4, 2)
         assert copy_true[0][0] == 0
         assert copy_false[0][0] == -1

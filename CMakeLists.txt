@@ -5,7 +5,7 @@ message(STATUS "CMake version: ${CMAKE_VERSION}")
 # main project setup
 #######################################################################
 
-project(h5features
+project(pyh5features
   VERSION 2.0.0
   DESCRIPTION "easy and efficient storage of large features data on HDF5 file format"
   LANGUAGES C CXX)
@@ -73,7 +73,7 @@ if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
   file(GLOB highfive "${PROJECT_SOURCE_DIR}/external/HighFive/include/*h")
   source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${gihfive})
   add_subdirectory(external/pybind11)
-  pybind11_add_module(h5features
+  pybind11_add_module(pyh5features
     THIN_LTO
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_h5features.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_features.cpp
@@ -99,10 +99,10 @@ if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
     ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
     ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp
     ${highfive})
-    target_link_libraries(h5features PRIVATE pybind11::module)
+    target_link_libraries(pyh5features PRIVATE pybind11::module)
 else() #compilation without wrapper
 message(STATUS "Compile H5features only")
-  add_library(h5features
+  add_library(pyh5features
     ${PROJECT_SOURCE_DIR}/src/item.cpp
     ${PROJECT_SOURCE_DIR}/src/features.cpp
     ${PROJECT_SOURCE_DIR}/src/times.cpp
@@ -120,14 +120,14 @@ message(STATUS "Compile H5features only")
     ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
     ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp)
 endif()
-target_include_directories(h5features PUBLIC
+target_include_directories(pyh5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
-target_link_libraries(h5features PUBLIC HighFive)
+target_link_libraries(pyh5features PUBLIC HighFive)
 
 
 # install the headers and library
-install(TARGETS h5features
+install(TARGETS pyh5features
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -138,7 +138,7 @@ if(H5FEATURES_BUILD_TEST)
   add_subdirectory(test)
 
   add_executable(benchmark ${PROJECT_SOURCE_DIR}/test/utils/src/benchmark.cpp)
-  target_link_libraries(benchmark h5features)
+  target_link_libraries(benchmark pyh5features)
 endif()
 
 

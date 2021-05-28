@@ -1,5 +1,5 @@
 import sys
-from h5features import Item
+from pyh5features import Item
 from unittest import TestCase
 import psutil
 import numpy as np
@@ -86,8 +86,9 @@ class PropertiesTests(TestCase):
         item.properties_set("test", "tset")
         props = item.properties()
         assert props["test"] == "tset"
-        assert item.properties_get("test") == "tset"
+        assert item.properties()["test"] == "tset"
         assert item.has_properties()
+        
 
     def test_no_properties(self):
         features = np.ones((100,4))

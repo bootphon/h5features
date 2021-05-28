@@ -62,10 +62,19 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
 
 setuptools.setup(
-    name='h5features',
+    name='pyh5features',
     setup_requires=['cmake>=3.12'],
-    ext_modules=[CMakeExtension('h5features')],
+    ext_modules=[CMakeExtension('pyh5features')],
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,
-    package_data={'':['h5features.so']}
+    package_data={'':['pyh5features.so']}
+)
+setuptools.setup(
+    name="h5features2",
+    # package_dir={"": "h5features2"},
+    package_data={'': ["h5features2"]},
+    packages=setuptools.find_packages(),
+    python_requires=">=3.8",
+    zip_safe=False,
+    
 )

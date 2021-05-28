@@ -10,7 +10,7 @@
 
 #include <pybind11/embed.h>
 
-
+/* parse types for properties */
 namespace pybind11::detail {
       template <>
    struct type_caster<h5features::properties>  { 
@@ -65,10 +65,12 @@ namespace pybind11::detail {
 
 bool h5features::item::pbind_contains(const std::string& name)
 {
+   /* check if properties exists*/
    return this->properties().contains(name);
 }
 void h5features::item::pbind_erase(const std::string& name)
 {
+   /*delete a propertie*/
    h5features::properties& ref = const_cast <h5features::properties&>(this->properties());
    ref.erase(name);
 }
@@ -76,6 +78,7 @@ void h5features::item::pbind_erase(const std::string& name)
 template<class T>
 void h5features::item::pbind_set_props(const std::string& name, T src)
 {
+   /* parse properties from python*/
    PyObject* pyob = src.ptr();
       if (pybind11::isinstance<pybind11::bool_>(src)){
          
@@ -132,10 +135,10 @@ void h5features::item::pbind_set_props(const std::string& name, T src)
 pybind11::dict return_props(h5features::properties src);
 pybind11::dict return_props(h5features::properties src)
 {
+   /* parse properties type from cpp*/
       pybind11::dict to_return;
       for (auto item : src)
       {
-         std::cout<<typeid(bool).name()<<" "<<typeid(double).name()<<std::endl;
          if (item.second.type().name() == typeid(int).name()){
             to_return[pybind11::str(PyUnicode_DecodeUTF8(item.first.data(), item.first.length(), NULL))] = pybind11::int_(boost::get<int>(item.second));}
          else if (item.second.type().name() == typeid(bool).name())
@@ -163,6 +166,7 @@ pybind11::dict return_props(h5features::properties src)
 template <class T>
 T h5features::item::pbind_get_properties(const std::string& name)
 {
+   /* return a properties */
    auto src = this->m_properties;
    auto dict = return_props(src);
    return dict[pybind11::str(name)];
@@ -171,34 +175,41 @@ T h5features::item::pbind_get_properties(const std::string& name)
 template<class T>
 T h5features::item::pbind_properties()
 {
-   std::cout<<"begin"<<std::endl;
+   /* return properties */
    auto src = this->m_properties;
    return return_props(src);
 }
 template<class T>
 T h5features::item::pbind_features()
 {
+
+   /*
+   return features
+   */
    double* p=(double*)this->features().data().data();
          return  T(
             {this->features().dim(),this->features().size()}, p
-            // , 
-   //          pybind11::capsule(
-   //      new auto(p)
-   //      ,
-   //      [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
-   //  )
+            , 
+            pybind11::capsule(
+        new auto(p)
+        ,
+        [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
+    )
     );
 }
 template<class T>
 T h5features::item::pbind_times()
 {
+   /*
+   return an array of time with row, the number of times, and columns, the start and end of time
+   */
    double* p=(double*)this->times().data().data();
          return  T(
-            {this->times().dim(),this->times().size()}, p
-   //          , pybind11::capsule(
-   //      new auto(p),
-   //      [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
-   //  )
+            {this->times().size(),this->times().dim()}, p
+            , pybind11::capsule(
+        new auto(p),
+        [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }
+    )
     );
 }
 void init_item(pybind11::module& m)
@@ -230,7 +241,7 @@ void init_item(pybind11::module& m)
             auto tims = h5features::times(begs, ens, check);
 
             // auto props = h5features::properties();
-            std::cout<<"essai1"<<std::endl;
+            // create properties object
             auto props = pybind11::handle(properties).cast<h5features::properties>();
             return h5features::item(name, feats, tims, props, check);
          }))
@@ -246,6 +257,6 @@ void init_item(pybind11::module& m)
       .def("properties_contains", &h5features::item::pbind_contains)
       .def("properties_erase", &h5features::item::pbind_erase)
       .def("properties_set", &h5features::item::pbind_set_props<const pybind11::handle&>)
-      .def("properties_get", &h5features::item::pbind_get_properties<pybind11::handle>)
+      // .def("properties_get", &h5features::item::pbind_get_properties<pybind11::handle>)
       ;
 }

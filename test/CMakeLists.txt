@@ -32,7 +32,7 @@ add_library(h5features-test
 target_include_directories(
   h5features-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils/include)
 target_link_libraries(
-  h5features-test h5features ${Boost_LIBRARIES})
+  h5features-test pyh5features ${Boost_LIBRARIES})
 
 # compile unit tests
 
