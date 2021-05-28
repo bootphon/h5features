@@ -21,6 +21,8 @@ namespace h5features
 class writer
 {
 public:
+
+   void pbind_write(h5features::item item);
    /// Destructor
    virtual ~writer() = default;
 

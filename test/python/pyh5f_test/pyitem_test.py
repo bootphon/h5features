@@ -17,3 +17,5 @@ class ItemTests(TestCase):
         assert item.name() == "Test"
         assert item.dim() == 100
         assert item.size() == 4
+        meti = Item(name, features, begin, end, properties, True)
+        self.assertEqual(item, meti)

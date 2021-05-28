@@ -4,7 +4,7 @@ from unittest import TestCase
 import numpy as np
 sys.path.insert(0, "./h5features2")
 from item import Item
-from pyh5features import Item as pyitem
+# from pyh5features import Item as pyitem
 class TestItem(TestCase):
     """Test Item class"""
     def test_constuctor(self):
