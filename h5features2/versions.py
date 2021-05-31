@@ -1,0 +1,10 @@
+from pyh5features import Writer as pywriter
+class Versions:
+    def versions():
+        versions = {
+            "v1_0" : "1.0",
+            "v1_1" : "1.1",
+            "v1_2" : "1.2",
+            "v2_0" : "2.0",
+        }
+        return [versions[key] for key in pywriter.version.__members__.keys()]

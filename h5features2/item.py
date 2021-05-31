@@ -2,7 +2,13 @@ from pyh5features import Item as pyitem
 import numpy as np
 from copy import deepcopy
 class Item:
-    def __init__(self, name, features, times, properties={}):
+    
+    def __init__(self, item):
+        if not isinstance(item, pyitem):
+            raise TypeError("item must have pyh5features.Item class")
+        self.item = item
+    @classmethod
+    def create(cls, name, features, times, properties={}):
 
         def rec_properties(props):
             for k, v in props.items():
@@ -13,8 +19,11 @@ class Item:
 
         if not isinstance(times, tuple):
             raise TypeError("times is not a tuple")
-
+        if len(times) != 2:
+            raise TypeError("times must contain to numpy arrays")
         start, stop = times
+        print(start)
+        print(stop)
         if not isinstance(name, str):
             raise TypeError("item's name must be str")
         if not isinstance(features, np.ndarray):
@@ -32,8 +41,9 @@ class Item:
         if not isinstance(properties, dict):
             raise TypeError("properties is not a dict")
         rec_properties(properties)
-        self.item = pyitem(name, features, start, stop, properties, True)
-
+        return cls(pyitem(name, features, start, stop, properties, True))
+    def __eq__(self, it):
+        return self.item == it
     def features(self,  copy=False):
         if copy:
             return deepcopy(np.asarray(self.item.features(), dtype=np.float64))
