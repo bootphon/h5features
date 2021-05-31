@@ -10,11 +10,12 @@ import numpy as np
 from copy import deepcopy
 
 class ReaderWritterTests(TestCase):
-    def test_writting(self):
-        """ test if np.array is copied or passed by reference to c++ """
-        array = np.ones((1000000, 4))
-        begin = np.asarray([0, 1, 2, 3])
-        end = np.asarray([1, 2, 3, 4])
+    def test_reading_writting(self):
+        """ """
+        array = np.ones((9, 1000))
+        array[1:3, ] = 0
+        begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
+        end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
         name = "Test"
         properties = {}
         print( Writer.version.v2_0)
@@ -25,6 +26,14 @@ class ReaderWritterTests(TestCase):
         writer.write(item)
         reader = Reader("test.h5f", "test")
         self.assertEqual(reader.items()[0], "Test")
-        it = reader.read(reader.items()[0])
+        it = reader.read(reader.items()[0], False)
         self.assertTrue(np.all(array==np.array(it.features())))
         self.assertEqual(item, it)
+        it = reader.read_btw(reader.items()[0], np.float64(1), np.float64(3), False)
+        self.assertTrue(np.all(array[1: 3,:]==np.array(it.features())))
+        self.assertTrue(np.all(array[1: 3,:]==np.zeros((2, 1000))))
+        self.assertTrue(np.all(array[[0,3,4,5,6,7,8]] == np.ones((7, 1000))))
+        self.assertNotEqual(item, it)
+        self.assertEqual("test.h5f", reader.filename())
+        self.assertEqual("test", reader.groupname())
+        self.assertEqual(reader.get_version().name, "v2_0")

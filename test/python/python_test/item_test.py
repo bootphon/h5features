@@ -12,6 +12,8 @@ class TestItem(TestCase):
         features = np.ones((10, 4), dtype=np.float64)
         begin = np.array([0, 1, 2, 3], dtype=np.float64)
         end = np.array([1, 2, 3, 4], dtype=np.float64)
+        begin = np.asarray([i for i in range(0, 10)])
+        end = np.asarray([i for i in range(1, 11)])
         properties = {}
         name = "test"
         # test error if times is a list of begin end
@@ -19,9 +21,9 @@ class TestItem(TestCase):
             _ = Item(name, features, [begin, end], properties=properties)
         # test error if begin or end are list and not numpy arrays
         with pytest.raises(TypeError):
-            _ = Item(name, features, ([0, 1, 2, 3], end), properties=properties)
+            _ = Item(name, features, ([i for i in range(0, 10)], end), properties=properties)
         with pytest.raises(TypeError):
-            _ = Item(name, features, (begin, [0, 1, 2, 3]), properties=properties)
+            _ = Item(name, features, (begin, [i for i in range(1, 11)]), properties=properties)
         # test error if features is a list
         with pytest.raises(TypeError):
             print(features.tolist())
@@ -44,6 +46,8 @@ class TestItem(TestCase):
         features = np.ones((1000000, 4), dtype=np.float64)
         begin = np.asarray([0, 1, 2, 3],np.float64 )
         end = np.asarray([1, 2, 3, 4],np.float64)
+        begin = np.asarray([i for i in range(0, 1000000)],np.float64)
+        end = np.asarray([i for i in range(1, 1000000+1)],np.float64)
         properties = {}
         name = "test"
         item = Item(name, features, (begin, end), properties=properties)
@@ -60,6 +64,8 @@ class TestItem(TestCase):
         features = np.ones((1000000, 4), dtype=np.float64)
         begin = np.asarray([0, 1, 2, 3],np.float64)
         end = np.asarray([1, 2, 3, 4], np.float64)
+        begin = np.asarray([i for i in range(0, 1000000)],np.float64)
+        end = np.asarray([i for i in range(1, 1000000+1)],np.float64)
         properties = {}
         name = "test"
         item = Item(name, features, (begin, end), properties=properties)
@@ -78,6 +84,8 @@ class TestItem(TestCase):
         features = np.ones((1000000, 4), dtype=np.float64)
         begin = np.asarray([0, 1, 2, 3],np.float64)
         end = np.asarray([1, 2, 3, 4], np.float64)
+        begin = np.asarray([i for i in range(0, 1000000)],np.float64)
+        end = np.asarray([i for i in range(1, 1000000+1)],np.float64)
         # a dict of dict
         properties = {
             "int" : 1,

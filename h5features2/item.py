@@ -24,11 +24,11 @@ class Item:
         if not isinstance(start, np.ndarray):
             raise TypeError("start is not a np.ndarray")
         if start.dtype != "float64":
-            raise TypeError("features must have float64 type")
+            raise TypeError("start must have float64 type")
         if not isinstance(stop, np.ndarray):
             raise TypeError("stop is not a np.ndarray")
         if stop.dtype != "float64":
-            raise TypeError("features must have float64 type")   
+            raise TypeError("stop must have float64 type")   
         if not isinstance(properties, dict):
             raise TypeError("properties is not a dict")
         rec_properties(properties)

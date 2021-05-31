@@ -188,7 +188,7 @@ T h5features::item::pbind_features()
    */
    double* p=(double*)this->features().data().data();
          return  T(
-            {this->features().dim(),this->features().size()}, p
+            {this->features().size(),this->features().dim()}, p
             , 
             pybind11::capsule(
         new auto(p)
@@ -227,7 +227,7 @@ void init_item(pybind11::module& m)
             pybind11::buffer_info info = features.request();
             double *p = (double*)info.ptr;
             std::size_t size = info.size;
-            std::size_t shape= info.shape[0];
+            std::size_t shape= info.shape[1];
             auto  array = std::vector<double>(p, p+size);
             auto feats = h5features::features(array, shape, check);
             // create times object

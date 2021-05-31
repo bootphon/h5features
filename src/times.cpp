@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <sstream>
 
-
 namespace details
 {
 // Returns a single vector `data` with `start` and `stop` interleaved, such as
@@ -293,7 +292,6 @@ std::pair<std::size_t, std::size_t> h5features::times::get_indices(double start,
    {
       throw h5features::exception("start must be lower than stop");
    }
-
    std::pair<std::size_t, std::size_t> indices;
    switch(m_format)
    {
@@ -326,7 +324,6 @@ std::pair<std::size_t, std::size_t> h5features::times::get_indices(double start,
          break;
       }
    }
-
    // ensure the indices are valid
    if(indices.first >= indices.second)
    {
@@ -334,7 +331,6 @@ std::pair<std::size_t, std::size_t> h5features::times::get_indices(double start,
       msg << "no valid indices for time interval (" << start << ", " << stop << ")";
       throw h5features::exception(msg.str());
    }
-
    return indices;
 }
 

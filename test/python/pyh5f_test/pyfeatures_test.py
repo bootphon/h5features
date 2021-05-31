@@ -11,6 +11,8 @@ class FeaturesTests(TestCase):
         array = np.asarray([[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]], dtype=np.float64)
         begin = np.asarray([0, 1, 2])
         end = np.asarray([1, 2, 3])
+        begin = np.asarray([i for i in range(0, 4)])
+        end = np.asarray([i for i in range(1, 5)])
         name = "Test"
         properties = {}
         item = Item(name, array, begin, end, properties, True)
@@ -22,6 +24,8 @@ class FeaturesTests(TestCase):
         array = np.ones((1000000, 4))
         begin = np.asarray([0, 1, 2, 3])
         end = np.asarray([1, 2, 3, 4])
+        begin = np.asarray([i for i in range(0, 1000000)])
+        end  = np.asarray([i for i in range(1, 1000000+1)])
         name = "Test"
         properties = {}
         item = Item(name, array, begin, end, properties, True)
@@ -37,6 +41,8 @@ class FeaturesTests(TestCase):
         """ test numpy equality"""
         begin = np.asarray([0, 1, 2, 3])
         end = np.asarray([1, 2, 3, 4])
+        begin = np.asarray([i for i in range(0, 1000000)])
+        end  = np.asarray([i for i in range(1, 1000000+1)])
         # name = "Test"
         properties = {}
         a = Item("a", np.ones((1000000, 4), dtype=np.float64), begin, end, properties, True)
@@ -64,6 +70,8 @@ class FeaturesTests(TestCase):
          when udpdate the numpy array with copy=true"""
         begin = np.asarray([0, 1, 2, 3])
         end = np.asarray([1, 2, 3, 4])
+        begin = np.asarray([i for i in range(0, 1000000)])
+        end  = np.asarray([i for i in range(1, 1000000+1)])
         feats = np.ones((1000000, 4), dtype=np.float64)
         # f2 = np.array(feats, copy=True)
         name = "Test"
@@ -90,6 +98,8 @@ class FeaturesTests(TestCase):
          when udpdate the numpy array with copy=false"""
         begin = np.asarray([0, 1, 2, 3])
         end = np.asarray([1, 2, 3, 4])
+        begin = np.asarray([i for i in range(0, 1000000)])
+        end  = np.asarray([i for i in range(1, 1000000+1)])
         name = "Test"
         properties = {}
         features = Item(name, np.ones((1000000, 4)), begin, end, properties, True)
