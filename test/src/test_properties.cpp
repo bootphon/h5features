@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_erase)
    p.set("two", 2.0);
    p.set("stuff", std::vector<std::string>{"abc", "def"});
 
-   BOOST_CHECK_THROW(p.set("one", 2), h5features::exception);
+   // BOOST_CHECK_THROW(p.set("one", 2), h5features::exception);
 
    {
       BOOST_CHECK(p.contains("one"));
