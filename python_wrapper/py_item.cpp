@@ -9,7 +9,7 @@
 #include <typeinfo> 
 
 #include <pybind11/embed.h>
-
+#include <chrono>
 /* parse types for properties */
 namespace pybind11::detail {
       template <>
@@ -223,6 +223,7 @@ void init_item(pybind11::module& m)
             const pybind11::dict & properties,
             bool check = true
          ) {
+            // auto start = std::chrono::high_resolution_clock::now();
             // create features object
             pybind11::buffer_info info = features.request();
             double *p = (double*)info.ptr;
@@ -243,7 +244,11 @@ void init_item(pybind11::module& m)
             // auto props = h5features::properties();
             // create properties object
             auto props = pybind11::handle(properties).cast<h5features::properties>();
-            return h5features::item(name, feats, tims, props, check);
+            auto item = h5features::item(name, feats, tims, props, check);
+            // auto finish = std::chrono::high_resolution_clock::now();
+            // std::chrono::duration<double> elapsed = finish - start;
+            // std::cout << "Elapsed time item: " << elapsed.count() << " s\n";
+            return item;
          }))
       .def("__eq__", &h5features::item::operator==, pybind11::is_operator(), "returns true if the two items instances are equal")
       .def("__ne__", &h5features::item::operator!=, pybind11::is_operator(), "returns true if the two items instances are not equal")      

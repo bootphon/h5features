@@ -2,9 +2,15 @@
 #include <pybind11/pybind11.h>
 #include <h5features/version.h>
 #include <h5features/item.h>
-
+#include <chrono>
 void h5features::writer::pbind_write(h5features::item item)
 {
+   // auto start = std::chrono::high_resolution_clock::now();
+   // this->write(item);
+   // auto finish = std::chrono::high_resolution_clock::now();
+   //          std::chrono::duration<double> elapsed = finish - start;
+   //          std::cout << "Elapsed time write: " << elapsed.count() << " s\n";
+
    this->write(item);
 }
 void init_writer(pybind11::module& m)
@@ -18,6 +24,12 @@ void init_writer(pybind11::module& m)
          bool compress = true,
          h5features::version version=h5features::current_version
          ) {
+            // auto start = std::chrono::high_resolution_clock::now();
+            // auto wt =  h5features::writer(filename, group, overwrite, compress, version);
+            // auto finish = std::chrono::high_resolution_clock::now();
+            // std::chrono::duration<double> elapsed = finish - start;
+            // std::cout << "Elapsed time writer: " << elapsed.count() << " s\n";
+            // return wt;
             return h5features::writer(filename, group, overwrite, compress, version);
          }));
             

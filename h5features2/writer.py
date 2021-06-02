@@ -13,7 +13,6 @@ class Writer:
         if not isinstance(file, str):
             raise TypeError("file name must be str")
         file = abspath(file)
-        print(dirname(file))
         if not exists(dirname(file)):
             raise FileNotFoundError("file {} does not exist".format(file))
         if not isinstance(group, str):

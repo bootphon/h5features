@@ -1,13 +1,27 @@
 #include <h5features/reader.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <chrono>
 h5features::item h5features::reader::pbind_read(const std::string& name, bool ignore_properties=false)
 {
+   //        auto start = std::chrono::high_resolution_clock::now();
+   // auto a = this->read_item(name, ignore_properties=ignore_properties);
+
+   //          auto finish = std::chrono::high_resolution_clock::now();
+   //          std::chrono::duration<double> elapsed = finish - start;
+   //          std::cout << "Elapsed time read: " << elapsed.count() << " s\n";
+   // return a;
    return this->read_item(name, ignore_properties=ignore_properties);
 }
 h5features::item h5features::reader::pbind_read_btw(const std::string& name, double start, double stop, bool ignore_properties=false)
 {
-   return this->read_item(name, start, stop, ignore_properties=ignore_properties);
+   // auto deb = std::chrono::high_resolution_clock::now();
+   // auto a=  this->read_item(name, start, stop, ignore_properties=ignore_properties);
+   // auto finish = std::chrono::high_resolution_clock::now();
+   //          std::chrono::duration<double> elapsed = finish - deb;
+   //          std::cout << "Elapsed time read: " << elapsed.count() << " s\n";
+   //    return a;
+      return this->read_item(name, start, stop, ignore_properties=ignore_properties);
 }
 template<class T>
 T h5features::reader::pbind_items()
@@ -24,6 +38,13 @@ void init_reader(pybind11::module& m)
          const std::string& filename,
          const std::string& group
          ) {
+
+            // auto start = std::chrono::high_resolution_clock::now();
+            // auto rd =  h5features::reader(filename, group);
+            // auto finish = std::chrono::high_resolution_clock::now();
+            // std::chrono::duration<double> elapsed = finish - start;
+            // std::cout << "Elapsed time reader: " << elapsed.count() << " s\n";
+            // return rd;
             return h5features::reader(filename, group);
          }));
             

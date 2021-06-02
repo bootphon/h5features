@@ -22,8 +22,6 @@ class Item:
         if len(times) != 2:
             raise TypeError("times must contain to numpy arrays")
         start, stop = times
-        print(start)
-        print(stop)
         if not isinstance(name, str):
             raise TypeError("item's name must be str")
         if not isinstance(features, np.ndarray):
