@@ -28,22 +28,7 @@ namespace h5features
 class item
 {
 public:
-   template<class T>
-   T pbind_features();
-
-   template<class T>
-   T pbind_times();
    
-   template < class T>
-   T pbind_properties();
-
-   bool pbind_contains(const std::string& name);
-   void pbind_erase(const std::string& name);
-
-   template < class T>
-   void pbind_set_props(const std::string& name, T src);
-   template <class T>
-   T pbind_get_properties(const std::string& name);
    /// Destructor
    virtual ~item() = default;
 

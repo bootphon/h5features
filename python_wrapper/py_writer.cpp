@@ -1,21 +1,11 @@
-#include <h5features/writer.h>
+#include <pbwriter.h>
 #include <pybind11/pybind11.h>
 #include <h5features/version.h>
 #include <h5features/item.h>
-#include <chrono>
-void h5features::writer::pbind_write(h5features::item item)
-{
-   // auto start = std::chrono::high_resolution_clock::now();
-   // this->write(item);
-   // auto finish = std::chrono::high_resolution_clock::now();
-   //          std::chrono::duration<double> elapsed = finish - start;
-   //          std::cout << "Elapsed time write: " << elapsed.count() << " s\n";
 
-   this->write(item);
-}
 void init_writer(pybind11::module& m)
 {
-   pybind11::class_<h5features::writer> writer(m, "Writer");
+   pybind11::class_<pbwriter> writer(m, "Writer");
 
    writer.def(pybind11::init([](
          const std::string& filename,
@@ -30,11 +20,11 @@ void init_writer(pybind11::module& m)
             // std::chrono::duration<double> elapsed = finish - start;
             // std::cout << "Elapsed time writer: " << elapsed.count() << " s\n";
             // return wt;
-            return h5features::writer(filename, group, overwrite, compress, version);
+            return pbwriter(filename, group, overwrite, compress, version);
          }));
             
-      writer.def("write", &h5features::writer::pbind_write, "write item");
-      writer.def("get_version", &h5features::writer::version);
+      writer.def("write", &pbwriter::write, "write item");
+      writer.def("get_version", &pbwriter::get_version);
       
        pybind11::enum_<h5features::version>(writer, "version")
       .value("v1_0", h5features::version::v1_0)

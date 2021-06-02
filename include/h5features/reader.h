@@ -20,10 +20,6 @@ namespace h5features
 class reader
 {
 public:
-   template<class T>
-   T pbind_items();
-   h5features::item pbind_read(const std::string& name, bool ignore_properties);
-   h5features::item pbind_read_btw(const std::string& name, double start, double stop, bool ignore_properties);
    /// Destructor
    virtual ~reader() = default;
 

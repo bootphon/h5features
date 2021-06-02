@@ -70,15 +70,16 @@ endif()
 if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
   message(STATUS "Compile H5features and wrapper")
   
-  file(GLOB highfive "${PROJECT_SOURCE_DIR}/external/HighFive/include/*h")
-  source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${gihfive})
+#  file(GLOB highfive "${PROJECT_SOURCE_DIR}/external/HighFive/include/*h")
+#  source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${highfive})
   add_subdirectory(external/pybind11)
+
   pybind11_add_module(pyh5features
     THIN_LTO
+    ${PROJECT_SOURCE_DIR}/python_wrapper/src/pbitem.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/src/pbwriter.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/src/pbreader.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_h5features.cpp
-    ${PROJECT_SOURCE_DIR}/python_wrapper/py_features.cpp
-    ${PROJECT_SOURCE_DIR}/python_wrapper/py_times.cpp
-    ${PROJECT_SOURCE_DIR}/python_wrapper/py_properties.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_item.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_reader.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_writer.cpp
@@ -99,7 +100,14 @@ if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
     ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
     ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp
     ${highfive})
+
+    target_include_directories(pyh5features PUBLIC
+    ${PROJECT_SOURCE_DIR}/python_wrapper/include
+    ${PROJECT_SOURCE_DIR}/include
+    ${HIGHFIVE_SOURCE_DIR}/include)
+
     target_link_libraries(pyh5features PRIVATE pybind11::module)
+
 else() #compilation without wrapper
 message(STATUS "Compile H5features only")
   add_library(pyh5features
@@ -119,10 +127,12 @@ message(STATUS "Compile H5features only")
     ${PROJECT_SOURCE_DIR}/src/v2_writer.cpp
     ${PROJECT_SOURCE_DIR}/src/properties_reader.cpp
     ${PROJECT_SOURCE_DIR}/src/properties_writer.cpp)
-endif()
-target_include_directories(pyh5features PUBLIC
+
+    target_include_directories(pyh5features PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${HIGHFIVE_SOURCE_DIR}/include)
+endif()
+
 target_link_libraries(pyh5features PUBLIC HighFive)
 
 
