@@ -10,34 +10,35 @@
 
 #include <pybind11/embed.h>
 
-
-class pbitem: public h5features::item
+namespace pybind
 {
-    public:
-         pbitem(
-            const std::string& name,
-            const h5features::features& features,
-            const h5features::times& times,
-            const h5features::properties& properties={},
-            bool check=true
-         );
-         pbitem(h5features::item item);
-         std::string name();
-         bool has_properties();
-         double dim();
-         double size();
-         pybind11::array_t<double> features();
-         pybind11::array_t<double> times();
-         pybind11::dict properties();
-         bool properties_contains(const std::string& name);
-         void erase_properties(const std::string& name);
-         void set_properties(const std::string& name, pybind11::handle src);
-         /// Returns true if the two items are  equal
-         bool operator==(const pbitem& other) const noexcept;
-         /// Returns true if the two items are not equal
-          bool operator!=(const pbitem& other) const noexcept;
-};
-
+   class item: public h5features::item
+   {
+      public:
+            item(
+               const std::string& name,
+               const h5features::features& features,
+               const h5features::times& times,
+               const h5features::properties& properties={},
+               bool check=true
+            );
+            item(h5features::item item);
+            std::string name();
+            bool has_properties();
+            double dim();
+            double size();
+            pybind11::array_t<double> features();
+            pybind11::array_t<double> times();
+            pybind11::dict properties();
+            bool properties_contains(const std::string& name);
+            void erase_properties(const std::string& name);
+            void set_properties(const std::string& name, pybind11::handle src);
+            /// Returns true if the two items are  equal
+            bool operator==(const pybind::item& other) const noexcept;
+            /// Returns true if the two items are not equal
+            bool operator!=(const pybind::item& other) const noexcept;
+   };
+}
 namespace pybind11::detail {
       template <>
    struct type_caster<h5features::properties>  { 

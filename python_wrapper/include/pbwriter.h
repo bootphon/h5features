@@ -2,7 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <h5features/version.h>
 #include <pbitem.h>
-namespace pybind11
+namespace pybind
 {
     class writer : public h5features::writer
     {
@@ -40,7 +40,7 @@ namespace pybind11
             object in the group or if the write operation failed.
 
             */
-            void write(pbitem item);
+            void write(pybind::item item);
 
             /// Returns the h5features format version being writen
             h5features::version get_version();

@@ -5,7 +5,7 @@
 
 void init_writer(pybind11::module& m)
 {
-   pybind11::class_<pybind11::writer> writer(m, "Writer");
+   pybind11::class_<pybind::writer> writer(m, "Writer");
 
    writer.def(pybind11::init([](
          const std::string& filename,
@@ -20,13 +20,13 @@ void init_writer(pybind11::module& m)
             // std::chrono::duration<double> elapsed = finish - start;
             // std::cout << "Elapsed time writer: " << elapsed.count() << " s\n";
             // return wt;
-            return pybind11::writer(filename, group, overwrite, compress, version);
+            return pybind::writer(filename, group, overwrite, compress, version);
          }));
             
-      writer.def("write", &pybind11::writer::write, "write item");
-      writer.def("get_version", &pybind11::writer::get_version, "return version");
-      writer.def("filename", &pybind11::writer::filename, "return filename");
-      writer.def("groupname", &pybind11::writer::groupname, "return groupname");
+      writer.def("write", &pybind::writer::write, "write item");
+      writer.def("get_version", &pybind::writer::get_version, "return version");
+      writer.def("filename", &pybind::writer::filename, "return filename");
+      writer.def("groupname", &pybind::writer::groupname, "return groupname");
       
       
        pybind11::enum_<h5features::version>(writer, "version")

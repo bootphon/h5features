@@ -1,6 +1,6 @@
 #include <pbwriter.h>
 // #include <chrono>
-pybind11::writer::writer(
+pybind::writer::writer(
         const std::string& filename,
          const std::string& group,
          bool overwrite,
@@ -8,22 +8,22 @@ pybind11::writer::writer(
          h5features::version version
          ) : h5features::writer::writer(filename, group, overwrite, compress, version) {}
 
-h5features::version pybind11::writer::get_version()
+h5features::version pybind::writer::get_version()
 {
     return h5features::writer::version();
 }
 
-std::string pybind11::writer::filename()
+std::string pybind::writer::filename()
 {
     return h5features::writer::filename();
 }
 
-std::string pybind11::writer::groupname()
+std::string pybind::writer::groupname()
 {
     return h5features::writer::groupname();
 }
 
-void pybind11::writer::write(pbitem item)
+void pybind::writer::write(pybind::item item)
 {
    // auto start = std::chrono::high_resolution_clock::now();
    // this->write(item);
