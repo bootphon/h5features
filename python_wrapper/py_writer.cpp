@@ -1,4 +1,4 @@
-#include <pbwriter.h>
+#include <writer.h>
 #include <pybind11/pybind11.h>
 #include <h5features/version.h>
 #include <h5features/item.h>

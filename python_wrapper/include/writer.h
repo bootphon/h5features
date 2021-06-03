@@ -1,7 +1,7 @@
 #include <h5features/writer.h>
 #include <pybind11/pybind11.h>
 #include <h5features/version.h>
-#include <pbitem.h>
+#include <item.h>
 namespace pybind
 {
     class writer : public h5features::writer

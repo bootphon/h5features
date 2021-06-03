@@ -76,9 +76,9 @@ if(H5FEATURES_BUILD_PYTHON) # include compilation of Python bindings
 
   pybind11_add_module(pyh5features
     THIN_LTO
-    ${PROJECT_SOURCE_DIR}/python_wrapper/src/pbitem.cpp
-    ${PROJECT_SOURCE_DIR}/python_wrapper/src/pbwriter.cpp
-    ${PROJECT_SOURCE_DIR}/python_wrapper/src/pbreader.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/src/item.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/src/writer.cpp
+    ${PROJECT_SOURCE_DIR}/python_wrapper/src/reader.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_h5features.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_item.cpp
     ${PROJECT_SOURCE_DIR}/python_wrapper/py_reader.cpp

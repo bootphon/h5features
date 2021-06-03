@@ -1,5 +1,5 @@
 #include <h5features/reader.h>
-#include <pbitem.h>
+#include <item.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 

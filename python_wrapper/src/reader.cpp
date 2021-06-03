@@ -1,4 +1,4 @@
-#include <pbreader.h>
+#include <reader.h>
 
 pybind::reader::reader(const std::string& filename,const std::string& group) : h5features::reader::reader(filename, group) {}
 pybind11::list pybind::reader::items() 

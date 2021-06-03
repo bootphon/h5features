@@ -1,4 +1,4 @@
-#include <pbreader.h>
+#include <reader.h>
 #include <pybind11/pybind11.h>
 
 void init_reader(pybind11::module& m)
