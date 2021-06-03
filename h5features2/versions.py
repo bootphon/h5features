@@ -1,5 +1,6 @@
 from pyh5features import Writer as pywriter
 class Versions:
+    """ This class allow to return the different version of writing """
     def versions():
         versions = {
             "v1_0" : "1.0",

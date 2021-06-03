@@ -40,7 +40,7 @@ class TestItem(TestCase):
             name = 1001
             _ = Item(name, np.asarray(features, dtype=np.float64), (begin, end))
 
-    def test_features(self):
+    def test_features_firstdim(self):
         """ test features copy or not """
 
         features = np.ones((1000000, 4), dtype=np.float64)
@@ -52,6 +52,24 @@ class TestItem(TestCase):
         name = "test"
         item = Item.create(name, features, (begin, end), properties=properties)
         f1 = item.features(copy=False)
+        f2 = item.features(copy=True)
+        f3 = item.features(copy=False)
+        f1[0, 0] = 0
+        self.assertEqual(f1[0, 0], 0)
+        self.assertEqual(f2[0, 0], 1)
+        self.assertEqual(f3[0, 0], 0)
+
+    def test_features_seconddim(self):
+        """ test features copy or not """
+
+        features = np.ones((100, 40000), dtype=np.float64)
+        begin = np.asarray([i for i in range(0, 100)],np.float64)
+        end = np.asarray([i for i in range(1, 100+1)],np.float64)
+        properties = {}
+        name = "test"
+        item = Item.create(name, features, (begin, end), properties=properties)
+        f1 = item.features(copy=False)
+        self.assertTrue(np.all(f1==features))
         f2 = item.features(copy=True)
         f3 = item.features(copy=False)
         f1[0, 0] = 0

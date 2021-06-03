@@ -15,9 +15,9 @@ import numpy as np
 # from memory_profiler import profile
 import time
 def data():
-    n=10000
+    n=10
     size = 100
-    dim = 10
+    dim = 100000
     items =["item"+str(i) for i in range(n)]
     features = [np.array(np.random.rand(size, dim) , dtype=np.float64) for _ in range(n)]
     times = [np.asarray([i+0.5 for i in range(size) ], dtype=np.float64)for _ in range(n)]
@@ -73,7 +73,7 @@ def deuxr(items, features, times, properties, begin, end,n):
 @profile
 def unrbtw(items, features, times, properties, begin, end,n):
     def _unrbtw():
-        return h5f.reader.Reader("testone.h5", "group1").read(from_item="item"+str(0), to_item="item"+str(n-1), from_time=0, to_time=1000000)
+        return h5f.reader.Reader("testone.h5", "group1").read(from_item="item"+str(0), to_item="item"+str(n-1), from_time=0, to_time=100)
     return _unrbtw()
 @profile
 def deuxrbtw(items, features, times, properties, begin, end,n):
@@ -81,7 +81,7 @@ def deuxrbtw(items, features, times, properties, begin, end,n):
         l=[]
         reader=Reader("testtwo.h5f", "group1")
         for it in items:
-            l.append(reader.read(it, features_between_times=(0, 1000000), ignore_properties=False))
+            l.append(reader.read(it, features_between_times=(0, 100), ignore_properties=False))
         return l
     return _deuxrbtw()
 
@@ -91,9 +91,9 @@ a = np.asarray(a.features())
 print(a.shape)
 print( np.all(a == np.asarray(features)))
 a=deuxw(items, features, times, properties, begin, end,n)
-a = np.asarray(a.features())
+a = np.asarray(a.features(copy=True))
 print(a.shape)
-print( np.all(a == np.asarray(features)))
+print( np.all(a == np.asarray(features[-1])))
 a=unr(items, features, times, properties, begin, end,n)
 a = np.asarray(a.features())
 print(a.shape)
