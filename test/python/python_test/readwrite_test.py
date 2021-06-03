@@ -1,6 +1,6 @@
 import sys
 from os import remove
-from os.path import exists
+from os.path import exists, abspath
 import pytest
 from unittest import TestCase
 import numpy as np
@@ -41,6 +41,8 @@ class TestWriterReader(TestCase):
             _ = Writer("/test/test.h5f", "test", False, True, "2.0")
         writer = Writer("test.h5f", "test", False, True, "2.0")
         self.assertEqual(writer.version(), "2.0")
+        self.assertEqual(writer.filename(), abspath("test.h5f"))
+        self.assertEqual(writer.groupname(), "test")
 
     def test_v2_0(self):
         array = np.ones((9, 1000))

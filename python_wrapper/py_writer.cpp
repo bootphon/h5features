@@ -24,7 +24,10 @@ void init_writer(pybind11::module& m)
          }));
             
       writer.def("write", &pbwriter::write, "write item");
-      writer.def("get_version", &pbwriter::get_version);
+      writer.def("get_version", &pbwriter::get_version, "return version");
+      writer.def("filename", &pbwriter::filename, "return filename");
+      writer.def("groupname", &pbwriter::groupname, "return groupname");
+      
       
        pybind11::enum_<h5features::version>(writer, "version")
       .value("v1_0", h5features::version::v1_0)

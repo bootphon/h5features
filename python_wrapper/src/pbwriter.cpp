@@ -12,6 +12,17 @@ h5features::version pbwriter::get_version()
 {
     return writer::version();
 }
+
+std::string pbwriter::filename()
+{
+    return writer::filename();
+}
+
+std::string pbwriter::groupname()
+{
+    return writer::groupname();
+}
+
 void pbwriter::write(pbitem item)
 {
    // auto start = std::chrono::high_resolution_clock::now();

@@ -39,4 +39,9 @@ class Writer:
         }
         return versions[self.writer.get_version().name]
 
+    def filename(self):
+        return self.writer.filename()
+    
+    def groupname(self):
+        return self.writer.groupname()
 
