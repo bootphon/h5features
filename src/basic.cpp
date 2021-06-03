@@ -84,7 +84,7 @@ void read_v11()
       std::cout << item << " ";
    std::cout << std::endl;
 
-   for(const auto item : reader.read_all())
+   for(const auto& item : reader.read_all())
    {
       std::cout << item.name() << ": " << item.dim() << ", " << item.size()
                 << ", t: " << item.times().data()

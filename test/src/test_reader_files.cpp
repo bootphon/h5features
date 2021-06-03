@@ -10,7 +10,7 @@
 BOOST_FIXTURE_TEST_CASE(test_read_files, utils::fixture::data_directory)
 {
    std::vector<std::vector<h5features::item>> data;
-   for(const auto file : data_files)
+   for(const auto& file : data_files)
    {
       h5features::reader reader = h5features::reader(file, "features");
       data.push_back(reader.read_all());

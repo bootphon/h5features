@@ -15,6 +15,8 @@ class writer_interface
 public:
    writer_interface(hdf5::Group&& group, bool compress=true, h5features::version version=h5features::current_version);
 
+   virtual ~writer_interface();
+
    h5features::version version() const noexcept;
 
    virtual void write(const h5features::item& item) = 0;

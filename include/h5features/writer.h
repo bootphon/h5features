@@ -27,9 +27,6 @@ public:
    /// Move constructor
    writer(writer&&) = default;
 
-   /// Move operator
-   writer& operator=(writer&&) = default;
-
    /**
       \brief Instanciates a writer
 
@@ -91,6 +88,9 @@ private:
 
    // Copy disabled
    writer(const writer&) = delete;
+
+   /// Move operator disabled
+   writer& operator=(writer&&) = delete;
 
    // Copy disabled
    writer& operator=(const writer&) = delete;
