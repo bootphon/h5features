@@ -3,7 +3,7 @@
 
 void init_reader(pybind11::module& m)
 {
-   pybind11::class_<pbreader> reader(m, "Reader");
+   pybind11::class_<pybind::reader> reader(m, "Reader");
 
 
    reader.def(pybind11::init([](
@@ -17,16 +17,16 @@ void init_reader(pybind11::module& m)
             // std::chrono::duration<double> elapsed = finish - start;
             // std::cout << "Elapsed time reader: " << elapsed.count() << " s\n";
             // return rd;
-            return pbreader(filename, group);
+            return pybind::reader(filename, group);
          }));
             
-      reader.def("read", &pbreader::read, "read item");
-      reader.def("read_btw", &pbreader::read_btw, "read item between times");
-      reader.def("items", &pbreader::items, "return items");
-      reader.def("filename", &pbreader::filename, "Returns the name of the file being read");
-      reader.def("groupname", &pbreader::groupname, "Returns the name of the group being read in the file");
+      reader.def("read", &pybind::reader::read, "read item");
+      reader.def("read_btw", &pybind::reader::read_btw, "read item between times");
+      reader.def("items", &pybind::reader::items, "return items");
+      reader.def("filename", &pybind::reader::filename, "Returns the name of the file being read");
+      reader.def("groupname", &pybind::reader::groupname, "Returns the name of the group being read in the file");
       // reader.def("version", &h5features::reader::version, "Returns the version of the h5features data in the group");
-      reader.def("get_version", &pbreader::get_version,"Returns the version of the h5features data in the group");
+      reader.def("get_version", &pybind::reader::get_version,"Returns the version of the h5features data in the group");
    //    pybind11::enum_<h5features::version>(reader, "rversion")
    //    .value("v1_0", h5features::version::v1_0)
    //  .value("v1_1", h5features::version::v1_1)
