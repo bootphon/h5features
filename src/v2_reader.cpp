@@ -185,9 +185,9 @@ protected:
    {
       return {
          name,
-         std::move(features_reader().read(group)),
-         std::move(read_times(group)),
-         std::move(read_properties(group)),
+         features_reader().read(group),
+         read_times(group),
+         read_properties(group),
          false};
    }
 };
@@ -213,9 +213,9 @@ private:
          auto indices = times.get_indices(m_start, m_stop);
          return {
             name,
-            std::move(features_partial_reader(indices).read(group)),
-            std::move(times.select(indices.first, indices.second)),
-            std::move(read_properties(group)),
+            features_partial_reader(indices).read(group),
+            times.select(indices.first, indices.second),
+            read_properties(group),
             false};
       }
       catch(const h5features::exception&)

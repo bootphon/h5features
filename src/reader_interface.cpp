@@ -6,6 +6,10 @@ h5features::details::reader_interface::reader_interface(hdf5::Group&& group, h5f
 {}
 
 
+h5features::details::reader_interface::~reader_interface()
+{}
+
+
 h5features::version h5features::details::reader_interface::version() const noexcept
 {
    return m_version;

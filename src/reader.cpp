@@ -80,7 +80,7 @@ std::vector<std::string> h5features::reader::items() const
 std::vector<h5features::item> h5features::reader::read_all(bool ignore_properties) const
 {
    std::vector<h5features::item> all_items;
-   for(const auto item : items())
+   for(const auto& item : items())
    {
       all_items.push_back(read_item(item, ignore_properties));
    }

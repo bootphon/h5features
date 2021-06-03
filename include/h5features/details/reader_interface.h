@@ -17,6 +17,8 @@ class reader_interface
 public:
    reader_interface(hdf5::Group&& group, h5features::version version);
 
+   virtual ~reader_interface();
+
    h5features::version version() const noexcept;
 
    virtual std::vector<std::string> items() const = 0;
