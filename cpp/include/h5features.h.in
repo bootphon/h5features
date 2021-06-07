@@ -1,0 +1,12 @@
+#ifndef H5FEATURES_H
+#define H5FEATURES_H
+
+#include <string>
+
+#include <h5features/item.h>
+#include <h5features/reader.h>
+#include <h5features/writer.h>
+
+const std::string H5FEATURES_VERSION = "@H5FEATURES_VERSION@";
+
+#endif  // H5FEATURES_H
