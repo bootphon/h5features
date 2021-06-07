@@ -20,17 +20,17 @@ bool pybind::item::has_properties()  {return h5features::item::has_properties();
 double pybind::item::dim()  {return h5features::item::dim();} 
 double pybind::item::size() {return h5features::item::size();} 
 bool pybind::item::operator==(const pybind::item& other) const noexcept {return h5features::item::operator==(other);} 
-         /// Returns true if the two items are not equal
+
 bool pybind::item::operator!=(const pybind::item& other) const noexcept {return h5features::item::operator!=(other);} 
 
 bool pybind::item::properties_contains(const std::string& name)
 {
-   /* check if properties exists*/
+
    return h5features::item::properties().contains(name);
 }
 void pybind::item::erase_properties(const std::string& name)
 {
-   /*delete a propertie*/
+
    h5features::properties& ref = const_cast <h5features::properties&>(h5features::item::properties());
    ref.erase(name);
 }
