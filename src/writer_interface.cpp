@@ -7,6 +7,10 @@ h5features::details::writer_interface::writer_interface(
 {}
 
 
+h5features::details::writer_interface::~writer_interface()
+{}
+
+
 h5features::version h5features::details::writer_interface::version() const noexcept
 {
    return m_version;

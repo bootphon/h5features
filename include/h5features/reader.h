@@ -26,9 +26,6 @@ public:
    /// Move constructor
    reader(reader&&) = default;
 
-   /// Move operator
-   reader& operator=(reader&&) = default;
-
    /**
       \brief Instanciates a reader
 
@@ -102,6 +99,9 @@ private:
 
    // Copy disabled
    reader(const reader&) = delete;
+
+   /// Move operator deleted
+   reader& operator=(reader&&) = delete;
 
    // Copy disabled
    reader& operator=(const reader&) = delete;

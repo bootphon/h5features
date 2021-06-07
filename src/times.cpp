@@ -160,7 +160,7 @@ h5features::times::times(std::vector<double>&& data, format times_format, bool v
 
 
 h5features::times::times(const std::vector<double>& start, const std::vector<double>& stop, bool validate)
-   : m_data{std::move(details::init_from_start_stop(start, stop))}, m_format{format::interval}
+   : m_data{details::init_from_start_stop(start, stop)}, m_format{format::interval}
 {
    if(validate)
    {
