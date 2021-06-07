@@ -1,7 +1,5 @@
-import sys
 from pyh5features import Item
 from unittest import TestCase
-import psutil
 import numpy as np
 
 class ItemTests(TestCase):

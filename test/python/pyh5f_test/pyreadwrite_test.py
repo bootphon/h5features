@@ -1,13 +1,10 @@
-import sys
 from os import remove
 from os.path import exists
 from pyh5features import Item
 from pyh5features import Writer, Reader
 # from pyh5features.Writer import version
 from unittest import TestCase
-import psutil
 import numpy as np
-from copy import deepcopy
 
 class ReaderWritterTests(TestCase):
     def test_reading_writting(self):
