@@ -16,8 +16,8 @@ import numpy as np
 import time
 def data():
     n=10
-    size = 100
-    dim = 100000
+    size = 1000000
+    dim = 10
     items =["item"+str(i) for i in range(n)]
     features = [np.array(np.random.rand(size, dim) , dtype=np.float64) for _ in range(n)]
     times = [np.asarray([i+0.5 for i in range(size) ], dtype=np.float64)for _ in range(n)]
@@ -91,7 +91,7 @@ a = np.asarray(a.features())
 print(a.shape)
 print( np.all(a == np.asarray(features)))
 a=deuxw(items, features, times, properties, begin, end,n)
-a = np.asarray(a.features(copy=True))
+a = np.asarray(a.features(copy=False))
 print(a.shape)
 print( np.all(a == np.asarray(features[-1])))
 a=unr(items, features, times, properties, begin, end,n)

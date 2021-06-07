@@ -37,4 +37,4 @@ assert it.properties() == {}
 # in order to check available version, use :
 print(Versions.versions())
 
-# see the API for others methods
+# see the API for other methods

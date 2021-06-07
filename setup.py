@@ -76,5 +76,8 @@ setuptools.setup(
     packages=setuptools.find_packages(include=['h5features2', 'h5features2.*']),
     python_requires=">=3.8",
     zip_safe=False,
+    install_requires=[
+        "numpy",
+        ],
     
 )

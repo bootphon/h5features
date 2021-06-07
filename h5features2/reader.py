@@ -5,17 +5,19 @@ import numpy as np
 class Reader:
     """This class implement the interface with the python wrapper Reader from h5features2
 
-    It allow to read Item from hdf5 format
-    """
-    def __init__(self, file, group):
-        """ As constructor, create the instance of Reader according to the following parameters:
+        It allow to read Item from hdf5 format
+
         Args:
             file (`str`) : the name of the file to read
             group (`str`) :  a 'location' in the file to read
 
         Raises:
             TypeError: if file, group are not `str`
-            FileNotFoundError :  if file does not exist
+            FileNotFoundError :  if file does not exist 
+    """
+    def __init__(self, file, group):
+        """ As constructor, create the instance of Reader according to the following parameters:
+        
         """
         if not isinstance(file, str):
             raise TypeError("file name must be str")
@@ -31,16 +33,16 @@ class Reader:
         Args:
             name (`str`): the name of item to return
             ignore_properties (`bool`) :  if True, do not return item properties (default False)
-            features_between_time (:obj: `tuple` of two float) : if specified, return the segments between the times given
+            features_between_time (`tuple` of two float) : if specified, return the segments between the times given
                 else the whole item
         Returns:
             Item: the item with the name specified
         
         Raises:
-            TypeError: If name is not `str`,
-                if ignore_properties is not `bool`,
-                if features_between_times is not `tuple`,
-                if features_between_times as a length != 2
+            TypeError: If name is not `str`, 
+                if ignore_properties is not `bool`, 
+                if features_between_times is not `tuple`, 
+                if features_between_times as a length != 2, 
                 if if one of time is None only
             ValueError: If times are not convertible to float
 
@@ -68,6 +70,7 @@ class Reader:
 
     def version(self):
         """ This method allow to check which version of reading is used
+
         Returns:
             str: the version of reading
         """
@@ -81,13 +84,15 @@ class Reader:
 
     def items(self):
         """This method allow to return the name of item writed in file and group specified
+
         Returns:
-        l   ist : list of item's name
+            list : list of item's name
         """
         return self.__reader.items()
     
     def groupname(self):
         """ This method allow to check in which group the item is read
+
         Returns:
             str: the group of the file to read
         """
@@ -95,6 +100,7 @@ class Reader:
     
     def filename(self):
         """ This method allow to check which file is used
+        
         Returns:
             str: the file to read
         """

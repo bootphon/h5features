@@ -5,10 +5,8 @@ from pyh5features import Writer as pywriter
 class Writer:
     """This class implement the interface with the python wrapper Writer from h5features2
 
-    It allow to write Item in hdf5 format
-    """
-    def __init__(self, file, group, overwrite=False, compress=True, version="2.0"):
-        """ As constructor, create the instance of Writer according to the following parameters:
+        It allow to write Item in hdf5 format
+
         Args:
             file (`str`) : the name of the file to write
             group (`str`) :  a 'location' in the file to write
@@ -20,6 +18,10 @@ class Writer:
             TypeError: if file, group are not `str`; compress and overwrite are not bool;
             KeyError: if version not in ['1.1', '1.2', '2.0']
             FileNotFoundError: if direname of file does not exist
+    """
+    def __init__(self, file, group, overwrite=False, compress=True, version="2.0"):
+        """ As constructor, create the instance of Writer according to the following parameters:
+        
         """
         versions = {
             # "1.0" : pywriter.version.v1_0,
@@ -46,7 +48,7 @@ class Writer:
         """This method allow to write the item
 
         Args:
-            item (:obj: Item) :  the Item to write
+            item (Item) :  the Item to write
         
         Raises:
             TypeError: if item is not an instance of Item
@@ -58,6 +60,7 @@ class Writer:
     
     def version(self) -> str:
         """ This method allow to check which version of writing is used
+
         Returns:
             str: the version of writing
         """
@@ -72,6 +75,7 @@ class Writer:
 
     def filename(self) -> str:
         """ This method allow to check which file is used
+
         Returns:
             str: the file to write
         """
@@ -79,6 +83,7 @@ class Writer:
     
     def groupname(self) -> str:
         """ This method allow to check in which group the item is writed
+        
         Returns:
             str: the group of the file to write
         """

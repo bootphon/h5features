@@ -14,7 +14,7 @@ class Item:
         """Constructor of Item class
         
         Args:
-            item (:obj: `pyh5features.Item`): Construct directly Item from wrapper
+            item (`pyh5features.Item`): Construct directly Item from wrapper
                 It is used internaly.
         Raises:
             TypeError: If `item` is not an instance of `pyh5features.Item`
@@ -27,14 +27,18 @@ class Item:
         """Main constructor of Item class for user usage
 
         Args:
-            name (str): a string to qualify the `Item`
-            features (:obj: `numpy.ndarray`) : a two-dimensionnal numpy array of data
-                The first dimension correspond to times or segments in the data
-                The second dimension correspond to one/several values according to shape for the segment
-            times (:obj: `tuple` of :obj: `numpy.ndarray`) : a tuple with two numpy array.
+            name (`str`): a string to qualify the `Item`.
+
+            features (`numpy.ndarray`): a two-dimensionnal numpy array of data.
+                The first dimension correspond to times or segments in the data.
+                The second dimension correspond to one/several values according to shape for the segment.
+
+            times (`tuple` of `numpy.ndarray`): a tuple with two numpy array.
                 The first correspond to a numpy array where each value correspond to the start time of same index in first dimension of features.
                 The second correspond to end time in the same way.
-            properties (:obj: `dict`, optional) : a python dictionnary to record characteristics on the Item.
+
+            properties (`dict`, optional): a python dictionnary to record characteristics on the Item.
+
 
         Notes:
             properties values can be either `dict`, `bool`, `int`, `float`, `string`, `list` of `int`, `float`, `string`
@@ -112,8 +116,9 @@ class Item:
         Allow to return the reference or to do a deepcopy of the features
 
         Args:
-            copy : If True, return a deepcopy of the features
+            copy (`bool`): If True, return a deepcopy of the features
                 else, return the reference
+
         Returns:
            np.ndarray : the features
 
@@ -128,8 +133,9 @@ class Item:
         Allow to return the reference or to do a deepcopy of the times
 
         Args:
-            copy : If True, return a deepcopy of the times
+            copy (`bool`): If True, return a deepcopy of the times
                 else, return the reference
+
         Returns:
            np.ndarray : the times
 
@@ -153,9 +159,11 @@ class Item:
     
     def set_properties(self, name, value):
         """This method allow to set a new propertie or update an existing propertie
+
         Args:
-            name (`str`) : key of propertie
+            name (`str`): key of propertie
             value : value of properties, see constructor to check the possible types
+
         Raises:
             TypeError is name is not `str`
         """
@@ -174,10 +182,13 @@ class Item:
     
     def properties_contains(self, name) -> bool:
         """This method allow to check if a propertie exists
+
         Args:
             name (`str`) : key of propertie
+
         Raises:
             TypeError is name is not `str`
+
         Returns:
             bool : True if contains the name, else False
         """
@@ -187,8 +198,10 @@ class Item:
 
     def properties_erase(self, name):
         """This method allow to delete a propertie
+
         Args:
             name (`str`) : key of propertie
+
         Raises:
             TypeError is name is not `str`
         """
@@ -198,6 +211,7 @@ class Item:
 
     def ncharacteristic(self) -> int:
         """ This method returns the number of characterics of one segment of features
+        
         Returns:
             int: the number of characteristics
         """

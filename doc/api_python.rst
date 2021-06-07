@@ -9,8 +9,8 @@ h5features2.versions
 .. automodule:: h5features2.versions
    :members:
 
-h5featres2.item
----------------
+h5features2.item
+----------------
 
 .. automodule:: h5features2.item
    :members:
