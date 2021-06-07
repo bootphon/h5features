@@ -3,7 +3,13 @@ copyright = '@PROJECT_COPYRIGHT@'
 author = '@PROJECT_AUTHOR@'
 release = '@PROJECT_VERSION@'
 
-extensions = ['breathe']
+import sys
+print('@CMAKE_CURRENT_SOURCE_DIR@')
+sys.path.insert(0, '@CMAKE_CURRENT_SOURCE_DIR@/../')
+#import item, writer, reader, version
+import h5features2
+
+extensions = ['breathe', 'sphinxcontrib.napoleon']
 breathe_projects = {'@PROJECT_NAME@': '@CMAKE_CURRENT_BINARY_DIR@/xml/'}
 breathe_default_project = '@PROJECT_NAME@'
 breathe_default_members = ('members', 'undoc-members')

@@ -113,3 +113,11 @@ Several versions of the *h5features* file format have been implemented:
   1.3.x                0.1, 1.0, 1.1       1.0, 1.1
   2.0.x                1.0, 1.1*, 1.2, 2.0 1.1*, 1.2, 2.0
   ==================== =================== ====================
+
+Basic usage
+-----------
+
+The following example show the main usage of h5features:
+
+.. include:: example.py
+   :code: python

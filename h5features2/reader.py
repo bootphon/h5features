@@ -1,6 +1,6 @@
 from os.path import exists
 from pyh5features import Reader as pyreader
-from item import Item
+from h5features2.item import Item
 import numpy as np
 class Reader:
     """This class implement the interface with the python wrapper Reader from h5features2

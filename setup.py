@@ -73,7 +73,7 @@ setuptools.setup(
     name="h5features2",
     # package_dir={"": "h5features2"},
     package_data={'': ["h5features2"]},
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include=['h5features2', 'h5features2.*']),
     python_requires=">=3.8",
     zip_safe=False,
     

@@ -21,6 +21,8 @@ The following dependencies need to be installed in order to install ``h5features
 
 * A ``python3`` interpreter (to build the documentation and the Python API).
 
+* The ``numpy`` python library.
+
 
 On Ubuntu install those dependencies with::
 
@@ -36,13 +38,13 @@ directory::
     git clone --recursive https://github.com/bootphon/h5features.git
     cd h5features
 
-Then create a ``build`` directory (to store intermediate and compiled files) and
+In order to buidl only the cpp h5features library, create a ``build`` directory (to store intermediate and compiled files) and
 run ``cmake`` from it (alternatively you can use ``cmake-gui`` to easily
 customize build options) and finally compile the project::
 
     mkdir -p build
     cd build
-    cmake ..
+    cmake -DH5FEATURES_BUILD_PYTHON=OFF ..
     make  # or "make -j4" to speed up compilation using 4 CPU cores
     make install
 
@@ -53,6 +55,13 @@ customize build options) and finally compile the project::
    directory use the following option to cmake::
 
         cmake -DCMAKE_INSTALL_PREFIX=<installation path> ..
+
+In order to compile and install h5features python library, execute the following command in 
+python environment ::
+
+    python3 setup.py install
+
+This command allow to compile the cpp h5features library and install the python interface
 
 
 Run the Test (optional)
@@ -66,6 +75,14 @@ option, then compile the project and execute the tests with ``make test``::
     make
     make test
 
+For python tests, install ``pytest`` with ::
+
+    pip install pytest
+
+and run ::
+
+    pytest
+
 
 Build the documentation (optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,3 +95,16 @@ included by default in the cmake configuration. To enable it, tun it with the
     make doc
 
 The documentation website is available at ``build/doc/html``.
+
+
+Import h5features
+~~~~~~~~~~~~~~~~~
+
+In order to import h5features, use this command in python script : 
+
+.. code-block:: python
+
+    from h5features2.item import Item
+    from h5features2.writer import Writer
+    from h5features2.reader import Reader
+    from h5features2.versions import Versions

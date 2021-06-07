@@ -154,5 +154,6 @@ endif()
 
 # build the documentation with "make doc"
 if(H5FEATURES_BUILD_DOC)
+  target_include_directories(pyh5features PUBLIC h5features2)
   add_subdirectory(doc)
 endif()

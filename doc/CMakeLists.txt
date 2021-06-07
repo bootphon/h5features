@@ -15,6 +15,9 @@ find_package(Python3 COMPONENTS Interpreter)
 message(STATUS "Installing dependencies for documentation build: breathe sphinx_rtd_theme")
 execute_process(COMMAND "${Python3_EXECUTABLE}" -m pip install --upgrade pip setuptools OUTPUT_QUIET)
 execute_process(COMMAND "${Python3_EXECUTABLE}" -m pip install breathe sphinx_rtd_theme OUTPUT_QUIET)
+execute_process(COMMAND "${Python3_EXECUTABLE}" -m pip install sphinxcontrib-napoleon OUTPUT_QUIET)
+execute_process(COMMAND "${Python3_EXECUTABLE}" -m pip install numpy OUTPUT_QUIET)
+execute_process(COMMAND "${Python3_EXECUTABLE}" setup.py install WORKING_DIRECTORY ../)
 find_program(SPHINX_BUILD sphinx-build PATHS ${PROJECT_BINARY_DIR}/venv/bin REQUIRED)
 
 

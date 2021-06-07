@@ -1,5 +1,5 @@
 from os.path import exists, dirname, abspath
-from item import Item
+from h5features2.item import Item
 from pyh5features import Writer as pywriter
 
 class Writer:
@@ -52,7 +52,7 @@ class Writer:
             TypeError: if item is not an instance of Item
 
         """
-        if not isinstance(item, Item):
+        if type(item).__name__ != Item.__name__:
             raise TypeError("item must have Item type")
         self.__writer.write(item._Item__item)
     
