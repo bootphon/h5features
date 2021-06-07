@@ -4,16 +4,19 @@ from os.path import exists, abspath
 import pytest
 from unittest import TestCase
 import numpy as np
+
 sys.path.insert(0, "./h5features2")
 from item import Item
 from writer import Writer
 from reader import Reader
 from versions import Versions
+
+
 class TestWriterReader(TestCase):
     """Test Item class"""
     def test_versions(self):
-
         self.assertEqual(Versions.versions(), ["1.0", "1.1", "1.2", "2.0"])
+
     def test_constructor_writer(self):
         # array = np.ones((9, 1000))
         # array[1:3, ] = 0
@@ -120,7 +123,7 @@ class TestWriterReader(TestCase):
     #         remove("test.h5f")
     #     writer = Writer("test.h5f", "test", False, False, "1.0")
     #     writer.write(item)
-    
+
     def test_v1_1(self):
         array = np.ones((9, 1000))
         array[1:3, ] = 0

@@ -1,27 +1,33 @@
 #include <writer.h>
 // #include <chrono>
+
 pybind::writer::writer(
-        const std::string& filename,
-         const std::string& group,
-         bool overwrite,
-         bool compress,
-         h5features::version version
-         ) : h5features::writer::writer(filename, group, overwrite, compress, version) {}
+   const std::string& filename,
+   const std::string& group,
+   bool overwrite,
+   bool compress,
+   h5features::version version)
+   : h5features::writer::writer(filename, group, overwrite, compress, version)
+{}
+
 
 h5features::version pybind::writer::get_version()
 {
     return h5features::writer::version();
 }
 
+
 std::string pybind::writer::filename()
 {
     return h5features::writer::filename();
 }
 
+
 std::string pybind::writer::groupname()
 {
     return h5features::writer::groupname();
 }
+
 
 void pybind::writer::write(pybind::item item)
 {

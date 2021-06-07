@@ -7,7 +7,7 @@
 #include <iostream>
 #include <boost/variant.hpp>
 #include <variant>
-#include <typeinfo> 
+#include <typeinfo>
 
 #include <pybind11/embed.h>
 
@@ -16,12 +16,11 @@ void init_item(pybind11::module& m)
    pybind11::class_<pybind::item>(m, "Item", pybind11::buffer_protocol())
       .def(pybind11::init([](
          const std::string& name,
-            const pybind11::buffer & features,
-            const pybind11::buffer & begin,
-            const pybind11::buffer & end,
-            const pybind11::dict & properties,
-            bool check = true
-         ) {
+         const pybind11::buffer & features,
+         const pybind11::buffer & begin,
+         const pybind11::buffer & end,
+         const pybind11::dict & properties,
+         bool check = true){
             // auto start = std::chrono::high_resolution_clock::now();
             // create features object
             pybind11::buffer_info info = features.request();
@@ -49,17 +48,48 @@ void init_item(pybind11::module& m)
             // std::cout << "Elapsed time item: " << elapsed.count() << " s\n";
             return item;
          }))
-      .def("__eq__", &pybind::item::operator==, pybind11::is_operator(), "returns true if the two items instances are equal")
-      .def("__ne__", &pybind::item::operator!=, pybind11::is_operator(), "returns true if the two items instances are not equal")      
-      .def("name", &pybind::item::name, "returns the name of the item")
-      .def("has_properties", &pybind::item::has_properties, "Returns true if the item has attached properties, false otherwise")
-      .def("dim", &pybind::item::dim, "returns the dimension of a feature vector")
-      .def("size", &pybind::item::size, "returns the number of features vectors")
-      .def("features",&pybind::item::features)
-      .def("times",&pybind::item::times)
-      .def("properties", &pybind::item::properties)
-      .def("properties_contains", &pybind::item::properties_contains)
-      .def("properties_erase", &pybind::item::erase_properties)
-      .def("properties_set", &pybind::item::set_properties)
+      .def(
+         "__eq__",
+         &pybind::item::operator==, pybind11::is_operator(),
+         "returns true if the two items instances are equal")
+      .def(
+         "__ne__",
+         &pybind::item::operator!=,
+         pybind11::is_operator(),
+         "returns true if the two items instances are not equal")
+      .def(
+         "name",
+         &pybind::item::name,
+         "returns the name of the item")
+      .def(
+         "has_properties",
+         &pybind::item::has_properties,
+         "Returns true if the item has attached properties, false otherwise")
+      .def(
+         "dim",
+         &pybind::item::dim,
+         "returns the dimension of a feature vector")
+      .def(
+         "size",
+         &pybind::item::size,
+         "returns the number of features vectors")
+      .def(
+         "features",
+         &pybind::item::features)
+      .def(
+         "times",
+         &pybind::item::times)
+      .def(
+         "properties",
+         &pybind::item::properties)
+      .def(
+         "properties_contains",
+         &pybind::item::properties_contains)
+      .def(
+         "properties_erase",
+         &pybind::item::erase_properties)
+      .def(
+         "properties_set",
+         &pybind::item::set_properties)
       ;
 }

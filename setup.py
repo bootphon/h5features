@@ -67,17 +67,17 @@ setuptools.setup(
     ext_modules=[CMakeExtension('pyh5features')],
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,
-    package_data={'':['pyh5features.so']}
+    package_data={'': ['pyh5features.so']}
 )
 setuptools.setup(
     name="h5features2",
     # package_dir={"": "h5features2"},
     package_data={'': ["h5features2"]},
-    packages=setuptools.find_packages(include=['h5features2', 'h5features2.*']),
+    packages=setuptools.find_packages(
+        include=['h5features2', 'h5features2.*']),
     python_requires=">=3.8",
     zip_safe=False,
     install_requires=[
         "numpy",
         ],
-    
 )
