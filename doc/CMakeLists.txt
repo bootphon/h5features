@@ -18,13 +18,12 @@ configure_file(
 
 # install dependencies for documentation building
 execute_process(
-  COMMAND ${PYTHON3} -m pip install --user breathe sphinx sphinx_rtd_theme sphinxcontrib-napoleon
-  OUTPUT_QUIET)
-
+  COMMAND mkdir -p ${PROJECT_BINARY_DIR}/pip
+  COMMAND ${Python3_EXECUTABLE} -m pip install --target ${PROJECT_BINARY_DIR}/pip breathe sphinx sphinx_rtd_theme sphinxcontrib-napoleon)
 
 add_custom_target(doc
   COMMAND ${DOXYGEN}
-  COMMAND sphinx-build -c. ${CMAKE_CURRENT_SOURCE_DIR} ./html
+  COMMAND ${PROJECT_BINARY_DIR}/pip/bin/sphinx-build -c. ${CMAKE_CURRENT_SOURCE_DIR} ./html
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Generating API documentation"
   VERBATIM)
