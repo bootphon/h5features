@@ -30,9 +30,11 @@ add_library(h5features-test
   ${CMAKE_CURRENT_BINARY_DIR}/utils/src/test_utils_datadir.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/src/test_utils_tmpdir.cpp)
 target_include_directories(
-  h5features-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils/include)
+  h5features-test PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/include
+  ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(
-  h5features-test pyh5features ${Boost_LIBRARIES})
+  h5features-test ${Boost_LIBRARIES} HighFive)
 
 # compile unit tests
 
@@ -46,7 +48,8 @@ function(add_h5features_test name)
   endif()
 
   add_executable(${name} ${src_file})
-  target_link_libraries(${name} h5features-test)
+  target_include_directories(${name} PUBLIC ${HIGHFIVE_SOURCE_DIR}/include)
+  target_link_libraries(${name} h5features-test h5features)
   add_test(${name} ${name})
 endfunction()
 

@@ -4,10 +4,8 @@ author = '@PROJECT_AUTHOR@'
 release = '@PROJECT_VERSION@'
 
 import sys
-print('@CMAKE_CURRENT_SOURCE_DIR@')
-sys.path.insert(0, '@CMAKE_CURRENT_SOURCE_DIR@/../')
-#import item, writer, reader, version
-import h5features2
+sys.path.insert(0, '@PROJECT_SOURCE_DIR@/python')
+import h5features
 
 extensions = ['breathe', 'sphinxcontrib.napoleon']
 breathe_projects = {'@PROJECT_NAME@': '@CMAKE_CURRENT_BINARY_DIR@/xml/'}

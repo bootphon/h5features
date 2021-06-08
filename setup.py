@@ -11,7 +11,7 @@ import setuptools
 import setuptools.command.build_ext
 
 
-H5FEATURES_ROOT_DIR = pathlib.Path(__file__).parent.parent
+H5FEATURES_ROOT_DIR = pathlib.Path(__file__).parent
 H5FEATURES_BUILD_DIR = H5FEATURES_ROOT_DIR / 'build'
 H5FEATURES_VERSION_FILE = H5FEATURES_ROOT_DIR / 'VERSION'
 H5FEATURES_VERSION = open(H5FEATURES_VERSION_FILE, 'r').read().strip()
@@ -69,9 +69,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             os.makedirs(H5FEATURES_BUILD_DIR)
 
         # configure
-        source_dir = (pathlib.Path(ext.sourcedir) / '..').resolve()
         subprocess.check_call(
-            ['cmake', source_dir] + cmake_args,
+            ['cmake', ext.sourcedir] + cmake_args,
             cwd=H5FEATURES_BUILD_DIR, env=env)
 
         # build
@@ -84,12 +83,10 @@ setuptools.setup(
     name="h5features",
     version=H5FEATURES_VERSION,
     python_requires=">=3.8",
-    setup_requires=['cmake>=3.12', 'pytest-runner'],
-    tests_require=['pytest'],
-
-    ext_modules=[CMakeExtension('h5features')],
+    setup_requires=['cmake>=3.12'],
+    install_requires=["numpy"],
+    ext_modules=[CMakeExtension('_h5features')],
     cmdclass={'build_ext': CMakeBuild},
-
-    packages=setuptools.find_packages(include=['h5features']),
-    zip_safe=True,
-    install_requires=["numpy"])
+    packages=['h5features'],
+    package_dir={'': 'python'},
+    zip_safe=True)

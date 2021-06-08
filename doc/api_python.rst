@@ -4,25 +4,25 @@ Python API
 .. contents:: Contents
    :local:
 
-h5features2.versions
---------------------
-.. automodule:: h5features2.versions
+h5features.versions
+-------------------
+.. automodule:: h5features.versions
    :members:
 
-h5features2.item
-----------------
+h5features.item
+---------------
 
-.. automodule:: h5features2.item
+.. automodule:: h5features.item
    :members:
 
-h5features2.writer
-------------------
+h5features.writer
+-----------------
 
-.. automodule:: h5features2.writer
+.. automodule:: h5features.writer
    :members:
-   
-h5features2.reader
-------------------
 
-.. automodule:: h5features2.reader
+h5features.reader
+-----------------
+
+.. automodule:: h5features.reader
    :members:
