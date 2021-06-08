@@ -125,7 +125,7 @@ if(H5FEATURES_BUILD_TEST)
   enable_testing()
   add_subdirectory(test)
 
-  add_executable(benchmark ${PROJECT_SOURCE_DIR}/test/utils/src/benchmark.cpp)
+  add_executable(benchmark ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/src/benchmark.cpp)
   target_link_libraries(benchmark h5features)
 endif()
 

@@ -39,8 +39,8 @@ Licence and copyright
 Copyright |copyright|
 
 This work is founded by the grant *ADT-193* from `Inria <https://inria.fr/en>`_
-and developed within the `Cognitive Machine Learning
-<https://syntheticlearnet.net>`_ research team.
+and developed within the `Cognitive Machine Learning <https://cognitive-ml.fr>`_
+research team.
 
 -----------------------
 
