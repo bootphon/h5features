@@ -62,6 +62,14 @@ option(H5FEATURES_BUILD_DOC "Builds the documentation" OFF)
 #######################################################################
 
 
+# HDF5, request 1.10 minimum
+if(NOT DEFINED HDF5_C_LIBRARIES)
+  set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)
+  set(HDF5_PREFER_PARALLEL ${HIGHFIVE_PARALLEL_HDF5})
+  find_package(HDF5 1.10 REQUIRED)
+endif()
+
+
 # HighFive (include Boost)
 if(NOT DEFINED HIGHFIVE_SOURCE_DIR)
   set(HIGHFIVE_USE_BOOST ON)
@@ -69,12 +77,6 @@ if(NOT DEFINED HIGHFIVE_SOURCE_DIR)
   set(HIGHFIVE_UNIT_TESTS OFF)
   set(HIGHFIVE_USE_INSTALL_DEPS YES)
   set(HIGHFIVE_BUILD_DOCS OFF)
-
-  if(NOT DEFINED HDF5_C_LIBRARIES)
-    set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)  # Consistency
-    set(HDF5_PREFER_PARALLEL ${HIGHFIVE_PARALLEL_HDF5})
-    find_package(HDF5 1.10 REQUIRED)
-  endif()
 
   set(HIGHFIVE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/HighFive)
   add_subdirectory(
