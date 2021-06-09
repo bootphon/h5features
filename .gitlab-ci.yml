@@ -4,7 +4,7 @@ variables:
 before_script:
   - scl enable devtoolset-9 bash
   - source /opt/rh/devtoolset-9/enable
-  - module load boost/1.73.0 hdf5/1.12.0 anaconda/3
+  - module load  anaconda/3 boost/1.73.0 hdf5/1.12.0
   - conda activate h5features-ci
   - mkdir -p build
   - cd build
@@ -12,7 +12,7 @@ before_script:
 test-linux:
   stage: test
   script:
-    - cmake3 -DCMAKE_BUILD_TYPE=Debug -DH5FEATURES_BUILD_TEST=ON -DH5FEATURES_BUILD_PYTHON=ON ..
+    - cmake3 -DH5FEATURES_BUILD_TEST=ON -DH5FEATURES_BUILD_PYTHON=ON ..
     - make -j6
     - make test
   tags:
