@@ -51,6 +51,14 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}',
             f'-DPYTHON_EXECUTABLE={sys.executable}']
 
+        # use ninja if installed, else fallback to default cmake backend
+        # (usually make)
+        try:
+            subprocess.check_output(['ninja', '--version'])
+            cmake_args += ['-GNinja']
+        except OSError:
+            pass
+
         if platform.system() == "Windows":
             cmake_args += [
                 f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE={extdir}']
