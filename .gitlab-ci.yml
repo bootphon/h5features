@@ -15,6 +15,8 @@ test-linux:
     - cmake3 -DCMAKE_BUILD_TYPE=Debug -DH5FEATURES_BUILD_TEST=ON -DH5FEATURES_BUILD_PYTHON=ON ..
     - make -j6
     - make test
+  tags:
+    - oberon
 
 documentation:
   stage: deploy
@@ -26,3 +28,5 @@ documentation:
   only:
     refs:
       - master
+  tags:
+    - oberon
