@@ -18,3 +18,19 @@ target_include_directories(_h5features PUBLIC
   ${HIGHFIVE_SOURCE_DIR}/include)
 
 target_link_libraries(_h5features PRIVATE pybind11::module h5features)
+
+
+# include the Python tests with "make test"
+if(H5FEATURES_BUILD_TEST)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+  add_test(
+    NAME test_python
+    COMMAND ${Python3_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test)
+
+  # need to tweak PYTHONPATH so as to find the _h5features library (either in
+  # BINARY_DIR if using "python setup.py install" / cmake, or in SOURCE_DIR if
+  # using "python setup.py develop")
+  set_tests_properties(test_python
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}:${CMAKE_CURRENT_BINARY_DIR}:$PYTHONPATH")
+endif()
