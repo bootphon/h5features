@@ -4,6 +4,9 @@ author = '@PROJECT_AUTHOR@'
 release = '@PROJECT_VERSION@'
 
 import sys
+# to find dependencies for documentation building (breathe, etc...)
+sys.path.insert(0, '@PROJECT_BINARY_DIR@/pip')
+# h5features python package for documentation generation from docstrings
 sys.path.insert(0, '@PROJECT_SOURCE_DIR@/python')
 import h5features
 
