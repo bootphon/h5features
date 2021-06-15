@@ -14,16 +14,6 @@ class TestWriterReader(TestCase):
         self.assertEqual(Versions.versions(), ["1.0", "1.1", "1.2", "2.0"])
 
     def test_constructor_writer(self):
-        # array = np.ones((9, 1000))
-        # array[1:3, ] = 0
-        # begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-        # end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-        # name = "Test"
-        # properties = {}
-        # item = Item(name, array, (begin, end), properties=properties)
-        # del array
-        # del begin
-        # del end
         if exists("test.h5f"):
             remove("test.h5f")
         with pytest.raises(TypeError):
@@ -59,9 +49,6 @@ class TestWriterReader(TestCase):
             writer.write(item)
         with Writer("test2.h5f", "test2", False, True, "2.0") as writer2:
             writer2.write(item)
-        # reader = Reader("test2.h5f", "test")
-        # # self.assertEqual(reader.items()[0], "Test")
-        # it = reader.read("Test", ignore_properties=False)
         groups = get_groups("test2.h5f")
         self.assertEqual(groups, ["test", "test2"])
         for group in groups:
@@ -87,43 +74,6 @@ class TestWriterReader(TestCase):
                 self.assertEqual("test2.h5f", reader.filename())
                 self.assertEqual(group, reader.groupname())
                 self.assertEqual(reader.version(), "2.0")
-        # with Reader("test2.h5f", "test2") as reader:
-        # # self.assertEqual(reader.items()[0], "Test")
-        #     it = reader.read("Test")
-        #     self.assertTrue(np.all(array==it.features()))
-        #     self.assertTrue(np.all(begin == it.times()[:,0]))
-        #     self.assertTrue(np.all(end == it.times()[:,1]))
-        #     self.assertEqual(it.properties(), properties)
-        #     self.assertEqual(item, it)
-        #     it = reader.read("Test", ignore_properties=True)
-        #     self.assertTrue(np.all(array==it.features()))
-        #     self.assertTrue(np.all(begin == it.times()[:,0]))
-        #     self.assertTrue(np.all(end == it.times()[:,1]))
-        #     self.assertEqual(it.properties(), {})
-        #     self.assertNotEqual(item, it)
-        #     it = reader.read("Test", True, (1, 4))
-        #     self.assertTrue(np.all(array[1:4]==it.features()))
-        #     self.assertTrue(np.all(begin[1:4] == it.times()[:,0]))
-        #     self.assertTrue(np.all(end[1:4] == it.times()[:,1]))
-        #     self.assertNotEqual(item, it)
-        #     self.assertEqual("test2.h5f", reader.filename())
-        #     self.assertEqual("test2", reader.groupname())
-        #     self.assertEqual(reader.version(), "2.0")
-    # def test_v1_0(self):
-    #     array = np.ones((9, 1000))
-    #     array[1:3, ] = 0
-    #     begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-    #     end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-    #     name = "Test"
-    #     properties = {}
-    #     item = Item(name, array, (begin, end), properties=properties)
-    #     del array
-    #     del begin
-    #     del end
-    #     if exists("test.h5f"):
-    #         remove("test.h5f")
-    #     writer = Writer("test.h5f", "test", False, False, "1.0")
-    #     writer.write(item)
 
     def test_v1_1(self):
         array = np.ones((9, 1000))

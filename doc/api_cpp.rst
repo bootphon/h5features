@@ -64,3 +64,9 @@ h5features::properties
 ----------------------
 
 .. doxygenclass:: h5features::properties
+
+
+h5features::read_group
+----------------------
+
+.. doxygenfunction:: h5features::read_group

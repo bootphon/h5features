@@ -26,3 +26,9 @@ h5features.reader
 
 .. automodule:: h5features.reader
    :members:
+
+h5features.get_groups
+---------------------
+
+.. automodule:: h5features.get_groups
+   :members:
