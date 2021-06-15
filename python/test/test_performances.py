@@ -110,3 +110,7 @@
 # a = np.asarray([i.features() for i in a])
 # print(a.shape)
 # print( np.all(a == np.asarray(features)))
+# if exists("testtwo.h5f"):
+#     remove("testtwo.h5f")
+# if exists("testone.h5"):
+#     remove("testone.h5")

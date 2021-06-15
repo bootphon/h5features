@@ -32,6 +32,8 @@ class TestWriterReader(TestCase):
             self.assertEqual(writer.version(), "2.0")
             self.assertEqual(writer.filename(), abspath("test.h5f"))
             self.assertEqual(writer.groupname(), "test")
+        if exists("test.h5f"):
+            remove("test.h5f")
 
     def test_v2_0(self):
         array = np.ones((9, 1000))
@@ -74,6 +76,8 @@ class TestWriterReader(TestCase):
                 self.assertEqual("test2.h5f", reader.filename())
                 self.assertEqual(group, reader.groupname())
                 self.assertEqual(reader.version(), "2.0")
+        if exists("test2.h5f"):
+            remove("test2.h5f")
 
     def test_v1_1(self):
         array = np.ones((9, 1000))
@@ -92,6 +96,8 @@ class TestWriterReader(TestCase):
         writer.write(item)
         reader = Reader("test.h5f", "test")
         self.assertEqual(reader.version(), "1.1")
+        if exists("test.h5f"):
+            remove("test.h5f")
 
     def test_v1_2(self):
         array = np.ones((9, 1000))
@@ -110,3 +116,5 @@ class TestWriterReader(TestCase):
         writer.write(item)
         reader = Reader("test.h5f", "test")
         self.assertEqual(reader.version(), "1.2")
+        if exists("test.h5f"):
+            remove("test.h5f")

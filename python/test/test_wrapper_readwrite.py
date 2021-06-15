@@ -36,3 +36,5 @@ class ReaderWritterTests(TestCase):
         self.assertEqual("test.h5f", reader.filename())
         self.assertEqual("test", reader.groupname())
         self.assertEqual(reader.get_version().name, "v2_0")
+        if exists("test.h5f"):
+            remove("test.h5f")
