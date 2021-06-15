@@ -1,6 +1,6 @@
 from os import remove
 from os.path import exists
-from _h5features import ItemWrapper, WriterWrapper, ReaderWrapper
+from _h5features import ItemWrapper, WriterWrapper, ReaderWrapper, read_group
 
 from unittest import TestCase
 import numpy as np
@@ -21,6 +21,8 @@ class ReaderWritterTests(TestCase):
             remove("test.h5f")
         writer = WriterWrapper("test.h5f", "test", False, True, WriterWrapper.version.v2_0)
         writer.write(item)
+        # print()
+        self.assertEqual(read_group("test.h5f"), ['test'])
         reader = ReaderWrapper("test.h5f", "test")
         self.assertEqual(reader.items()[0], "Test")
         it = reader.read(reader.items()[0], False)

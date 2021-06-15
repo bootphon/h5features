@@ -106,7 +106,8 @@ add_library(h5features
   ${CMAKE_CURRENT_SOURCE_DIR}/src/v1_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/v2_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/properties_reader.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/properties_writer.cpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/properties_writer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/read_group.cpp)
 
 target_include_directories(h5features PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
