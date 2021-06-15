@@ -119,3 +119,10 @@ class Reader:
             str: the file to read
         """
         return self.__reader.filename()
+
+    def __enter__(self):
+        return self
+
+
+    def __exit__(self, type, value, traceback):
+        del self
