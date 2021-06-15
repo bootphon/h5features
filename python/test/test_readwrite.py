@@ -38,10 +38,10 @@ class TestWriterReader(TestCase):
             _ = Writer("test.h5f", "test", False, True, "2.10")
         with pytest.raises(FileNotFoundError):
             _ = Writer("/test/test.h5f", "test", False, True, "2.0")
-        writer = Writer("test.h5f", "test", False, True, "2.0")
-        self.assertEqual(writer.version(), "2.0")
-        self.assertEqual(writer.filename(), abspath("test.h5f"))
-        self.assertEqual(writer.groupname(), "test")
+        with Writer("test.h5f", "test", False, True, "2.0") as writer:
+            self.assertEqual(writer.version(), "2.0")
+            self.assertEqual(writer.filename(), abspath("test.h5f"))
+            self.assertEqual(writer.groupname(), "test")
 
     def test_v2_0(self):
         array = np.ones((9, 1000))
@@ -55,10 +55,10 @@ class TestWriterReader(TestCase):
         print(item)
         if exists("test2.h5f"):
             remove("test2.h5f")
-        writer = Writer("test2.h5f", "test", False, True, "2.0")
-        writer.write(item)
-        writer2 = Writer("test2.h5f", "test2", False, True, "2.0")
-        writer2.write(item)
+        with Writer("test2.h5f", "test", False, True, "2.0") as writer:
+            writer.write(item)
+        with Writer("test2.h5f", "test2", False, True, "2.0") as writer2:
+            writer2.write(item)
         # reader = Reader("test2.h5f", "test")
         # # self.assertEqual(reader.items()[0], "Test")
         # it = reader.read("Test", ignore_properties=False)

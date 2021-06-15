@@ -100,3 +100,10 @@ class Writer:
 
         """
         return self.__writer.groupname()
+
+    def __enter__(self):
+        return self
+
+
+    def __exit__(self, type, value, traceback):
+        del self
