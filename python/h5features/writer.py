@@ -9,7 +9,7 @@ class Writer:
     It allow to write Item in hdf5 format
 
     Args:
-        file (`str`) : the name of the file to write
+        filename (`str`) : the name of the file to write
         group (`str`) :  a 'location' in the file to write
         overwrite (`bool`, optionnal) : If True, overwrite the file (default
             False)
@@ -18,29 +18,27 @@ class Writer:
         version (`str`, optionnal) : version of writing choosen in ['1.1',
             '1.2', '2.0'] (default "2.0")
 
-        Raises:
-            TypeError: if file, group are not `str`; compress and overwrite are
-                not bool;
-            KeyError: if version not in ['1.1', '1.2', '2.0']
-            FileNotFoundError: if direname of file does not exist
+    Raises:
+        TypeError: if file, group are not `str`; compress and overwrite are
+            not bool;
+        KeyError: if version not in ['1.1', '1.2', '2.0']
+        FileNotFoundError: if direname of file does not exist
 
     """
-    def __init__(self, file, group, overwrite=False,
+    def __init__(self, filename, group, overwrite=False,
                  compress=True, version="2.0"):
-        """Creates an instance of Writer"""
         versions = {
             # writing v1.0 is not supported
-            # "1.0" : pywriter.version.v1_0,
             "1.1": WriterWrapper.version.v1_1,
             "1.2": WriterWrapper.version.v1_2,
             "2.0": WriterWrapper.version.v2_0,
         }
 
-        if not isinstance(file, str):
+        if not isinstance(filename, str):
             raise TypeError("file name must be str")
-        file = abspath(file)
-        if not exists(dirname(file)):
-            raise FileNotFoundError("file {} does not exist".format(file))
+        filename = abspath(filename)
+        if not exists(dirname(filename)):
+            raise FileNotFoundError("file {} does not exist".format(filename))
         if not isinstance(group, str):
             raise TypeError("group name must be str")
         if not isinstance(overwrite, bool):
@@ -50,8 +48,8 @@ class Writer:
         if versions.get(version, None) is None:
             raise KeyError("version {} does not exist".format(version))
 
-        self.__writer = WriterWrapper(
-            file, group, overwrite, compress, versions[version])
+        self._writer = WriterWrapper(
+            filename, group, overwrite, compress, versions[version])
 
     def write(self, item):
         """This method allow to write the item
@@ -65,45 +63,29 @@ class Writer:
         """
         if type(item).__name__ != Item.__name__:
             raise TypeError("item must have Item type")
-        self.__writer.write(item._Item__item)
+        self._writer.write(item._Item__item)
 
+    @property
     def version(self) -> str:
-        """ This method allow to check which version of writing is used
+        """The file format version used for writing"""
+        return {
+            'v1_0': '1.0',
+            'v1_1': '1.1',
+            'v1_2': '1.2',
+            'v2_0': '2.0'}[self._writer.get_version().name]
 
-        Returns:
-            str: the version of writing
-
-        """
-
-        versions = {
-            "v1_0": "1.0",
-            "v1_1": "1.1",
-            "v1_2": "1.2",
-            "v2_0": "2.0",
-        }
-        return versions[self.__writer.get_version().name]
-
+    @property
     def filename(self) -> str:
-        """ This method allow to check which file is used
+        """The file to write on"""
+        return self._writer.filename()
 
-        Returns:
-            str: the file to write
-
-        """
-        return self.__writer.filename()
-
+    @property
     def groupname(self) -> str:
-        """ This method allow to check in which group the item is writed
-
-        Returns:
-            str: the group of the file to write
-
-        """
-        return self.__writer.groupname()
+        """The group in which items are wrote"""
+        return self._writer.groupname()
 
     def __enter__(self):
         return self
-
 
     def __exit__(self, type, value, traceback):
         del self

@@ -1,120 +1,107 @@
-import sys
-from os import remove
-from os.path import exists, abspath
-import pytest
-from unittest import TestCase
+import os
 import numpy as np
+import pytest
 
 from h5features import Item, Writer, Reader, Versions, get_groups
 
 
-class TestWriterReader(TestCase):
-    """Test Item class"""
-    def test_versions(self):
-        self.assertEqual(Versions.versions(), ["1.0", "1.1", "1.2", "2.0"])
+@pytest.fixture
+def item():
+    array = np.ones((9, 10))
+    array[1:3, ] = 0
+    begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
+    end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
+    name = "Test"
+    properties = {"test": True}
+    return Item.create(name, array, (begin, end), properties=properties)
 
-    def test_constructor_writer(self):
-        if exists("test.h5f"):
-            remove("test.h5f")
-        with pytest.raises(TypeError):
-            _ = Writer(0, "test", False, True, "2.0")
-        with pytest.raises(TypeError):
-            _ = Writer("test.h5f", 0, False, True, "2.0")
-        with pytest.raises(TypeError):
-            _ = Writer("test.h5f", "test", "test", True, "2.0")
-        with pytest.raises(TypeError):
-            _ = Writer("test.h5f", "test", False, "test", "2.0")
-        with pytest.raises(KeyError):
-            _ = Writer("test.h5f", "test", False, True, "2.10")
-        with pytest.raises(FileNotFoundError):
-            _ = Writer("/test/test.h5f", "test", False, True, "2.0")
-        with Writer("test.h5f", "test", False, True, "2.0") as writer:
-            self.assertEqual(writer.version(), "2.0")
-            self.assertEqual(writer.filename(), abspath("test.h5f"))
-            self.assertEqual(writer.groupname(), "test")
-        if exists("test.h5f"):
-            remove("test.h5f")
 
-    def test_v2_0(self):
-        array = np.ones((9, 1000))
-        array[1:3, ] = 0
-        begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-        end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-        name = "Test"
-        properties = {"test": True}
-        item = Item.create(name, array, (begin, end), properties=properties)
+def test_versions():
+    assert Versions.versions() == ["1.0", "1.1", "1.2", "2.0"]
 
-        print(item)
-        if exists("test2.h5f"):
-            remove("test2.h5f")
-        with Writer("test2.h5f", "test", False, True, "2.0") as writer:
-            writer.write(item)
-        with Writer("test2.h5f", "test2", False, True, "2.0") as writer2:
-            writer2.write(item)
-        groups = get_groups("test2.h5f")
-        self.assertEqual(groups, ["test", "test2"])
-        for group in groups:
-            with Reader("test2.h5f", group) as reader:
-                print(reader)
-                it = reader.read("Test")
-                self.assertTrue(np.all(array==it.features()))
-                self.assertTrue(np.all(begin == it.times()[:,0]))
-                self.assertTrue(np.all(end == it.times()[:,1]))
-                self.assertEqual(it.properties(), properties)
-                self.assertEqual(item, it)
-                it = reader.read("Test", ignore_properties=True)
-                self.assertTrue(np.all(array==it.features()))
-                self.assertTrue(np.all(begin == it.times()[:,0]))
-                self.assertTrue(np.all(end == it.times()[:,1]))
-                self.assertEqual(it.properties(), {})
-                self.assertNotEqual(item, it)
-                it = reader.read("Test", True,  (1, 4))
-                self.assertTrue(np.all(array[1:4]==it.features()))
-                self.assertTrue(np.all(begin[1:4] == it.times()[:,0]))
-                self.assertTrue(np.all(end[1:4] == it.times()[:,1]))
-                self.assertNotEqual(item, it)
-                self.assertEqual("test2.h5f", reader.filename())
-                self.assertEqual(group, reader.groupname())
-                self.assertEqual(reader.version(), "2.0")
-        if exists("test2.h5f"):
-            remove("test2.h5f")
 
-    def test_v1_1(self):
-        array = np.ones((9, 1000))
-        array[1:3, ] = 0
-        begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-        end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-        name = "Test"
-        properties = {}
-        item = Item.create(name, array, (begin, end), properties=properties)
-        del array
-        del begin
-        del end
-        if exists("test.h5f"):
-            remove("test.h5f")
-        writer = Writer("test.h5f", "test", False, True, "1.1")
+def test_constructor_writer(tmpdir):
+    filename = str(tmpdir / 'test.h5')
+
+    with pytest.raises(TypeError):
+        _ = Writer(0, "test", False, True, "2.0")
+
+    with pytest.raises(TypeError):
+        _ = Writer(filename, 0, False, True, "2.0")
+
+    with pytest.raises(TypeError):
+        _ = Writer(filename, "test", "test", True, "2.0")
+
+    with pytest.raises(TypeError):
+        _ = Writer(filename, "test", False, "test", "2.0")
+
+    with pytest.raises(KeyError):
+        _ = Writer(filename, "test", False, True, "2.10")
+
+    with pytest.raises(FileNotFoundError):
+        _ = Writer(str(tmpdir / 'test/test.h5'), "test", False, True, "2.0")
+
+    with Writer(filename, "test", False, True, "2.0") as writer:
+        assert writer.version == "2.0"
+        assert writer.filename == os.path.abspath(filename)
+        assert writer.groupname == "test"
+
+
+def test_v2_0(item, tmpdir):
+    filename = str(tmpdir / 'test.h5f')
+    with Writer(filename, "test", False, True, "2.0") as writer:
         writer.write(item)
-        reader = Reader("test.h5f", "test")
-        self.assertEqual(reader.version(), "1.1")
-        if exists("test.h5f"):
-            remove("test.h5f")
+    with Writer(filename, "test2", False, True, "2.0") as writer2:
+        writer2.write(item)
 
-    def test_v1_2(self):
-        array = np.ones((9, 1000))
-        array[1:3, ] = 0
-        begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-        end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-        name = "Test"
-        properties = {}
-        item = Item.create(name, array, (begin, end), properties=properties)
-        del array
-        del begin
-        del end
-        if exists("test.h5f"):
-            remove("test.h5f")
-        writer = Writer("test.h5f", "test", False, True, "1.2")
-        writer.write(item)
-        reader = Reader("test.h5f", "test")
-        self.assertEqual(reader.version(), "1.2")
-        if exists("test.h5f"):
-            remove("test.h5f")
+    assert get_groups(filename) == ["test", "test2"]
+
+    for group in get_groups(filename):
+        with Reader(filename, group) as reader:
+            it = reader.read("Test")
+            assert np.all(item.features() == it.features())
+            assert np.all(item.times() == it.times())
+            assert item.properties() == it.properties()
+            assert item == it
+
+            it = reader.read("Test", ignore_properties=True)
+            assert np.all(item.features() == it.features())
+            assert np.all(item.times() == it.times())
+            assert it.properties() == {}
+            assert not item == it
+            assert item != it
+
+            it = reader.read("Test", True,  (1, 4))
+            assert np.all(item.features()[1:4] == it.features())
+            assert np.all(item.times()[1:4] == it.times())
+            assert not item == it
+            assert item != it
+            assert filename == reader.filename
+            assert group == reader.groupname
+            assert reader.version == "2.0"
+
+
+def test_v1_1(capsys, item, tmpdir):
+    filename = str(tmpdir / 'test.h5f')
+    Writer(filename, "test", False, True, "1.1").write(item)
+    # TODO must pass
+    # assert 'version 1.1: ignoring properties' in capsys.readouterr().err
+
+    with Reader(filename, "test") as reader:
+        assert reader.version == "1.1"
+        it = reader.read('Test')
+        # TODO must pass
+        # assert 'version 1.1: ignoring properties' in capsys.readouterr().err
+        assert it != item
+        assert np.all(it.features() == item.features())
+        assert np.all(it.times() == item.times())
+        assert it.properties() == {}
+
+
+def test_v1_2(item, tmpdir):
+    filename = str(tmpdir / 'test.h5f')
+    Writer(filename, "test", False, True, "1.2").write(item)
+
+    with Reader(filename, 'test') as reader:
+        assert reader.version == "1.2"
+        assert reader.read('Test') == item

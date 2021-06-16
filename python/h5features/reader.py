@@ -28,7 +28,7 @@ class Reader:
         if not isinstance(group, str):
             raise TypeError("group name must be str")
 
-        self.__reader = ReaderWrapper(file, group)
+        self._reader = ReaderWrapper(file, group)
 
     def read(self, name, ignore_properties=False,
              features_between_times=(None, None)):
@@ -68,7 +68,7 @@ class Reader:
             if (
                     features_between_times[0] is None and
                     features_between_times[1] is None):
-                return Item(self.__reader.read(name, ignore_properties))
+                return Item(self._reader.read(name, ignore_properties))
 
             raise TypeError(
                 "features_between_times values must be none for start "
@@ -79,50 +79,33 @@ class Reader:
         start = np.float64(start)
         stop = np.float64(stop)
         return Item(
-            self.__reader.read_btw(name, start, stop, ignore_properties))
+            self._reader.read_btw(name, start, stop, ignore_properties))
 
+    @property
     def version(self):
-        """ This method allow to check which version of reading is used
-
-        Returns:
-            str: the version of reading
-        """
-        versions = {
+        """The file format version"""
+        return {
             "v1_0": "1.0",
             "v1_1": "1.1",
             "v1_2": "1.2",
-            "v2_0": "2.0",
-        }
-        return versions[self.__reader.get_version().name]
+            "v2_0": "2.0"}[self._reader.get_version().name]
 
     def items(self):
-        """Returns the name of item writed in file and group specified
+        """Returns the readable items as a list"""
+        return self._reader.items()
 
-        Returns:
-            list : list of item's name
-
-        """
-        return self.__reader.items()
-
+    @property
     def groupname(self):
-        """Checks in which group the item is read
+        """The group from which items are read"""
+        return self._reader.groupname()
 
-        Returns:
-            str: the group of the file to read
-        """
-        return self.__reader.groupname()
-
+    @property
     def filename(self):
-        """Checks which file is used
-
-        Returns:
-            str: the file to read
-        """
-        return self.__reader.filename()
+        """The file being read"""
+        return self._reader.filename()
 
     def __enter__(self):
         return self
-
 
     def __exit__(self, type, value, traceback):
         del self
