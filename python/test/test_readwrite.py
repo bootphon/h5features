@@ -84,14 +84,12 @@ def test_v2_0(item, tmpdir):
 def test_v1_1(capsys, item, tmpdir):
     filename = str(tmpdir / 'test.h5f')
     Writer(filename, "test", False, True, "1.1").write(item)
-    # TODO must pass
-    # assert 'version 1.1: ignoring properties' in capsys.readouterr().err
+    assert 'version 1.1: ignoring properties' in capsys.readouterr().err
 
     with Reader(filename, "test") as reader:
         assert reader.version == "1.1"
         it = reader.read('Test')
-        # TODO must pass
-        # assert 'version 1.1: ignoring properties' in capsys.readouterr().err
+        assert 'version 1.1: ignoring properties' in capsys.readouterr().err
         assert it != item
         assert np.all(it.features() == item.features())
         assert np.all(it.times() == item.times())

@@ -1,6 +1,6 @@
 from os.path import exists, dirname, abspath
 from h5features import Item
-from _h5features import WriterWrapper
+from _h5features import WriterWrapper, ostream_redirect
 
 
 class Writer:
@@ -63,7 +63,8 @@ class Writer:
         """
         if type(item).__name__ != Item.__name__:
             raise TypeError("item must have Item type")
-        self._writer.write(item._Item__item)
+        with ostream_redirect(stderr=True):
+            self._writer.write(item._Item__item)
 
     @property
     def version(self) -> str:

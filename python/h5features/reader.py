@@ -2,7 +2,7 @@ from os.path import exists
 import numpy as np
 
 from h5features import Item
-from _h5features import ReaderWrapper
+from _h5features import ReaderWrapper, ostream_redirect
 
 
 class Reader:
@@ -68,7 +68,8 @@ class Reader:
             if (
                     features_between_times[0] is None and
                     features_between_times[1] is None):
-                return Item(self._reader.read(name, ignore_properties))
+                with ostream_redirect(stderr=True):
+                    return Item(self._reader.read(name, ignore_properties))
 
             raise TypeError(
                 "features_between_times values must be none for start "
@@ -78,8 +79,9 @@ class Reader:
         start, stop = features_between_times
         start = np.float64(start)
         stop = np.float64(stop)
-        return Item(
-            self._reader.read_btw(name, start, stop, ignore_properties))
+        with ostream_redirect(stderr=True):
+            return Item(
+                self._reader.read_btw(name, start, stop, ignore_properties))
 
     @property
     def version(self):
