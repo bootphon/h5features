@@ -48,4 +48,5 @@ setup(
     url='https://github.com/bootphon/h5features',
     license='GPLv3',
     long_description=open(os.path.join(HERE, 'README.rst')).read(),
+    long_description_content_type='text/x-rst'
 )

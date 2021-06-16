@@ -5,6 +5,12 @@
 What's new ?
 ============
 
+h5features-1.4.1
+================
+
+* bugfix with `pip install h5features` (missing `requirements.txt`).
+
+
 h5features-1.4
 ==============
 
