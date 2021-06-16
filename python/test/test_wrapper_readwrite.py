@@ -17,6 +17,8 @@ def test_reading_writting(tmpdir):
 
     writer = WriterWrapper(
         filename, "test", False, True, WriterWrapper.version.v2_0)
+    assert writer.filename() == filename
+    assert writer.groupname() == 'test'
     writer.write(item)
     assert read_group(filename) == ['test']
 

@@ -1,11 +1,25 @@
-#include <writer.h>
 #include <pybind11/pybind11.h>
+#include <h5features/writer.h>
 #include <h5features/version.h>
-#include <h5features/item.h>
+#include <item.h>
+
+
+
+class writer_wrapper : public h5features::writer
+{
+public:
+   using h5features::writer::writer;
+
+   void write(pybind::item item)
+   {
+      h5features::writer::write(item);
+   }
+};
+
 
 void init_writer(pybind11::module& m)
 {
-   pybind11::class_<pybind::writer> writer(m, "WriterWrapper");
+   pybind11::class_<writer_wrapper> writer(m, "WriterWrapper");
 
    writer.def(pybind11::init([](
          const std::string& filename,
@@ -20,13 +34,13 @@ void init_writer(pybind11::module& m)
             // std::chrono::duration<double> elapsed = finish - start;
             // std::cout << "Elapsed time writer: " << elapsed.count() << " s\n";
             // return wt;
-            return pybind::writer(filename, group, overwrite, compress, version);
+            return writer_wrapper(filename, group, overwrite, compress, version);
          }));
 
-   writer.def("write", &pybind::writer::write, "write item");
-   writer.def("get_version", &pybind::writer::get_version, "return version");
-   writer.def("filename", &pybind::writer::filename, "return filename");
-   writer.def("groupname", &pybind::writer::groupname, "return groupname");
+   writer.def("write", &writer_wrapper::write, "write item");
+   writer.def("get_version", &writer_wrapper::version, "return version");
+   writer.def("filename", &writer_wrapper::filename, "return filename");
+   writer.def("groupname", &writer_wrapper::groupname, "return groupname");
 
    pybind11::enum_<h5features::version>(writer, "version")
       .value("v1_0", h5features::version::v1_0)
