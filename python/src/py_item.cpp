@@ -22,13 +22,15 @@ void init_item(pybind11::module& m)
          const pybind11::dict & properties,
          bool check = true){
             // auto start = std::chrono::high_resolution_clock::now();
+
             // create features object
             pybind11::buffer_info info = features.request();
             double *p = (double*)info.ptr;
             std::size_t size = info.size;
             std::size_t shape= info.shape[1];
-            auto  array = std::vector<double>(p, p+size);
+            auto array = std::vector<double>(p, p+size);
             auto feats = h5features::features(array, shape, check);
+
             // create times object
             info = begin.request();
             p = (double*)info.ptr;
@@ -39,10 +41,10 @@ void init_item(pybind11::module& m)
             auto ens = std::vector<double>(p, p+size);
             auto tims = h5features::times(begs, ens, check);
 
-            // auto props = h5features::properties();
             // create properties object
             auto props = pybind11::handle(properties).cast<h5features::properties>();
             auto item = pybind::item(name, feats, tims, props, check);
+
             // auto finish = std::chrono::high_resolution_clock::now();
             // std::chrono::duration<double> elapsed = finish - start;
             // std::cout << "Elapsed time item: " << elapsed.count() << " s\n";

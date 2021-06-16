@@ -1,14 +1,9 @@
-#include <h5features/item.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/embed.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
-#include <unordered_map>
-#include <iostream>
-#include <boost/variant.hpp>
-#include <variant>
-#include <typeinfo>
 
-#include <pybind11/embed.h>
+#include <h5features/item.h>
 
 
 namespace pybind
@@ -34,10 +29,10 @@ public:
    bool has_properties();
 
    // returns item's dimension
-   double dim();
+   std::size_t dim();
 
    // returns item's size
-   double size();
+   std::size_t size();
 
    // returns item's features in python
    pybind11::array_t<double> features();
@@ -74,7 +69,7 @@ struct type_caster<h5features::properties>
    PYBIND11_TYPE_CASTER(h5features::properties, "p");
    bool load(handle src, bool)
    {
-      for (auto item: src)
+      for(auto& item: src)
          value.set(item.cast<std::string>(), src[item].cast<h5features::properties::value_type>());
       return true;
    }

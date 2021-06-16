@@ -28,13 +28,13 @@ bool pybind::item::has_properties()
 }
 
 
-double pybind::item::dim()
+std::size_t pybind::item::dim()
 {
    return h5features::item::dim();
 }
 
 
-double pybind::item::size()
+std::size_t pybind::item::size()
 {
    return h5features::item::size();
 }
@@ -190,15 +190,18 @@ pybind11::dict pybind::item::properties()
    return return_props(src);
 }
 
+
 pybind11::array_t<double> pybind::item::features()
 {
+   auto& features = h5features::item::features();
    /* return features  */
-   double* p=(double*)h5features::item::features().data().data();
+   double* p = (double*)features.data().data();
    return  pybind11::array_t<double>(
-      {h5features::item::features().size(), h5features::item::features().dim()},
+      {features.size(), features.dim()},
       p,
       pybind11::capsule(new auto(p), [](void* ptr){ delete reinterpret_cast<decltype(p)*>(ptr); }));
 }
+
 
 pybind11::array_t<double> pybind::item::times()
 {
