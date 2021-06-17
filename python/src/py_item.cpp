@@ -1,14 +1,13 @@
-#include "item.h"
+#include <unordered_map>
+#include <iostream>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <pybind11/embed.h>
-#include <unordered_map>
-#include <iostream>
-#include <boost/variant.hpp>
-#include <variant>
-#include <typeinfo>
+//#include <typeinfo>
 
+#include "item_wrapper.h"
 
 
 void init_item(pybind11::module& m)

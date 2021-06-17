@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <h5features/reader.h>
-#include "item.h"
+#include "item_wrapper.h"
 
 
 class reader_wrapper : public h5features::reader

@@ -4,7 +4,7 @@ add_subdirectory(
 
 pybind11_add_module(_h5features
   THIN_LTO
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/item.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/item_wrapper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/py_h5features.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/py_item.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/py_reader.cpp

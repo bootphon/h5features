@@ -1,4 +1,4 @@
-#include <item.h>
+#include "item_wrapper.h"
 
 
 pybind::item::item(
@@ -11,7 +11,7 @@ pybind::item::item(
 {}
 
 
-pybind::item::item(h5features::item item)
+pybind::item::item(const h5features::item& item)
    : pybind::item(item.name(), item.features(), item.times(), item.properties(), true)
 {}
 

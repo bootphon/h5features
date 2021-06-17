@@ -20,7 +20,7 @@ public:
       bool check=true);
 
    // constructor from reader
-   item(h5features::item item);
+   item(const h5features::item& item);
 
    //returns name of item
    std::string name();
