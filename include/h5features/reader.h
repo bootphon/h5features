@@ -30,7 +30,7 @@ public:
       \brief Instanciates a reader
 
       \param filename The HDF5 file to read from
-      \param group The group with the file to read items from
+      \param group The group within the file to read items from
 
       \throw h5features::exception If the file cannot be opened or if the group
       does not exist in the file.

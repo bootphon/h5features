@@ -26,6 +26,16 @@ public:
    {
       return pybind::item(h5features::reader::read_item(name, start, stop, ignore_properties=ignore_properties));
    }
+
+   std::vector<pybind::item> read_all(bool ignore_properties)
+   {
+      std::vector<pybind::item> all_items;
+      for(const auto& item: h5features::reader::items())
+      {
+         all_items.push_back(read(item, ignore_properties));
+      }
+      return all_items;
+   }
 };
 
 
@@ -37,27 +47,11 @@ void init_reader(pybind11::module& m)
      const std::string& filename,
      const std::string& group) {return reader_wrapper(filename, group);}));
 
-      reader.def(
-         "read", &reader_wrapper::read,
-         "read item");
-
-      reader.def(
-         "read_btw", &reader_wrapper::read_btw,
-         "read item between times");
-
-      reader.def(
-         "items", &reader_wrapper::items,
-         "return items");
-
-      reader.def(
-         "filename", &reader_wrapper::filename,
-         "Returns the name of the file being read");
-
-      reader.def(
-         "groupname", &reader_wrapper::groupname,
-         "Returns the name of the group being read in the file");
-
-      reader.def(
-         "get_version", &reader_wrapper::version,
-         "Returns the version of the h5features data in the group");
+   reader.def("read", &reader_wrapper::read);
+   reader.def("read_btw", &reader_wrapper::read_btw);
+   reader.def("read_all", &reader_wrapper::read_all);
+   reader.def("items", &reader_wrapper::items);
+   reader.def("filename", &reader_wrapper::filename);
+   reader.def("groupname", &reader_wrapper::groupname);
+   reader.def("version", &reader_wrapper::version);
 }

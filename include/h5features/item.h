@@ -28,7 +28,6 @@ namespace h5features
 class item
 {
 public:
-   
    /// Destructor
    virtual ~item() = default;
 

@@ -1,4 +1,4 @@
-from os.path import exists
+import os
 import numpy as np
 
 from h5features import Item
@@ -11,24 +11,27 @@ class Reader:
     It allow to read Item from hdf5 format
 
     Args:
-        file (`str`) : the name of the file to read
-        group (`str`) :  a 'location' in the file to read
+        filename (`str`) : the h5features file to read from
+        group (`str`) :  The group within the file to read items from
 
     Raises:
         TypeError: if file, group are not `str`
         FileNotFoundError :  if file does not exist
 
     """
-    def __init__(self, file, group):
-        """Creates an instance of Reader"""
-        if not isinstance(file, str):
+    def __init__(self, filename, group):
+        if not isinstance(filename, str):
             raise TypeError("file name must be str")
-        if not exists(file):
-            raise FileNotFoundError("file {} does not exist".format(file))
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"file {filename} does not exist")
         if not isinstance(group, str):
             raise TypeError("group name must be str")
 
-        self._reader = ReaderWrapper(file, group)
+        self._reader = ReaderWrapper(filename, group)
+
+    def read_all(self, ignore_properties=False):
+        """Returns all the items stored in the file as a list"""
+        return self._reader.read_all(ignore_properties)
 
     def read(self, name, ignore_properties=False,
              features_between_times=(None, None)):
@@ -90,7 +93,7 @@ class Reader:
             "v1_0": "1.0",
             "v1_1": "1.1",
             "v1_2": "1.2",
-            "v2_0": "2.0"}[self._reader.get_version().name]
+            "v2_0": "2.0"}[self._reader.version().name]
 
     def items(self):
         """Returns the readable items as a list"""
@@ -98,7 +101,7 @@ class Reader:
 
     @property
     def groupname(self):
-        """The group from which items are read"""
+        """The group from which items are read in the file"""
         return self._reader.groupname()
 
     @property
