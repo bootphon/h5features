@@ -96,7 +96,6 @@ add_library(h5features
   ${CMAKE_CURRENT_SOURCE_DIR}/src/times.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/properties.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/exception.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reader_interface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/v1_reader.cpp

@@ -1,5 +1,5 @@
 #ifndef H5FEATURES_EXCEPTION_H
-#define  H5FEATURES_EXCEPTION_H
+#define H5FEATURES_EXCEPTION_H
 
 #include <stdexcept>
 #include <string>
@@ -11,14 +11,12 @@ namespace h5features
 class exception : public std::runtime_error
 {
 public:
-   /// @name Constructors
-   /// @{
    /// Constructs the exception with `what` as explanatory string
-   explicit exception(const std::string& what);
-
-   explicit exception(const char* what);
-   /// @}
+   template<typename String>
+   explicit exception(String&& what)
+      : std::runtime_error(std::forward<String>(what))
+   {}
 };
 }
 
-#endif  //  H5FEATURES_EXCEPTION_H
+#endif  // H5FEATURES_EXCEPTION_H
