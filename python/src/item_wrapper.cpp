@@ -1,7 +1,7 @@
 #include "item_wrapper.h"
 
 
-pybind::item::item(
+item_wrapper::item_wrapper(
    const std::string& name,
    const h5features::features& features,
    const h5features::times& times,
@@ -11,61 +11,61 @@ pybind::item::item(
 {}
 
 
-pybind::item::item(const h5features::item& item)
-   : pybind::item(item.name(), item.features(), item.times(), item.properties(), true)
+item_wrapper::item_wrapper(const h5features::item& item)
+   : item_wrapper(item.name(), item.features(), item.times(), item.properties(), true)
 {}
 
 
-std::string pybind::item::name()
+std::string item_wrapper::name()
 {
    return h5features::item::name();
 }
 
 
-bool pybind::item::has_properties()
+bool item_wrapper::has_properties()
 {
    return h5features::item::has_properties();
 }
 
 
-std::size_t pybind::item::dim()
+std::size_t item_wrapper::dim()
 {
    return h5features::item::dim();
 }
 
 
-std::size_t pybind::item::size()
+std::size_t item_wrapper::size()
 {
    return h5features::item::size();
 }
 
 
-bool pybind::item::operator==(const pybind::item& other) const noexcept
+bool item_wrapper::operator==(const item_wrapper& other) const noexcept
 {
    return h5features::item::operator==(other);
 }
 
 
-bool pybind::item::operator!=(const pybind::item& other) const noexcept
+bool item_wrapper::operator!=(const item_wrapper& other) const noexcept
 {
    return h5features::item::operator!=(other);
 }
 
 
-bool pybind::item::properties_contains(const std::string& name)
+bool item_wrapper::properties_contains(const std::string& name)
 {
    return h5features::item::properties().contains(name);
 }
 
 
-void pybind::item::erase_properties(const std::string& name)
+void item_wrapper::erase_properties(const std::string& name)
 {
    h5features::properties& ref = const_cast<h5features::properties&>(h5features::item::properties());
    ref.erase(name);
 }
 
 
-void pybind::item::set_properties(const std::string& name, pybind11::handle src)
+void item_wrapper::set_properties(const std::string& name, pybind11::handle src)
 {
    /* parse properties from python*/
    PyObject* pyob = src.ptr();
@@ -183,7 +183,7 @@ pybind11::dict return_props(h5features::properties src)
 }
 
 
-pybind11::dict pybind::item::properties()
+pybind11::dict item_wrapper::properties()
 {
    /* return properties */
    auto src = h5features::item::properties();
@@ -191,7 +191,7 @@ pybind11::dict pybind::item::properties()
 }
 
 
-pybind11::array_t<double> pybind::item::features()
+pybind11::array_t<double> item_wrapper::features()
 {
    auto& features = h5features::item::features();
    /* return features  */
@@ -203,7 +203,7 @@ pybind11::array_t<double> pybind::item::features()
 }
 
 
-pybind11::array_t<double> pybind::item::times()
+pybind11::array_t<double> item_wrapper::times()
 {
    /*
    return an array of time with row, the number of times, and columns, the start and end of time

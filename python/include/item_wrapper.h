@@ -1,18 +1,15 @@
 #include <pybind11/pybind11.h>
-#include <pybind11/embed.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
 #include <h5features/item.h>
 
 
-namespace pybind
-{
-class item: public h5features::item
+class item_wrapper: public h5features::item
 {
 public:
    // constructor form python
-   item(
+   item_wrapper(
       const std::string& name,
       const h5features::features& features,
       const h5features::times& times,
@@ -20,7 +17,7 @@ public:
       bool check=true);
 
    // constructor from reader
-   item(const h5features::item& item);
+   item_wrapper(const h5features::item& item);
 
    //returns name of item
    std::string name();
@@ -53,12 +50,12 @@ public:
    void set_properties(const std::string& name, pybind11::handle src);
 
    // Returns true if the two items are  equal
-   bool operator==(const pybind::item& other) const noexcept;
+   bool operator==(const item_wrapper& other) const noexcept;
 
    // Returns true if the two items are not equal
-   bool operator!=(const pybind::item& other) const noexcept;
+   bool operator!=(const item_wrapper& other) const noexcept;
 };
-}
+
 
 // prepare cast for h5features::properties
 namespace pybind11::detail

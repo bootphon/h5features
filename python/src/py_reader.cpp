@@ -16,20 +16,20 @@ public:
    }
 
    // read an item in file/group
-   pybind::item read(const std::string& name, bool ignore_properties)
+   item_wrapper read(const std::string& name, bool ignore_properties)
    {
-      return pybind::item(h5features::reader::read_item(name, ignore_properties=ignore_properties));
+      return h5features::reader::read_item(name, ignore_properties=ignore_properties);
    }
 
    // read an item in file/group from t1 to tn time
-   pybind::item read_btw(const std::string& name, double start, double stop, bool ignore_properties)
+   item_wrapper read_btw(const std::string& name, double start, double stop, bool ignore_properties)
    {
-      return pybind::item(h5features::reader::read_item(name, start, stop, ignore_properties=ignore_properties));
+      return h5features::reader::read_item(name, start, stop, ignore_properties=ignore_properties);
    }
 
-   std::vector<pybind::item> read_all(bool ignore_properties)
+   std::vector<item_wrapper> read_all(bool ignore_properties)
    {
-      std::vector<pybind::item> all_items;
+      std::vector<item_wrapper> all_items;
       for(const auto& item: h5features::reader::items())
       {
          all_items.push_back(read(item, ignore_properties));

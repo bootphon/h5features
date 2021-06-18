@@ -1,18 +1,12 @@
-#include <unordered_map>
-#include <iostream>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
-#include <pybind11/embed.h>
-//#include <typeinfo>
-
 #include "item_wrapper.h"
 
 
 void init_item(pybind11::module& m)
 {
-   pybind11::class_<pybind::item>(m, "ItemWrapper", pybind11::buffer_protocol())
+   pybind11::class_<item_wrapper>(m, "ItemWrapper", pybind11::buffer_protocol())
       .def(pybind11::init([](
          const std::string& name,
          const pybind11::buffer & features,
@@ -20,8 +14,6 @@ void init_item(pybind11::module& m)
          const pybind11::buffer & end,
          const pybind11::dict & properties,
          bool check = true){
-            // auto start = std::chrono::high_resolution_clock::now();
-
             // create features object
             pybind11::buffer_info info = features.request();
             double *p = (double*)info.ptr;
@@ -42,55 +34,19 @@ void init_item(pybind11::module& m)
 
             // create properties object
             auto props = pybind11::handle(properties).cast<h5features::properties>();
-            auto item = pybind::item(name, feats, tims, props, check);
-
-            // auto finish = std::chrono::high_resolution_clock::now();
-            // std::chrono::duration<double> elapsed = finish - start;
-            // std::cout << "Elapsed time item: " << elapsed.count() << " s\n";
-            return item;
+            return item_wrapper(name, feats, tims, props, check);
          }))
-      .def(
-         "__eq__",
-         &pybind::item::operator==, pybind11::is_operator(),
-         "returns true if the two items instances are equal")
-      .def(
-         "__ne__",
-         &pybind::item::operator!=,
-         pybind11::is_operator(),
-         "returns true if the two items instances are not equal")
-      .def(
-         "name",
-         &pybind::item::name,
-         "returns the name of the item")
-      .def(
-         "has_properties",
-         &pybind::item::has_properties,
-         "Returns true if the item has attached properties, false otherwise")
-      .def(
-         "dim",
-         &pybind::item::dim,
-         "returns the dimension of a feature vector")
-      .def(
-         "size",
-         &pybind::item::size,
-         "returns the number of features vectors")
-      .def(
-         "features",
-         &pybind::item::features)
-      .def(
-         "times",
-         &pybind::item::times)
-      .def(
-         "properties",
-         &pybind::item::properties)
-      .def(
-         "properties_contains",
-         &pybind::item::properties_contains)
-      .def(
-         "properties_erase",
-         &pybind::item::erase_properties)
-      .def(
-         "properties_set",
-         &pybind::item::set_properties)
+      .def("__eq__", &item_wrapper::operator==, pybind11::is_operator())
+      .def("__ne__", &item_wrapper::operator!=, pybind11::is_operator())
+      .def("name", &item_wrapper::name)
+      .def("has_properties", &item_wrapper::has_properties)
+      .def("dim", &item_wrapper::dim)
+      .def("size",&item_wrapper::size)
+      .def("features", &item_wrapper::features)
+      .def("times", &item_wrapper::times)
+      .def("properties", &item_wrapper::properties)
+      .def("properties_contains", &item_wrapper::properties_contains)
+      .def("properties_erase", &item_wrapper::erase_properties)
+      .def("properties_set", &item_wrapper::set_properties)
       ;
 }
