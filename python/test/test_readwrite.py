@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pytest
 
-from h5features import Item, Writer, Reader, get_groups
+from h5features import Item, Writer, Reader
 
 
 @pytest.fixture
@@ -52,9 +52,9 @@ def test_v2_0(item, tmpdir):
     with Writer(filename, "test2", False, True, "2.0") as writer2:
         writer2.write(item)
 
-    assert get_groups(filename) == ["test", "test2"]
+    assert Reader.list_groups(filename) == ["test", "test2"]
 
-    for group in get_groups(filename):
+    for group in Reader.list_groups(filename):
         with Reader(filename, group) as reader:
             it = reader.read('item')
             assert np.all(item.features() == it.features())

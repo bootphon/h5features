@@ -4,11 +4,6 @@ Python API
 .. contents:: Contents
    :local:
 
-h5features.versions
--------------------
-.. automodule:: h5features.versions
-   :members:
-
 h5features.item
 ---------------
 
@@ -25,10 +20,4 @@ h5features.reader
 -----------------
 
 .. automodule:: h5features.reader
-   :members:
-
-h5features.get_groups
----------------------
-
-.. automodule:: h5features.get_groups
    :members:

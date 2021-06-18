@@ -35,6 +35,10 @@ BOOST_DATA_TEST_CASE_F(utils::fixture::temp_directory, test_simple, version_data
 
    {
       // read nothing
+      BOOST_CHECK_EQUAL(
+         h5features::reader::list_groups(filename),
+         std::vector<std::string>{"group"});
+
       h5features::reader reader(filename, "group");
       BOOST_CHECK_EQUAL(reader.filename(), filename);
       BOOST_CHECK_EQUAL(reader.groupname(), "group");

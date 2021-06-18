@@ -38,6 +38,15 @@ public:
     */
    reader(const std::string& filename, const std::string& group);
 
+   /**
+      \brief Returns the list of groups in the specified HDF5 file
+
+      \param name The HDF5 file to list the groups from
+
+      \throw h5features::exception If the file cannot be opened
+   */
+   static std::vector<std::string> list_groups(const std::string& filename);
+
    /// Returns the name of the file being read
    std::string filename() const;
 

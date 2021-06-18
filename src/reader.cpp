@@ -54,6 +54,19 @@ h5features::reader::reader(const std::string& filename, const std::string& group
 {}
 
 
+std::vector<std::string> h5features::reader::list_groups(const std::string& filename)
+{
+   try
+   {
+      return HighFive::File(filename).listObjectNames();
+   }
+   catch(const hdf5::Exception& e)
+   {
+      throw h5features::exception(e.what());
+   }
+}
+
+
 std::string h5features::reader::filename() const
 {
    return m_filename;

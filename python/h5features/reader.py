@@ -88,6 +88,18 @@ class Reader:
             return self._create_item(
                 self._reader.read_btw(name, start, stop, ignore_properties))
 
+    @staticmethod
+    def list_groups(filename):
+        """Returns the groups in the specified HDF5 file as a list
+
+        Raises
+        ------
+        RuntimeError
+            If the `filename` cannot be opened or is not a HDF5 file
+
+        """
+        return ReaderWrapper.list_groups(filename)
+
     @property
     def version(self):
         """The file format version"""

@@ -36,6 +36,11 @@ public:
       }
       return all_items;
    }
+
+   static pybind11::list list_groups(const std::string& filename)
+   {
+      return pybind11::cast(h5features::reader::list_groups(filename));
+   }
 };
 
 
@@ -54,4 +59,5 @@ void init_reader(pybind11::module& m)
    reader.def("filename", &reader_wrapper::filename);
    reader.def("groupname", &reader_wrapper::groupname);
    reader.def("version", &reader_wrapper::version);
+   reader.def("list_groups", &reader_wrapper::list_groups);
 }
