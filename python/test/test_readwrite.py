@@ -13,7 +13,8 @@ def item():
     end = begin + 0.5
     name = "item"
     properties = {"test": True}
-    return Item.create(name, array, (begin, end), properties=properties)
+
+    return Item(name, array, (begin, end), properties=properties)
 
 
 def test_versions():
@@ -114,7 +115,7 @@ def test_read_all(item, tmpdir):
             writer.write(item)
             assert 'item already existing' in str(err)
 
-        item2 = Item.create(
+        item2 = Item(
             'item2', item.features(), (item.times()[:, 0], item.times()[:, 1]))
         writer.write(item2)
 

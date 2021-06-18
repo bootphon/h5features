@@ -7,29 +7,14 @@ class Item:
     """Interface with the python wrapper Item from h5features2
 
     It allow to create an object with several characteristics. The features are
-    datas of type time x characteristics. They store several value each of
+    data of type time x characteristics. They store several value each of
     several segment, for example of time. The time are datas of type time x
     (begin-end). The store the begin and the end of each time segment. The
     properties are datas stored in an hash table. They contribute to
     characterize the Item.
 
     """
-    def __init__(self, item):
-        """Constructor of Item class
-
-        Args:
-            item (`pyh5features.Item`): Construct directly Item from wrapper
-                It is used internaly.
-        Raises:
-            TypeError: If `item` is not an instance of `pyh5features.Item`
-        """
-        if not isinstance(item, ItemWrapper):
-            raise TypeError(
-                "item must be h5features_python.ItemWrapper class")
-        self.__item = item
-
-    @classmethod
-    def create(cls, name, features, times, properties={}):
+    def __init__(self, name, features, times, properties=None):
         """Main constructor of Item class for user usage
 
         Args:
@@ -60,6 +45,9 @@ class Item:
                 type, if properties keys are not `str`.
 
         """
+        # from None to empty dict
+        properties = properties or {}
+
         def rec_properties(props):
             for key, value in props.items():
                 if not isinstance(key, str):
@@ -96,7 +84,7 @@ class Item:
             raise TypeError("properties is not a dict")
         rec_properties(properties)
 
-        return cls(ItemWrapper(name, features, start, stop, properties, True))
+        self._item = ItemWrapper(name, features, start, stop, properties, True)
 
     def __eq__(self, it) -> bool:
         """Test equality of two Item
@@ -108,7 +96,7 @@ class Item:
             bool: True if equal, else False
 
         """
-        return self.__item == it
+        return self._item == it
 
     def __ne__(self, it):
         """Test inequality of two Item
@@ -120,7 +108,7 @@ class Item:
             bool: True if inequal, else False
 
         """
-        return self.__item != it
+        return self._item != it
 
     def features(self, copy=False) -> np.ndarray:
         """The method returns the features of the Item
@@ -137,8 +125,8 @@ class Item:
         """
         if copy:
             return deepcopy(
-                np.asarray(self.__item.features(), dtype=np.float64))
-        return np.array(self.__item.features(), dtype=np.float64, copy=False)
+                np.asarray(self._item.features(), dtype=np.float64))
+        return np.array(self._item.features(), dtype=np.float64, copy=False)
 
     def times(self, copy=False) -> np.ndarray:
         """The method returns the times of the Item
@@ -159,8 +147,9 @@ class Item:
 
         """
         if copy:
-            return deepcopy(np.asarray(self.__item.times(), dtype=np.float64))
-        return np.array(self.__item.times(), dtype=np.float64, copy=False)
+            return deepcopy(
+                np.asarray(self._item.times(), dtype=np.float64))
+        return np.array(self._item.times(), dtype=np.float64, copy=False)
 
     def properties(self) -> dict:
         """This method returns the properties of the Item
@@ -169,7 +158,7 @@ class Item:
             dict : the properties
 
         """
-        return self.__item.properties()
+        return self._item.properties()
 
     def set_properties(self, name, value):
         """This method allow to set a new property or update an existing property
@@ -185,7 +174,7 @@ class Item:
         """
         if not isinstance(name, str):
             raise TypeError("name must be str")
-        self.__item.properties_set(name, value)
+        self._item.properties_set(name, value)
 
     def has_properties(self) -> bool:
         """This method allow to check if Item has properties
@@ -194,7 +183,7 @@ class Item:
             bool:True if Itme has properties, else False
 
         """
-        return self.__item.has_properties()
+        return self._item.has_properties()
 
     def properties_contains(self, name) -> bool:
         """This method allow to check if a propertie exists
@@ -211,7 +200,7 @@ class Item:
         """
         if not isinstance(name, str):
             raise TypeError("name must be str")
-        return self.__item.properties_contains(name)
+        return self._item.properties_contains(name)
 
     def properties_erase(self, name):
         """This method allow to delete a propertie
@@ -225,7 +214,7 @@ class Item:
         """
         if not isinstance(name, str):
             raise TypeError("name must be str")
-        self.__item.properties_erase(name)
+        self._item.properties_erase(name)
 
     def ncharacteristic(self) -> int:
         """ This method returns the number of characterics of one segment of features
@@ -234,7 +223,7 @@ class Item:
             int: the number of characteristics
 
         """
-        return self.__item.dim()
+        return self._item.dim()
 
     def size(self) -> int:
         """This methods the number of segments of features or times
@@ -243,4 +232,4 @@ class Item:
             int: the number of segments
 
         """
-        return self.__item.size()
+        return self._item.size()

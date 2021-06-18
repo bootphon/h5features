@@ -64,7 +64,7 @@ class Writer:
         if type(item).__name__ != Item.__name__:
             raise TypeError("item must have Item type")
         with ostream_redirect(stderr=True):
-            self._writer.write(item._Item__item)
+            self._writer.write(item._item)
 
     @property
     def version(self) -> str:

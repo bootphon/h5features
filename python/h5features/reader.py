@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from h5features import Item
-from _h5features import ReaderWrapper, ostream_redirect
+from _h5features import ReaderWrapper, ItemWrapper, ostream_redirect
 
 
 class Reader:
@@ -72,7 +72,8 @@ class Reader:
                     features_between_times[0] is None and
                     features_between_times[1] is None):
                 with ostream_redirect(stderr=True):
-                    return Item(self._reader.read(name, ignore_properties))
+                    return self._create_item(
+                        self._reader.read(name, ignore_properties))
 
             raise TypeError(
                 "features_between_times values must be none for start "
@@ -83,7 +84,7 @@ class Reader:
         start = np.float64(start)
         stop = np.float64(stop)
         with ostream_redirect(stderr=True):
-            return Item(
+            return self._create_item(
                 self._reader.read_btw(name, start, stop, ignore_properties))
 
     @property
@@ -114,3 +115,16 @@ class Reader:
 
     def __exit__(self, type, value, traceback):
         del self
+
+    @staticmethod
+    def _create_item(item):
+        """Helper function for item instanciation
+
+        Creates a h5features.Item instance from a _h5features._ItemWrapper
+        instance without using the usual h5features.Item constructor.
+
+        """
+        assert isinstance(item, ItemWrapper)
+        instance = Item.__new__(Item)
+        instance._item = item
+        return instance

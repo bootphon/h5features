@@ -16,18 +16,18 @@ def test_constuctor():
 
     # test error if times is a list of begin end
     with pytest.raises(TypeError):
-        _ = Item.create(name, features, [begin, end], properties=properties)
+        _ = Item(name, features, [begin, end], properties=properties)
 
     # test error if begin or end are list and not numpy arrays
     with pytest.raises(TypeError):
-        _ = Item.create(
+        _ = Item(
             name,
             features,
             ([i for i in range(0, 10)], end),
             properties=properties)
 
     with pytest.raises(TypeError):
-        _ = Item.create(
+        _ = Item(
             name,
             features,
             (begin, [i for i in range(1, 11)]),
@@ -35,7 +35,7 @@ def test_constuctor():
 
     # test error if features is a list
     with pytest.raises(TypeError):
-        _ = Item.create(
+        _ = Item(
             name,
             features.tolist(),
             (begin, end),
@@ -44,7 +44,7 @@ def test_constuctor():
     # test error if properties are not in dict
     features = np.ones((10, 4), dtype=np.float64)
     with pytest.raises(TypeError):
-        _ = Item.create(
+        _ = Item(
             name,
             features,
             (begin, end),
@@ -52,7 +52,7 @@ def test_constuctor():
 
     # test if features is not flaot64
     with pytest.raises(TypeError):
-        _ = Item.create(
+        _ = Item(
             name,
             np.asarray(features, dtype=np.int8),
             (begin, end))
@@ -75,7 +75,7 @@ def test_features_firstdim():
     end = np.asarray([i for i in range(1, 11)], np.float64)
     properties = {}
     name = "test"
-    item = Item.create(name, features, (begin, end), properties=properties)
+    item = Item(name, features, (begin, end), properties=properties)
     f1 = item.features(copy=False)
     f2 = item.features(copy=True)
     f3 = item.features(copy=False)
@@ -93,7 +93,7 @@ def test_features_seconddim():
     end = np.asarray([i for i in range(1, 11)], np.float64)
     properties = {}
     name = "test"
-    item = Item.create(name, features, (begin, end), properties=properties)
+    item = Item(name, features, (begin, end), properties=properties)
     f1 = item.features(copy=False)
     assert np.all(f1 == features)
 
@@ -114,7 +114,7 @@ def test_times():
     end = np.asarray([i for i in range(1, 11)], np.float64)
     properties = {}
     name = "test"
-    item = Item.create(name, features, (begin, end), properties=properties)
+    item = Item(name, features, (begin, end), properties=properties)
     t1 = item.times(copy=False)
     t2 = item.times(copy=True)
     t3 = item.times(copy=False)
@@ -153,7 +153,7 @@ def test_properties():
             "list of int": [1, 2, 3],
             "list of double": [1., 2., 3.]}}
     name = "test"
-    item = Item.create(name, features, (begin, end), properties=properties)
+    item = Item(name, features, (begin, end), properties=properties)
     props = item.properties()
     assert props.get("int", None) is not None
     assert props.get("double", None) is not None
@@ -217,7 +217,7 @@ def test_properties():
         "double": 1.,
         "bool": True}
     with pytest.raises(TypeError):
-        item = Item.create(name, features, (begin, end), properties=properties)
+        item = Item(name, features, (begin, end), properties=properties)
 
     properties = {
         "int": 1,
@@ -226,4 +226,4 @@ def test_properties():
             2: 1,
             "double": 1.}}
     with pytest.raises(TypeError):
-        item = Item.create(name, features, (begin, end), properties=properties)
+        item = Item(name, features, (begin, end), properties=properties)
