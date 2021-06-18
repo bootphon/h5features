@@ -10,7 +10,17 @@ sys.path.insert(0, '@PROJECT_BINARY_DIR@/pip')
 sys.path.insert(0, '@PROJECT_SOURCE_DIR@/python')
 import h5features
 
-extensions = ['breathe', 'sphinxcontrib.napoleon']
+
+extensions = [
+    'breathe',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.coverage',
+    'sphinx.ext.imgmath',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon']
+
 breathe_projects = {'@PROJECT_NAME@': '@CMAKE_CURRENT_BINARY_DIR@/xml/'}
 breathe_default_project = '@PROJECT_NAME@'
 breathe_default_members = ('members', 'undoc-members')
@@ -27,3 +37,16 @@ html_theme_options = {
 }
 
 rst_epilog = '.. |copyright| replace:: %s' % copyright
+
+
+# -- Napoleon options --------------------------------------------------------
+# http://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
+
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+napoleon_include_special_with_doc = False
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_rtype = False

@@ -1,23 +1,35 @@
 Python API
 ==========
 
+.. note::
+
+   The whole library is accessible by importing the ``h5features`` module.
+
+   .. code-block:: python
+
+      import h5features as h5f
+
+
 .. contents:: Contents
    :local:
 
-h5features.item
+
+h5features.Item
 ---------------
 
-.. automodule:: h5features.item
+.. autoclass:: h5features.Item
    :members:
 
-h5features.writer
+
+h5features.Writer
 -----------------
 
-.. automodule:: h5features.writer
+.. autoclass:: h5features.Writer
    :members:
 
-h5features.reader
+
+h5features.Reader
 -----------------
 
-.. automodule:: h5features.reader
+.. autoclass:: h5features.Reader
    :members:
