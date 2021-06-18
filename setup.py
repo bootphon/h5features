@@ -92,7 +92,9 @@ setuptools.setup(
     version=H5FEATURES_VERSION,
     python_requires=">=3.8",
     setup_requires=['cmake>=3.12'],
-    install_requires=["numpy"],
+    install_requires=[
+        'numpy',
+        'importlib-metadata >= 1.0 ; python_version < "3.8"'],
     ext_modules=[CMakeExtension('_h5features')],
     cmdclass={'build_ext': CMakeBuild},
     packages=['h5features'],
