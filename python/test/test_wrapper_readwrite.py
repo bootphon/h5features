@@ -1,6 +1,7 @@
 import numpy as np
 
-from _h5features import ItemWrapper, WriterWrapper, ReaderWrapper, read_group
+from _h5features import (
+    ItemWrapper, WriterWrapper, ReaderWrapper, VersionWrapper, read_group)
 
 
 def test_read_write(tmpdir):
@@ -14,7 +15,7 @@ def test_read_write(tmpdir):
     item2 = ItemWrapper('item2', array, begin, end, {}, True)
 
     writer = WriterWrapper(
-        filename, 'group', False, True, WriterWrapper.version.v2_0)
+        filename, 'group', False, True, VersionWrapper.v2_0)
     assert writer.filename() == filename
     assert writer.groupname() == 'group'
     writer.write(item1)
@@ -37,7 +38,7 @@ def test_read_write(tmpdir):
     assert item1 != it
     assert filename == reader.filename()
     assert reader.groupname() == 'group'
-    assert reader.version().name == 'v2_0'
+    assert reader.version() == VersionWrapper.v2_0
 
     all_items = reader.read_all(False)
     assert len(all_items) == 2

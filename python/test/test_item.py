@@ -6,13 +6,17 @@ from h5features import Item
 
 def test_constuctor():
     """ test constructor """
-    features = np.ones((10, 4), dtype=np.float64)
-    begin = np.array([0, 1, 2, 3], dtype=np.float64)
-    end = np.array([1, 2, 3, 4], dtype=np.float64)
-    begin = np.asarray([i for i in range(0, 10)])
-    end = np.asarray([i for i in range(1, 11)])
+    features = np.random.rand(10, 4)
+    begin = np.asarray(range(0, 10))
+    end = begin + 1
     properties = {}
-    name = "test"
+    name = 'item'
+
+    item = Item(
+        name, features, (begin.astype(np.float64), end.astype(np.float64)))
+    assert item.name == name
+    assert item.size == 10
+    assert item.dim == 4
 
     # test error if times is a list of begin end
     with pytest.raises(TypeError):

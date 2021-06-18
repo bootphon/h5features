@@ -1,6 +1,6 @@
 from os.path import exists, dirname, abspath
 from h5features import Item
-from _h5features import WriterWrapper, ostream_redirect
+from _h5features import WriterWrapper, VersionWrapper, ostream_redirect
 
 
 class Writer:
@@ -29,9 +29,9 @@ class Writer:
                  compress=True, version="2.0"):
         versions = {
             # writing v1.0 is not supported
-            "1.1": WriterWrapper.version.v1_1,
-            "1.2": WriterWrapper.version.v1_2,
-            "2.0": WriterWrapper.version.v2_0,
+            "1.1": VersionWrapper.v1_1,
+            "1.2": VersionWrapper.v1_2,
+            "2.0": VersionWrapper.v2_0,
         }
 
         if not isinstance(filename, str):
@@ -73,7 +73,7 @@ class Writer:
             'v1_0': '1.0',
             'v1_1': '1.1',
             'v1_2': '1.2',
-            'v2_0': '2.0'}[self._writer.get_version().name]
+            'v2_0': '2.0'}[self._writer.version().name]
 
     @property
     def filename(self) -> str:

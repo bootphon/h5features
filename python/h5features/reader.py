@@ -31,7 +31,8 @@ class Reader:
 
     def read_all(self, ignore_properties=False):
         """Returns all the items stored in the file as a list"""
-        return self._reader.read_all(ignore_properties)
+        return [self._create_item(item)
+                for item in self._reader.read_all(ignore_properties)]
 
     def read(self, name, ignore_properties=False,
              features_between_times=(None, None)):

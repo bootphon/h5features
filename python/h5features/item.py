@@ -1,5 +1,5 @@
-from copy import deepcopy
 import numpy as np
+from copy import deepcopy
 from _h5features import ItemWrapper
 
 
@@ -86,29 +86,32 @@ class Item:
 
         self._item = ItemWrapper(name, features, start, stop, properties, True)
 
-    def __eq__(self, it) -> bool:
-        """Test equality of two Item
+    def __eq__(self, other) -> bool:
+        """Returns True if the two items are equal, False otherwise"""
+        if not isinstance(other, Item):
+            return False
+        return self._item == other._item
 
-        The method test the equality of features, times and properties from the
-        wrapper
+    def __ne__(self, other):
+        """Returns Fasle if the two items are not equal, True otherwise"""
+        if not isinstance(other, Item):
+            return True
+        return self._item != other._item
 
-        Returns:
-            bool: True if equal, else False
+    @property
+    def name(self) -> str:
+        """The item's name"""
+        return self._item.name()
 
-        """
-        return self._item == it
+    @property
+    def dim(self) -> int:
+        """Features frame dimension"""
+        return self._item.dim()
 
-    def __ne__(self, it):
-        """Test inequality of two Item
-
-        The method test the inequality of features, times and properties from
-        the wrapper
-
-        Returns:
-            bool: True if inequal, else False
-
-        """
-        return self._item != it
+    @property
+    def size(self) -> int:
+        """Number of frames"""
+        return self._item.size()
 
     def features(self, copy=False) -> np.ndarray:
         """The method returns the features of the Item
@@ -126,7 +129,8 @@ class Item:
         if copy:
             return deepcopy(
                 np.asarray(self._item.features(), dtype=np.float64))
-        return np.array(self._item.features(), dtype=np.float64, copy=False)
+        # return np.array(self._item.features(), dtype=np.float64, copy=False)
+        return self._item.features()
 
     def times(self, copy=False) -> np.ndarray:
         """The method returns the times of the Item
@@ -149,7 +153,8 @@ class Item:
         if copy:
             return deepcopy(
                 np.asarray(self._item.times(), dtype=np.float64))
-        return np.array(self._item.times(), dtype=np.float64, copy=False)
+        # return np.array(self._item.times(), dtype=np.float64, copy=False)
+        return self._item.times()
 
     def properties(self) -> dict:
         """This method returns the properties of the Item
@@ -215,21 +220,3 @@ class Item:
         if not isinstance(name, str):
             raise TypeError("name must be str")
         self._item.properties_erase(name)
-
-    def ncharacteristic(self) -> int:
-        """ This method returns the number of characterics of one segment of features
-
-        Returns:
-            int: the number of characteristics
-
-        """
-        return self._item.dim()
-
-    def size(self) -> int:
-        """This methods the number of segments of features or times
-
-        Returns:
-            int: the number of segments
-
-        """
-        return self._item.size()

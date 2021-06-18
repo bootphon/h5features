@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pytest
 
-from h5features import Item, Writer, Reader, Versions, get_groups
+from h5features import Item, Writer, Reader, get_groups
 
 
 @pytest.fixture
@@ -15,10 +15,6 @@ def item():
     properties = {"test": True}
 
     return Item(name, array, (begin, end), properties=properties)
-
-
-def test_versions():
-    assert Versions.versions() == ["1.0", "1.1", "1.2", "2.0"]
 
 
 def test_constructor_writer(tmpdir):
@@ -51,6 +47,7 @@ def test_constructor_writer(tmpdir):
 def test_v2_0(item, tmpdir):
     filename = str(tmpdir / 'test.h5f')
     with Writer(filename, "test", False, True, "2.0") as writer:
+        assert writer.version == '2.0'
         writer.write(item)
     with Writer(filename, "test2", False, True, "2.0") as writer2:
         writer2.write(item)
