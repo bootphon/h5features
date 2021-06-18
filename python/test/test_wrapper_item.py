@@ -3,18 +3,17 @@ from _h5features import ItemWrapper
 
 
 def test_item():
-    features = np.random.rand(100, 4)
-    begin = np.asarray([0, 1, 2, 3])
-    end = np.asarray([1, 2, 3, 4])
-    begin = np.asarray([i for i in range(0, 100)])
-    end = np.asarray([i for i in range(1, 101)])
-
-    item = ItemWrapper('item', features, begin, end, {}, True)
+    features = np.random.rand(10, 3)
+    times = np.vstack((np.arange(10), np.arange(10) + 1)).T.astype(np.float64)
+    props = {'pi': 3.14}
+    item = ItemWrapper('item', features, times, props, True)
 
     assert item.name() == 'item'
-    assert item.dim() == 4
-    assert item.size() == 100
+    assert item.dim() == 3
+    assert item.size() == 10
+    assert np.all(features == item.features())
+    assert np.all(times == item.times())
+    assert item.properties() == props
 
-    meti = ItemWrapper('item', features, begin, end, {}, True)
-    assert item == meti
-    assert np.all(features == np.array(item.features(), copy=False))
+    item2 = ItemWrapper('item', features, times, props, True)
+    assert item == item2

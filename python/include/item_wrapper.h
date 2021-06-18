@@ -31,25 +31,16 @@ public:
    // returns item's size
    std::size_t size();
 
-   // returns item's features in python
+   // returns item's features as numpy array
    pybind11::array_t<double> features();
 
-   // returns item's time
+   // returns item's time as numpy array
    pybind11::array_t<double> times();
 
    // returns item's properties
    pybind11::dict properties();
 
-   // checksif a propertie exists
-   bool properties_contains(const std::string& name);
-
-   // delete a property
-   void erase_properties(const std::string& name);
-
-   // create or update a property
-   void set_properties(const std::string& name, pybind11::handle src);
-
-   // Returns true if the two items are  equal
+   // Returns true if the two items are equal
    bool operator==(const item_wrapper& other) const noexcept;
 
    // Returns true if the two items are not equal

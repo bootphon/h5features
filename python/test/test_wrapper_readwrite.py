@@ -9,10 +9,10 @@ def test_read_write(tmpdir):
 
     array = np.ones((9, 1))
     array[1:3, ] = 0
-    begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-    end = begin + 1
-    item1 = ItemWrapper('item1', array, begin, end, {}, True)
-    item2 = ItemWrapper('item2', array, begin, end, {}, True)
+    times = np.vstack((np.arange(9), np.arange(9) + 1)).T.astype(np.float64)
+
+    item1 = ItemWrapper('item1', array, times, {}, True)
+    item2 = ItemWrapper('item2', array, times, {}, True)
 
     writer = WriterWrapper(
         filename, 'group', False, True, VersionWrapper.v2_0)

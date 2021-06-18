@@ -8,21 +8,19 @@ def test_data_equality():
     array = np.asarray(
         [[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]],
         dtype=np.float64)
-    begin = np.asarray([0, 1, 2, 3])
-    end = np.asarray([1, 2, 3, 4])
+    times = np.vstack((np.arange(4), np.arange(4) + 1)).T.astype(np.float64)
     name = "Test"
-    item = ItemWrapper(name, array, begin, end, {}, True)
+    item = ItemWrapper(name, array, times, {}, True)
 
-    assert np.all(array == np.array(item.features()))
+    assert np.all(array == item.features())
 
 
 def test_update_from_init():
     """ test if np.array is copied or passed by reference to c++ """
     array = np.ones((4, 4))
-    begin = np.asarray([0, 1, 2, 3])
-    end = np.asarray([1, 2, 3, 4])
+    times = np.arange(4).astype(np.float64).reshape(-1, 1)
     name = "Test"
-    item = ItemWrapper(name, array, begin, end, {}, True)
+    item = ItemWrapper(name, array, times, {}, True)
     features = item.features()
     fcopy = np.array(features, copy=False)
 
@@ -33,15 +31,14 @@ def test_update_from_init():
 
 def test_in_equality():
     """ test numpy equality"""
-    begin = np.asarray([0, 1, 2, 3])
-    end = np.asarray([1, 2, 3, 4])
+    times = np.asarray([[0, 1, 2, 3], [1, 2, 3, 4]]).T.astype(np.float64)
 
     a = ItemWrapper(
-        "a", np.ones((4, 4), dtype=np.float64), begin, end, {}, True)
+        "a", np.ones((4, 4), dtype=np.float64), times, {}, True)
     b = ItemWrapper(
-        "b", np.ones((4, 4), dtype=np.float64), begin, end, {}, True)
+        "b", np.ones((4, 4), dtype=np.float64), times, {}, True)
     c = ItemWrapper(
-        "c", np.zeros((4, 4), dtype=np.float64), begin, end, {}, True)
+        "c", np.zeros((4, 4), dtype=np.float64), times, {}, True)
 
     f1 = np.array(a.features(), copy=False)
     f2 = np.array(b.features(), copy=False)
@@ -56,11 +53,10 @@ def test_in_equality():
 def test_copy_true():
     """ this method test the updates of severals call of features.data()
     when udpdate the numpy array with copy=true"""
-    begin = np.asarray([0, 1, 2, 3])
-    end = np.asarray([1, 2, 3, 4])
+    times = np.asarray([[0, 1, 2, 3], [1, 2, 3, 4]]).T.astype(np.float64)
     feats = np.ones((4, 4), dtype=np.float64)
     name = "Test"
-    features = ItemWrapper(name, feats, begin, end, {}, True)
+    features = ItemWrapper(name, feats, times, {}, True)
     first_copy = copy.deepcopy(np.asarray(features.features()))
     second_copy = copy.deepcopy(np.asarray(features.features()))
     third_copy = np.array(features.features(), copy=False)
@@ -82,11 +78,9 @@ def test_copy_true():
 def test_copy_false():
     """ this method test the updates of severals call of features()
     when udpdate the numpy array with copy=false"""
-    begin = np.asarray([0, 1, 2, 3])
-    end = np.asarray([1, 2, 3, 4])
+    times = np.asarray([[0, 1, 2, 3], [1, 2, 3, 4]]).T.astype(np.float64)
     name = "Test"
-    features = ItemWrapper(
-        name, np.ones((4, 4)), begin, end, {}, True)
+    features = ItemWrapper(name, np.ones((4, 4)), times, {}, True)
     first_copy = np.array(features.features(), copy=False)
     fs_copy = np.array(features.features(), copy=False)
     sd_copy = copy.deepcopy(np.asarray(features.features()))

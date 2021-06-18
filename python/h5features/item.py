@@ -1,90 +1,94 @@
+"""Implementation of the class h5features.Item"""
 import numpy as np
-from copy import deepcopy
 from _h5features import ItemWrapper
 
 
 class Item:
-    """Interface with the python wrapper Item from h5features2
+    """Handles temporal numerical data related to a single item.
 
-    It allow to create an object with several characteristics. The features are
-    data of type time x characteristics. They store several value each of
-    several segment, for example of time. The time are datas of type time x
-    (begin-end). The store the begin and the end of each time segment. The
-    properties are datas stored in an hash table. They contribute to
-    characterize the Item.
+    An ``Item`` instance is at the interface between
+    :class:`~h5features.Reader` / :class:`~h5features.Writer` and user code. By
+    design an ``Item`` instance is not modifiable once created. It is made of a
+    **name**, some **features** attached to **times** stamps and optional
+    **properties**.
+
+    Parameters
+    ----------
+    name : str
+      The name of the item
+
+    features : numpy.ndarray, shape = [nframes, ndims], type = np.float64
+      The underlying data matrix as a two-dimensionnal array.
+
+    times : numpy.ndarray, shape = [nframes, 1 or 2], type = np.float64
+      The timestamps in seconds associated to each features frame. If
+      timestamps have a single dimension they are interpreted as the
+      ``tcenter`` time of the associated frames. If timestamps have two
+      dimensions, they are interpreted as the ``(tstart, tstop)`` times of the
+      frames.
+
+    properties : dict, optional
+      An optional dictionnary to record item's properties and metadata. Key
+      must be ``str``. Values can be one of ``bool``, ``int``, ``float``,
+      ``str``, ``list of int``, ``list of float``, ``list of str`` or nested
+      ``properties``.
+
+    Raises
+    ------
+    RuntimeError
+        If the item features, times or properties are not valid.
 
     """
     def __init__(self, name, features, times, properties=None):
-        """Main constructor of Item class for user usage
+        if not isinstance(name, str):
+            raise RuntimeError('item name must be str')
 
-        Args:
-            name (`str`): a string to qualify the `Item`.
+        if not (isinstance(times, np.ndarray) and times.dtype == 'float64'):
+            raise RuntimeError('times is not a float64 numpy array')
+        if times.ndim not in (1, 2):
+            raise RuntimeError('times is not a 1D or 2D numpy array')
+        # force as a 2D array. From shape (n,) to (n, 1).
+        if times.ndim == 1:
+            times = np.reshape(times, (-1, 1))
 
-            features (`numpy.ndarray`): a two-dimensionnal numpy array of data.
-                The first dimension correspond to times or segments in the
-                data. The second dimension correspond to one/several values
-                according to shape for the segment.
-            times (`tuple` of `numpy.ndarray`): a tuple with two numpy array.
-                The first correspond to a numpy array where each value
-                correspond to the start time of same index in first dimension
-                of features. The second correspond to end time in the same way.
-            properties (`dict`, optional): a python dictionnary to record
-                characteristics on the Item.
+        if not (
+                isinstance(features, np.ndarray) and
+                features.dtype == 'float64' and
+                features.ndim == 2):
+            raise RuntimeError('features is not a 2D float64 numpy array')
 
-        Notes:
-            properties values can be either `dict`, `bool`, `int`, `float`,
-            `string`, `list` of `int`, `float`, `string`
-
-        Returns:
-            Item
-
-        Raises:
-            TypeError: if item's name is not `str`, if features is not a two
-                dimensionnal `numpy.ndarray` of `float64 type, if times is not
-                a `tuple` of two one-dimensionnal `numpy.ndarray` of `float64`
-                type, if properties keys are not `str`.
-
-        """
         # from None to empty dict
         properties = properties or {}
+        self._check_properties(properties)
 
-        def rec_properties(props):
-            for key, value in props.items():
-                if not isinstance(key, str):
-                    raise TypeError("property key must be str")
-                if isinstance(value, dict):
-                    rec_properties(value)
+        # force item validation to ensure consistency from C++ side
+        validate = True
+        self._item = ItemWrapper(name, features, times, properties, validate)
 
-        if not isinstance(times, tuple):
-            raise TypeError("times is not a tuple")
-        if len(times) != 2:
-            raise TypeError("times must contain to numpy arrays")
-        start, stop = times
-        if not isinstance(name, str):
-            raise TypeError("item's name must be str")
-        if not isinstance(features, np.ndarray):
-            raise TypeError("features is not a np.ndarray")
-        if features.dtype != "float64":
-            raise TypeError("features must have float64 type")
-        if len(features.shape) != 2:
-            raise TypeError("features must be two-dimensionnal")
-        if not isinstance(start, np.ndarray):
-            raise TypeError("start is not a np.ndarray")
-        if start.dtype != "float64":
-            raise TypeError("start must have float64 type")
-        if not isinstance(stop, np.ndarray):
-            raise TypeError("stop is not a np.ndarray")
-        if stop.dtype != "float64":
-            raise TypeError("stop must have float64 type")
-        if len(start.shape) != 1:
-            raise TypeError("start must be one-dimensionnal")
-        if len(stop.shape) != 1:
-            raise TypeError("stop must be one-dimensionnal")
+    @classmethod
+    def _check_properties(cls, properties):
+        """Ensure properties are valid"""
         if not isinstance(properties, dict):
-            raise TypeError("properties is not a dict")
-        rec_properties(properties)
+            raise RuntimeError('properties is not a dict')
 
-        self._item = ItemWrapper(name, features, start, stop, properties, True)
+        for key, value in properties.items():
+            if not isinstance(key, str):
+                raise RuntimeError('property keys must be str')
+            if not isinstance(value, (bool, int, float, str, list, dict)):
+                raise RuntimeError(
+                    f'property value type invalid: {type(value)}')
+
+            if isinstance(value, list):
+                ltype = type(value[0])
+                if not isinstance(value[0], (int, float, str)):
+                    raise RuntimeError(
+                        f'property value type invalid: list of {ltype}')
+                if not all(isinstance(v, ltype) for v in value):
+                    raise RuntimeError(
+                        'property list must be homogoneous')
+
+            if isinstance(value, dict):
+                cls._check_properties(value)
 
     def __eq__(self, other) -> bool:
         """Returns True if the two items are equal, False otherwise"""
@@ -97,6 +101,10 @@ class Item:
         if not isinstance(other, Item):
             return True
         return self._item != other._item
+
+    def has_properties(self) -> bool:
+        """Returns True if the item has properties, False otherwise"""
+        return self._item.has_properties()
 
     @property
     def name(self) -> str:
@@ -113,110 +121,17 @@ class Item:
         """Number of frames"""
         return self._item.size()
 
-    def features(self, copy=False) -> np.ndarray:
-        """The method returns the features of the Item
-
-        Allow to return the reference or to do a deepcopy of the features
-
-        Args:
-            copy (`bool`): If True, return a deepcopy of the features
-                else, return the reference
-
-        Returns:
-           np.ndarray : the features
-
-        """
-        if copy:
-            return deepcopy(
-                np.asarray(self._item.features(), dtype=np.float64))
-        # return np.array(self._item.features(), dtype=np.float64, copy=False)
+    @property
+    def features(self) -> np.ndarray:
+        """A reference to the item's features"""
         return self._item.features()
 
-    def times(self, copy=False) -> np.ndarray:
-        """The method returns the times of the Item
-
-        Allow to return the reference or to do a deepcopy of the times
-
-        Args:
-            copy (`bool`): If True, return a deepcopy of the times
-                else, return the reference
-
-        Returns:
-           np.ndarray : the times
-
-        Notes: The times returned is two dimensionnal. The first dimension
-            correspond to the segments according to the features. The second
-            dimension correspond to two values, the start and the stop of the
-            segment
-
-        """
-        if copy:
-            return deepcopy(
-                np.asarray(self._item.times(), dtype=np.float64))
-        # return np.array(self._item.times(), dtype=np.float64, copy=False)
+    @property
+    def times(self) -> np.ndarray:
+        """A reference to the item's timestamps"""
         return self._item.times()
 
+    @property
     def properties(self) -> dict:
-        """This method returns the properties of the Item
-
-        Returns:
-            dict : the properties
-
-        """
+        """The item's properties"""
         return self._item.properties()
-
-    def set_properties(self, name, value):
-        """This method allow to set a new property or update an existing property
-
-        Args:
-            name (`str`): key of property
-            value : value of properties, see constructor to check the possible
-                types
-
-        Raises:
-            TypeError is name is not `str`
-
-        """
-        if not isinstance(name, str):
-            raise TypeError("name must be str")
-        self._item.properties_set(name, value)
-
-    def has_properties(self) -> bool:
-        """This method allow to check if Item has properties
-
-        Returns:
-            bool:True if Itme has properties, else False
-
-        """
-        return self._item.has_properties()
-
-    def properties_contains(self, name) -> bool:
-        """This method allow to check if a propertie exists
-
-        Args:
-            name (`str`) : key of propertie
-
-        Raises:
-            TypeError is name is not `str`
-
-        Returns:
-            bool : True if contains the name, else False
-
-        """
-        if not isinstance(name, str):
-            raise TypeError("name must be str")
-        return self._item.properties_contains(name)
-
-    def properties_erase(self, name):
-        """This method allow to delete a propertie
-
-        Args:
-            name (`str`) : key of propertie
-
-        Raises:
-            TypeError is name is not `str`
-
-        """
-        if not isinstance(name, str):
-            raise TypeError("name must be str")
-        self._item.properties_erase(name)

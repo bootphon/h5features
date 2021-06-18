@@ -9,32 +9,32 @@ void init_item(pybind11::module& m)
    pybind11::class_<item_wrapper>(m, "ItemWrapper", pybind11::buffer_protocol())
       .def(pybind11::init([](
          const std::string& name,
-         const pybind11::buffer & features,
-         const pybind11::buffer & begin,
-         const pybind11::buffer & end,
-         const pybind11::dict & properties,
-         bool check = true){
+         const pybind11::buffer& features,
+         const pybind11::array_t<double, pybind11::array::c_style>& times,
+         const pybind11::dict& properties,
+         bool check = true)
+         {
             // create features object
             pybind11::buffer_info info = features.request();
-            double *p = (double*)info.ptr;
-            std::size_t size = info.size;
-            std::size_t shape= info.shape[1];
-            auto array = std::vector<double>(p, p+size);
-            auto feats = h5features::features(array, shape, check);
+            double *ptr = static_cast<double*>(info.ptr);
+            h5features::features cfeatures{
+               std::vector<double>{ptr, ptr + info.size},
+               static_cast<std::size_t>(info.shape[1]),
+               check};
 
             // create times object
-            info = begin.request();
-            p = (double*)info.ptr;
-            size = info.size;
-            auto begs = std::vector<double>(p, p+size);
-            info = end.request();
-            p = (double*)info.ptr;
-            auto ens = std::vector<double>(p, p+size);
-            auto tims = h5features::times(begs, ens, check);
+            info = times.request();
+            ptr = static_cast<double*>(info.ptr);
+            h5features::times ctimes{
+               std::vector<double>{ptr, ptr + info.size},
+               h5features::times::get_format(info.shape[1]),
+               check};
 
             // create properties object
             auto props = pybind11::handle(properties).cast<h5features::properties>();
-            return item_wrapper(name, feats, tims, props, check);
+
+            // instanciate item object
+            return item_wrapper(name, cfeatures, ctimes, props, check);
          }))
       .def("__eq__", &item_wrapper::operator==, pybind11::is_operator())
       .def("__ne__", &item_wrapper::operator!=, pybind11::is_operator())
@@ -44,9 +44,5 @@ void init_item(pybind11::module& m)
       .def("size",&item_wrapper::size)
       .def("features", &item_wrapper::features)
       .def("times", &item_wrapper::times)
-      .def("properties", &item_wrapper::properties)
-      .def("properties_contains", &item_wrapper::properties_contains)
-      .def("properties_erase", &item_wrapper::erase_properties)
-      .def("properties_set", &item_wrapper::set_properties)
-      ;
+      .def("properties", &item_wrapper::properties);
 }
