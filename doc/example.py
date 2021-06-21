@@ -1,37 +1,52 @@
+"""Usage example of the h5features library in Python
+
+Generate fake FFT transforms as features, store them in a h5features file and
+read them back.
+
+"""
+import os
 import numpy as np
 import h5features as h5f
 
 
-# Create features, times begin and end, name and properties
-features = np.ones((9, 1000))
-begin = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=np.float64)
-end = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-name = "Test"
-properties = {"test": True}
+def generate_fft(name):
+    # from 10 to 100 frames
+    nframes = np.random.randint(10, 100)
 
-# Create item object by the class method create
-item = h5f.Item.create(name, features, (begin, end), properties=properties)
+    # features of shape [nframes, 10]
+    features = np.random.rand(nframes, 10)
 
-# Create writer object and write item in test2.h5f, in group 'test'
-writer = h5f.Writer("test2.h5f", "test", True, True, "2.0")
-writer.write(item)
+    # times windows of 25ms with overlap of 10ms
+    times = np.asarray([
+        np.arange(nframes).astype(np.float64) * 0.025,
+        np.arange(nframes).astype(np.float64) * 0.025 + 0.01]).T
 
-# Create reader object and read the file to get an item
-reader = h5f.Reader("test2.h5f", "test")
+    return h5f.Item(name, features, times)
 
-it = reader.read("Test", ignore_properties=False)
 
-# an item has several methods to get features, times, properties, name
+# write a file with 3 random items
+with h5f.Writer('example_file.h5f') as writer:
+    writer.write(generate_fft('item1'))
+    writer.write(generate_fft('item2'))
+    writer.write(generate_fft('item3'))
 
-assert np.all(features == it.features())
-assert np.all(begin == it.times()[:, 0])
-assert np.all(end == it.times()[:, 1])
-assert it.properties() == properties
 
-it = reader.read("Test", ignore_properties=True)
-assert it.properties() == {}
+# read back the items
+with h5f.Reader('example_file.h5f') as reader:
+    assert reader.items() == ['item1', 'item2', 'item3']
 
-# in order to check available version, use :
-print(h5f.Versions.versions())
+    # read all the item1
+    item1 = reader.read('item1')
 
-# see the API for other methods
+    # partially read item2 from 0.1s to 0.2s
+    item2 = reader.read('item2', start=0.1, stop=0.2)
+
+    # item read from file are instance on h5features.Item. Features and times
+    # are usual numpy array.
+    assert isinstance(item2, h5f.Item)
+    assert item2.features.shape == (4, 10)
+    assert np.all(item2.times[0, :] == np.asarray([0.1, 0.11]))
+
+
+# cleanup
+os.remove('example_file.h5f')

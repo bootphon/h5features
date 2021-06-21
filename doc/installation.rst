@@ -13,7 +13,8 @@ The following dependencies need to be installed in order to install ``h5features
 
 * The `cmake>=3.12 <https://cmake.org>`_ build system.
 
-* A recent C++ compiler supporting the ``C++17`` standard (tested with *gcc-9*).
+* A recent C++ compiler supporting the ``C++17`` standard (tested with *gcc-9*
+  and *clang-10*).
 
 * The `hdf5>=1.10 <https://www.hdfgroup.org/solutions/hdf5>`_ library.
 
@@ -38,9 +39,10 @@ directory::
     git clone --recursive https://github.com/bootphon/h5features.git
     cd h5features
 
-In order to buidl only the cpp h5features library, create a ``build`` directory (to store intermediate and compiled files) and
-run ``cmake`` from it (alternatively you can use ``cmake-gui`` to easily
-customize build options) and finally compile the project::
+In order to buidl only the cpp h5features library, create a ``build`` directory
+(to store intermediate and compiled files) and run ``cmake`` from it
+(alternatively you can use ``cmake-gui`` to easily customize build options) and
+finally compile the project::
 
     mkdir -p build
     cd build
@@ -56,12 +58,13 @@ customize build options) and finally compile the project::
 
         cmake -DCMAKE_INSTALL_PREFIX=<installation path> ..
 
-In order to compile and install h5features python library, execute the following command in 
-python environment ::
+In order to compile and install h5features python library, execute the following
+command in python environment::
 
     python3 setup.py install
 
-This command allow to compile the cpp h5features library and install the python interface
+This command allow to compile the cpp h5features library and install the python
+interface.
 
 
 Run the Test (optional)
@@ -95,16 +98,3 @@ included by default in the cmake configuration. To enable it, tun it with the
     make doc
 
 The documentation website is available at ``build/doc/html``.
-
-
-Import h5features
-~~~~~~~~~~~~~~~~~
-
-In order to import h5features, use this command in python script : 
-
-.. code-block:: python
-
-    from h5features2.item import Item
-    from h5features2.writer import Writer
-    from h5features2.reader import Reader
-    from h5features2.versions import Versions
