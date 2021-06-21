@@ -86,7 +86,7 @@ public:
    h5features::item read_item(const std::string& name, bool ignore_properties=false) const;
 
    /**
-      \brief Partial Read of a `h5features::item`
+      \brief Partial read of a `h5features::item`
 
       The method allows to partially load the content of an item, by
       specifiying the time interval `[start, stop]` to load.

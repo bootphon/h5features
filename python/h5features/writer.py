@@ -1,6 +1,6 @@
 from os.path import exists, dirname, abspath
 from h5features import Item
-from _h5features import WriterWrapper, VersionWrapper, ostream_redirect
+from _h5features import WriterWrapper, VersionWrapper, OstreamRedirect
 
 
 class Writer:
@@ -52,18 +52,17 @@ class Writer:
             filename, group, overwrite, compress, versions[version])
 
     def write(self, item):
-        """This method allow to write the item
+        """Writes an item to file
 
-        Args:
-            item (Item) :  the Item to write
-
-        Raises:
-            TypeError: if item is not an instance of Item
+        Raises
+        ------
+        TypeError
+          if `item` is not an instance of Item.
 
         """
-        if type(item).__name__ != Item.__name__:
+        if not isinstance(item, Item):
             raise TypeError("item must have Item type")
-        with ostream_redirect(stderr=True):
+        with OstreamRedirect(stderr=True):
             self._writer.write(item._item)
 
     @property

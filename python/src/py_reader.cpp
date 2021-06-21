@@ -22,7 +22,7 @@ public:
    }
 
    // read an item in file/group from t1 to tn time
-   item_wrapper read_btw(const std::string& name, double start, double stop, bool ignore_properties)
+   item_wrapper read_partial(const std::string& name, double start, double stop, bool ignore_properties)
    {
       return h5features::reader::read_item(name, start, stop, ignore_properties=ignore_properties);
    }
@@ -53,7 +53,7 @@ void init_reader(pybind11::module& m)
      const std::string& group) {return reader_wrapper(filename, group);}));
 
    reader.def("read", &reader_wrapper::read);
-   reader.def("read_btw", &reader_wrapper::read_btw);
+   reader.def("read_partial", &reader_wrapper::read_partial);
    reader.def("read_all", &reader_wrapper::read_all);
    reader.def("items", &reader_wrapper::items);
    reader.def("filename", &reader_wrapper::filename);

@@ -61,6 +61,10 @@ class Item:
         properties = properties or {}
         self._check_properties(properties)
 
+        # cache the properties Python side because retrieving them from C++
+        # involve some cooking (this is a really minor optimization)
+        self._properties = None
+
         # force item validation to ensure consistency from C++ side
         validate = True
         self._item = ItemWrapper(name, features, times, properties, validate)
@@ -102,10 +106,6 @@ class Item:
             return True
         return self._item != other._item
 
-    def has_properties(self) -> bool:
-        """Returns True if the item has properties, False otherwise"""
-        return self._item.has_properties()
-
     @property
     def name(self) -> str:
         """The item's name"""
@@ -134,4 +134,6 @@ class Item:
     @property
     def properties(self) -> dict:
         """The item's properties"""
-        return self._item.properties()
+        if self._properties is None:
+            self._properties = self._item.properties()
+        return self._properties

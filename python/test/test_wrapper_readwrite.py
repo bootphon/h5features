@@ -29,7 +29,7 @@ def test_read_write(tmpdir):
     assert np.all(array == np.array(it.features()))
     assert item1 == it
 
-    it = reader.read_btw(
+    it = reader.read_partial(
         reader.items()[0], np.float64(1), np.float64(3), False)
     assert np.all(array[1:3, :] == np.array(it.features()))
     assert np.all(array[1:3, :] == np.zeros((2, 1000)))

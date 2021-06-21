@@ -68,7 +68,7 @@ def test_v2_0(item, tmpdir):
             assert not item == it
             assert item != it
 
-            it = reader.read('item', True,  (1, 4))
+            it = reader.read('item', start=1, stop=4, ignore_properties=True)
             assert np.all(item.features[1:4] == it.features)
             assert np.all(item.times[1:4] == it.times)
             assert not item == it

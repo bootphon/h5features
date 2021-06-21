@@ -26,7 +26,7 @@ std::vector<double> init_from_start_stop(const std::vector<double>& start, const
 }
 
 
-// An iterator used to iterated on interleaved data stored in a vector, i.e. to
+// An iterator used to iterate on interleaved data stored in a vector, i.e. to
 // iterate the vector with a step of 2. It is assumed the vector has an even
 // size. It is used to efficiently use STL algorithms on interleaved data.
 class iterator
