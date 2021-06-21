@@ -9,7 +9,7 @@ class writer_wrapper : public h5features::writer
 public:
    using h5features::writer::writer;
 
-   void write(item_wrapper item)
+   void write(const item_wrapper& item)
    {
       h5features::writer::write(item);
    }

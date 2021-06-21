@@ -10,24 +10,24 @@ public:
    using h5features::reader::reader;
 
    // returns list of item in file and group read
-   pybind11::list items()
+   pybind11::list items() const
    {
       return pybind11::cast(h5features::reader::items());
    }
 
    // read an item in file/group
-   item_wrapper read(const std::string& name, bool ignore_properties)
+   item_wrapper read(const std::string& name, bool ignore_properties) const
    {
-      return h5features::reader::read_item(name, ignore_properties=ignore_properties);
+      return h5features::reader::read_item(name, ignore_properties);
    }
 
    // read an item in file/group from t1 to tn time
-   item_wrapper read_partial(const std::string& name, double start, double stop, bool ignore_properties)
+   item_wrapper read_partial(const std::string& name, double start, double stop, bool ignore_properties) const
    {
-      return h5features::reader::read_item(name, start, stop, ignore_properties=ignore_properties);
+      return h5features::reader::read_item(name, start, stop, ignore_properties);
    }
 
-   std::vector<item_wrapper> read_all(bool ignore_properties)
+   std::vector<item_wrapper> read_all(bool ignore_properties) const
    {
       std::vector<item_wrapper> all_items;
       for(const auto& item: h5features::reader::items())

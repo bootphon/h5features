@@ -46,7 +46,7 @@ def test_properties(item):
         "list of int": [1, 2, 3],
         "list of double": [1., 2., 3.]}
 
-    assert item.has_properties()
+    assert item.properties() != {}
 
 
 def test_no_properties():
@@ -55,4 +55,4 @@ def test_no_properties():
     name = "Test"
     properties = {}
     item = ItemWrapper(name, features, times, properties, True)
-    assert not item.has_properties()
+    assert item.properties() == {}

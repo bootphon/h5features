@@ -1,113 +1,65 @@
+#ifndef H5FEATURES_WRAPPER_ITEM_H
+#define H5FEATURES_WRAPPER_ITEM_H
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
-
 #include <h5features/item.h>
 
 
 class item_wrapper: public h5features::item
 {
 public:
-   // constructor form python
-   item_wrapper(
+   // inherited from h5features::item
+
+   using h5features::item::item;
+
+   inline std::string name() const noexcept
+   {
+      return h5features::item::name();
+   }
+
+   inline std::size_t dim() const noexcept
+   {
+      return h5features::item::dim();
+   }
+
+   inline std::size_t size() const noexcept
+   {
+      return h5features::item::size();
+   }
+
+   inline bool operator==(const item_wrapper& other) const noexcept
+   {
+      return h5features::item::operator==(other);
+   }
+
+   inline bool operator!=(const item_wrapper& other) const noexcept
+   {
+      return h5features::item::operator!=(other);
+   }
+
+   // Specific methods for the wrapper
+
+   static item_wrapper create(
       const std::string& name,
-      const h5features::features& features,
-      const h5features::times& times,
-      const h5features::properties& properties={},
-      bool check=true);
+      const pybind11::array_t<double, pybind11::array::c_style | pybind11::array::forcecast>& features,
+      const pybind11::array_t<double, pybind11::array::c_style | pybind11::array::forcecast>& times,
+      const pybind11::dict& properties,
+      bool check = true);
 
-   // constructor from reader
-   item_wrapper(const h5features::item& item);
-
-   //returns name of item
-   std::string name();
-
-   //checks if item has properties
-   bool has_properties();
-
-   // returns item's dimension
-   std::size_t dim();
-
-   // returns item's size
-   std::size_t size();
+   // required by the reader
+   item_wrapper(h5features::item&& item);
 
    // returns item's features as numpy array
-   pybind11::array_t<double> features();
+   pybind11::array_t<double> features() const;
 
    // returns item's time as numpy array
-   pybind11::array_t<double> times();
+   pybind11::array_t<double> times() const;
 
-   // returns item's properties
-   pybind11::dict properties();
-
-   // Returns true if the two items are equal
-   bool operator==(const item_wrapper& other) const noexcept;
-
-   // Returns true if the two items are not equal
-   bool operator!=(const item_wrapper& other) const noexcept;
+   // returns item's properties as dictionnary
+   pybind11::dict properties() const;
 };
 
 
-// prepare cast for h5features::properties
-namespace pybind11::detail
-{
-template <>
-struct type_caster<h5features::properties>
-{
-   PYBIND11_TYPE_CASTER(h5features::properties, "p");
-   bool load(handle src, bool)
-   {
-      for(auto& item: src)
-         value.set(item.cast<std::string>(), src[item].cast<h5features::properties::value_type>());
-      return true;
-   }
-};
-
-
-// prepare cast for h5features::properties
-template <>
-struct type_caster<h5features::properties::value_type>
-{
-   PYBIND11_TYPE_CASTER(h5features::properties::value_type, "pvt");
-   bool load(handle src, bool)
-   {
-      PyObject* pyob = src.ptr();
-      if (isinstance<pybind11::bool_>(src))
-      {
-         value = handle(pyob).cast<bool>();
-      }
-      else if (isinstance<pybind11::int_>(src))
-      {
-         value = handle(pyob).cast<int>();
-      }
-      else if (isinstance<pybind11::float_>(src))
-      {
-         value = handle(pyob).cast<double>();
-      }
-      else if (isinstance<pybind11::str>(src))
-      {
-         value = handle(pyob).cast<std::string>();
-      }
-      else if (isinstance<pybind11::list>(src))
-      {
-         if (isinstance<pybind11::str>(*src.begin()))
-         {
-            value = handle(pyob).cast<std::vector<std::string>>();
-         }
-         else if (isinstance<pybind11::int_>(*src.begin()))
-         {
-            value = handle(pyob).cast<std::vector<int>>();
-         }
-         else if (isinstance<pybind11::float_>(*src.begin()))
-         {
-            value = handle(pyob).cast<std::vector<double>>();
-         }
-      }
-      else if (isinstance<pybind11::dict>(src))
-      {
-         value = handle(pyob).cast<h5features::properties>();
-      }
-      return true;
-   }
-};
-}
+#endif  // H5FEATURES_WRAPPER_ITEM_H

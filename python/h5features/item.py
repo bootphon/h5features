@@ -3,6 +3,24 @@ import numpy as np
 from _h5features import ItemWrapper
 
 
+# an immutable dictionnay to store item properties, from
+# https://www.python.org/dev/peps/pep-0351/
+class _immutable_dict(dict):
+    def __hash__(self):
+        return id(self)
+
+    def _immutable(self, *args, **kws):
+        raise ValueError('properties are read-only')
+
+    __setitem__ = _immutable
+    __delitem__ = _immutable
+    clear = _immutable
+    update = _immutable
+    setdefault = _immutable
+    pop = _immutable
+    popitem = _immutable
+
+
 class Item:
     """Handles temporal numerical data related to a single item.
 
@@ -134,6 +152,8 @@ class Item:
     @property
     def properties(self) -> dict:
         """The item's properties"""
-        if self._properties is None:
-            self._properties = self._item.properties()
-        return self._properties
+        # if self._properties is None:
+        #     # self._properties = _immutable_dict(self._item.properties())
+        #     self._properties = self._item.properties()
+        # return self._properties
+        return self._item.properties()
