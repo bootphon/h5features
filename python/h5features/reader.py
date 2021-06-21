@@ -7,7 +7,7 @@ from _h5features import ReaderWrapper, ItemWrapper, OstreamRedirect
 
 
 class Reader:
-    """Reads :class:`~h5features.Item` from  h5features file
+    """Reads :class:`~h5features.Item` from a h5features file
 
     A reader is attached to a HDF5 file and a h5features group within this
     file.
@@ -61,6 +61,29 @@ class Reader:
 
     def __exit__(self, type, value, traceback):
         del self
+
+    @staticmethod
+    def list_groups(filename) -> list:
+        """Returns the groups in the specified HDF5 file as a list
+
+        Parameters
+        ----------
+        filename : str or pathlib.Path
+            The HDF5 to read groups from
+
+        Raises
+        ------
+        RuntimeError
+            If the `filename` cannot be opened or is not a HDF5 file
+
+        """
+        if isinstance(filename, pathlib.Path):
+            filename = str(filename)
+        return ReaderWrapper.list_groups(filename)
+
+    def items(self) -> list:
+        """Returns the name of readable items as a list"""
+        return self._reader.items()
 
     def read_all(self, ignore_properties=False):
         """Returns all the items stored in the file as a list"""
@@ -131,38 +154,6 @@ class Reader:
 
         raise TypeError('start and stop arguments must be both None or float')
 
-    @staticmethod
-    def list_groups(filename) -> list:
-        """Returns the groups in the specified HDF5 file as a list
-
-        Parameters
-        ----------
-        filename : str or pathlib.Path
-            The HDF5 to read groups from
-
-        Raises
-        ------
-        RuntimeError
-            If the `filename` cannot be opened or is not a HDF5 file
-
-        """
-        if isinstance(filename, pathlib.Path):
-            filename = str(filename)
-        return ReaderWrapper.list_groups(filename)
-
-    @property
-    def version(self) -> str:
-        """The file format version"""
-        return {
-            "v1_0": "1.0",
-            "v1_1": "1.1",
-            "v1_2": "1.2",
-            "v2_0": "2.0"}[self._reader.version().name]
-
-    def items(self) -> list:
-        """Returns the name of readable items as a list"""
-        return self._reader.items()
-
     @property
     def groupname(self):
         """The group from which items are read in the file"""
@@ -172,3 +163,12 @@ class Reader:
     def filename(self):
         """The file being read"""
         return self._reader.filename()
+
+    @property
+    def version(self) -> str:
+        """The file format version"""
+        return {
+            "v1_0": "1.0",
+            "v1_1": "1.1",
+            "v1_2": "1.2",
+            "v2_0": "2.0"}[self._reader.version().name]

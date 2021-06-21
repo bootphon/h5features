@@ -19,28 +19,26 @@ def item():
 def test_constructor_writer(tmpdir):
     filename = str(tmpdir / 'test.h5')
 
-    with pytest.raises(TypeError):
-        _ = Writer(0, "test", False, True, "2.0")
+    with pytest.raises(TypeError) as err:
+        Writer(0, group='test')
+    assert 'incompatible constructor arguments' in str(err.value)
 
-    with pytest.raises(TypeError):
-        _ = Writer(filename, 0, False, True, "2.0")
+    with pytest.raises(TypeError) as err:
+        Writer(filename, group=0)
+    assert 'incompatible constructor arguments' in str(err.value)
 
-    with pytest.raises(TypeError):
-        _ = Writer(filename, "test", "test", True, "2.0")
+    with pytest.raises(RuntimeError) as err:
+        Writer(filename, 'test', False, True, version='2.10')
+    assert 'version 2.10 is not supported' in str(err.value)
 
-    with pytest.raises(TypeError):
-        _ = Writer(filename, "test", False, "test", "2.0")
+    with pytest.raises(RuntimeError) as err:
+        Writer(str(tmpdir / 'test/test.h5'))
+    assert 'Unable to open file' in str(err.value)
 
-    with pytest.raises(KeyError):
-        _ = Writer(filename, "test", False, True, "2.10")
-
-    with pytest.raises(FileNotFoundError):
-        _ = Writer(str(tmpdir / 'test/test.h5'), "test", False, True, "2.0")
-
-    with Writer(filename, "test", False, True, "2.0") as writer:
-        assert writer.version == "2.0"
+    with Writer(filename, 'test', False, True, '2.0') as writer:
+        assert writer.version == '2.0'
         assert writer.filename == os.path.abspath(filename)
-        assert writer.groupname == "test"
+        assert writer.groupname == 'test'
 
 
 def test_v2_0(item, tmpdir):
@@ -119,3 +117,31 @@ def test_read_all(item, tmpdir):
     assert isinstance(all_items, list)
     assert all_items[0] == item
     assert all_items[1] == item2
+
+
+def test_times1d(tmpdir):
+    filename = str(tmpdir / 'file.h5f')
+
+    # create an item
+    item = Item(
+        name='name',
+        features=np.random.random((3, 5)),
+        times=np.asarray([0, 1, 2]).astype(np.float64),
+        properties={'param1': 'toto', 'param2': 1})
+
+    # write it
+    with Writer(filename, 'features') as writer:
+        writer.write(item)
+
+    # read it
+    with Reader(filename, 'features') as reader:
+        assert reader.items() == ['name']
+        item2 = reader.read('name')
+        assert item == item2
+
+        # partial read
+        item3 = reader.read('name', 0, 1.5)
+        assert item3.features.shape == (2, 5)
+
+        item3 = reader.read('name', 0, 0.5)
+        assert item3.features.shape == (1, 5)

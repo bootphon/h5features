@@ -1,55 +1,53 @@
-from os.path import exists, dirname, abspath
+"""Implementation of the class h5features.Writer"""
+import pathlib
 from h5features import Item
 from _h5features import WriterWrapper, VersionWrapper, OstreamRedirect
 
 
 class Writer:
-    """Interface with the python wrapper Writer from h5features2
+    """Writes :class:`~h5features.Item` to a h5features file
 
-    It allow to write Item in hdf5 format
+    Parameters
+    ----------
+    filename : str or pathlib.Path
+      The name of the file to write
+    group : str, optional
+      The group in the file to write on. Default to "features".
+    overwrite : bool, optionnal
+      If true erase the file content if it is already existing. If false it
+      will append new items to the existing group. Default to False.
+    compress : bool, optionnal
+      When true, compress the data. Default to True.
+    version : str, optionnal
+      The version of the file to write. Version 1.0 is **not
+      available** to write, only read. Default to "2.0"
 
-    Args:
-        filename (`str`) : the name of the file to write
-        group (`str`) :  a 'location' in the file to write
-        overwrite (`bool`, optionnal) : If True, overwrite the file (default
-            False)
-        compress (`bool`, optionnal) : If True, compress the file (default
-            True)
-        version (`str`, optionnal) : version of writing choosen in ['1.1',
-            '1.2', '2.0'] (default "2.0")
-
-    Raises:
-        TypeError: if file, group are not `str`; compress and overwrite are
-            not bool;
-        KeyError: if version not in ['1.1', '1.2', '2.0']
-        FileNotFoundError: if direname of file does not exist
+    Raises
+    ------
+    RuntimeError
+      If the file cannot be opened. When `overwrite` is true, if the `group`
+      already exists in the file and the version is not supported. Or if the
+      requested `version` is not supported. If `group` is not a str.
+    TypeError
+      If `filename` is not a `Path` or `str`, if `group` is not a `str`.
 
     """
-    def __init__(self, filename, group, overwrite=False,
-                 compress=True, version="2.0"):
+    def __init__(self, filename, group='features',
+                 overwrite=False, compress=True, version='2.0'):
         versions = {
             # writing v1.0 is not supported
-            "1.1": VersionWrapper.v1_1,
-            "1.2": VersionWrapper.v1_2,
-            "2.0": VersionWrapper.v2_0,
-        }
+            '1.1': VersionWrapper.v1_1,
+            '1.2': VersionWrapper.v1_2,
+            '2.0': VersionWrapper.v2_0}
+        if version not in versions:
+            raise RuntimeError(f'version {version} is not supported')
 
-        if not isinstance(filename, str):
-            raise TypeError("file name must be str")
-        filename = abspath(filename)
-        if not exists(dirname(filename)):
-            raise FileNotFoundError("file {} does not exist".format(filename))
-        if not isinstance(group, str):
-            raise TypeError("group name must be str")
-        if not isinstance(overwrite, bool):
-            raise TypeError("overwrite must be bool")
-        if not isinstance(compress, bool):
-            raise TypeError("compress must be bool")
-        if versions.get(version, None) is None:
-            raise KeyError("version {} does not exist".format(version))
+        if isinstance(filename, pathlib.Path):
+            filename = str(filename)
 
         self._writer = WriterWrapper(
-            filename, group, overwrite, compress, versions[version])
+            filename, group,
+            bool(overwrite), bool(compress), versions[version])
 
     def write(self, item):
         """Writes an item to file
@@ -58,10 +56,14 @@ class Writer:
         ------
         TypeError
           if `item` is not an instance of Item.
+        RuntimeError
+          If `item` cannot be wrote (e.g. an item with this same name already
+          exists in the file).
 
         """
         if not isinstance(item, Item):
-            raise TypeError("item must have Item type")
+            raise TypeError("item must be of type h5features.Item")
+
         with OstreamRedirect(stderr=True):
             self._writer.write(item._item)
 
