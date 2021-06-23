@@ -9,7 +9,8 @@ pybind11_add_module(_h5features
   ${CMAKE_CURRENT_SOURCE_DIR}/src/py_item.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/py_reader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/py_writer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/py_version.cpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/py_version.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/py_properties.cpp)
 
 target_include_directories(_h5features PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include

@@ -142,7 +142,7 @@ public:
       return m_properties.end();
    }
 
-private:
+protected:
    // The properties container
    std::unordered_map<std::string, value_type> m_properties;
 };
