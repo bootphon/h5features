@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
-#include <pybind11/stl.h>
-#include <h5features/properties.h>
+#include "properties_wrapper.h"
+
 
 namespace pybind11::detail
 {
@@ -94,64 +94,76 @@ struct type_caster<h5features::properties>
 }  // namespace pybind11::detail
 
 
-class properties_wrapper : public h5features::properties
+
+properties_wrapper::properties_wrapper(const pybind11::dict& dict)
 {
-public:
-   using h5features::properties::properties;
-
-   properties_wrapper(const pybind11::dict& dict)
+   for(const auto& [key, value] : dict)
    {
-      for(const auto& [key, value] : dict)
-      {
-         set(key.cast<std::string>(), value.cast<value_type>());
-      }
+      set(key.cast<std::string>(), value.cast<value_type>());
    }
+}
 
-   pybind11::iterator py_iter() const
-   {
-      return pybind11::make_key_iterator(begin(), end());
-   }
 
-   void py_set(const std::string& key, const pybind11::handle& value)
-   {
-      set(key, value.cast<value_type>());
-   }
+properties_wrapper::properties_wrapper(const h5features::properties& properties)
+   : h5features::properties(properties)
+{}
 
-   pybind11::object py_get(const std::string& name) const
-   {
-      return pybind11::cast(m_properties.at(name));
-   }
 
-   pybind11::iterator py_keys() const
-   {
-      return py_iter();
-   }
+properties_wrapper::properties_wrapper(h5features::properties&& properties)
+   : h5features::properties(std::move(properties))
+{}
 
-   pybind11::list py_values() const
-   {
-      pybind11::list list;
-      for(const auto& item : m_properties)
-      {
-         list.append(item.second);
-      }
-      return list;
-   }
 
-   pybind11::iterator py_items() const
-   {
-      return pybind11::make_iterator(begin(), end());
-   }
+pybind11::iterator properties_wrapper::py_iter() const
+{
+   return pybind11::make_key_iterator(begin(), end());
+}
 
-   pybind11::dict py_todict() const
+
+void properties_wrapper::py_set(const std::string& key, const pybind11::handle& value)
+{
+   set(key, value.cast<value_type>());
+}
+
+
+pybind11::object properties_wrapper::py_get(const std::string& name) const
+{
+   return pybind11::cast(m_properties.at(name));
+}
+
+
+pybind11::iterator properties_wrapper::py_keys() const
+{
+   return py_iter();
+}
+
+
+pybind11::list properties_wrapper::py_values() const
+{
+   pybind11::list list;
+   for(const auto& item : m_properties)
    {
-      pybind11::dict dict;
-      for(const auto& [key, value] : m_properties)
-      {
-         dict[pybind11::str(key)] = value;
-      }
-      return dict;
+      list.append(item.second);
    }
-};
+   return list;
+}
+
+
+pybind11::iterator properties_wrapper::py_items() const
+{
+   return pybind11::make_iterator(begin(), end());
+}
+
+
+pybind11::dict properties_wrapper::py_todict() const
+{
+   pybind11::dict dict;
+   for(const auto& [key, value] : m_properties)
+   {
+      dict[pybind11::str(key)] = value;
+   }
+   return dict;
+}
 
 
 void init_properties(pybind11::module& m)
@@ -164,7 +176,8 @@ void init_properties(pybind11::module& m)
       .def("__len__", &properties_wrapper::size)
       .def("__contains__", &properties_wrapper::contains)
       .def("__iter__", &properties_wrapper::py_iter, pybind11::keep_alive<0, 1>())
-      .def("__setitem__", &properties_wrapper::py_set)
+      // properties are exposed read-only to Python
+      // .def("__setitem__", &properties_wrapper::py_set)
       .def("__getitem__", &properties_wrapper::py_get)
       .def("keys", &properties_wrapper::py_keys, pybind11::keep_alive<0, 1>())
       .def("values", &properties_wrapper::py_values)

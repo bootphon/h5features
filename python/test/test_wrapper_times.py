@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from _h5features import ItemWrapper
 
 
@@ -12,7 +13,9 @@ def test_times():
 
     copy_true = np.array(times.times(), dtype=np.int8, copy=True)
     copy_false = np.array(times.times(), copy=False)
-    np.array(times.times(), copy=False)[0][0] = -1
+
+    with pytest.raises(ValueError):
+        np.array(times.times(), copy=False)[0][0] = -1
     assert np.array(times.times(), dtype=np.int8, copy=True).shape == (5, 2)
     assert copy_true[0][0] == 0
-    assert copy_false[0][0] == -1
+    assert copy_false[0][0] == 0

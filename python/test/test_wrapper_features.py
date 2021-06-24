@@ -1,6 +1,7 @@
 """Test of the Features from wrapper"""
 import copy
 import numpy as np
+import pytest
 from _h5features import ItemWrapper
 
 
@@ -61,7 +62,8 @@ def test_copy_true():
     second_copy = copy.deepcopy(np.asarray(features.features()))
     third_copy = np.array(features.features(), copy=False)
     first_copy[0, 0] = 0
-    third_copy[1, 0] = 0
+    with pytest.raises(ValueError):
+        third_copy[1, 0] = 0
 
     # test if the array have changed after it-s update
     assert first_copy[0, 0] == 0
@@ -70,9 +72,9 @@ def test_copy_true():
     # test if second copy change after other update
     assert second_copy[0, 0] == 1
     assert second_copy[1, 0] == 1
-    # test if third copy change after other and it's updates
-    assert third_copy[0, 0] == 1
-    assert third_copy[1, 0] == 0
+    # # test if third copy change after other and it's updates
+    # assert third_copy[0, 0] == 1
+    # assert third_copy[1, 0] == 0
 
 
 def test_copy_false():
@@ -81,18 +83,14 @@ def test_copy_false():
     times = np.asarray([[0, 1, 2, 3], [1, 2, 3, 4]]).T.astype(np.float64)
     name = "Test"
     features = ItemWrapper(name, np.ones((4, 4)), times, {}, True)
+
     first_copy = np.array(features.features(), copy=False)
-    fs_copy = np.array(features.features(), copy=False)
-    sd_copy = copy.deepcopy(np.asarray(features.features()))
-    first_copy[0, 0] = 0
+
+    with pytest.raises(ValueError):
+        first_copy[0, 0] = 0
     second_copy = copy.deepcopy(np.asarray(features.features()))
     third_copy = np.array(features.features(), copy=False)
 
     # test if update in pointor, change other call with copy or not
-    assert first_copy[0, 0] == 0
-    assert second_copy[0, 0] == 0
-    assert third_copy[0, 0] == 0
-
-    # test copy or not before changing first_copy
-    assert sd_copy[0, 0] == 1
-    assert fs_copy[0, 0] == 0
+    assert second_copy[0, 0] == 1
+    assert third_copy[0, 0] == 1

@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from h5features import Item
+from _h5features import PropertiesWrapper
 
 
 @pytest.fixture
@@ -75,10 +76,12 @@ def test_features_firstdim(item):
     f2 = np.copy(item.features)
     f3 = item.features
 
-    f1[0, 1] = 3.14
-    assert f1[0, 1] == 3.14
-    assert f2[0, 1] == 1
-    assert f3[0, 1] == 3.14
+    with pytest.raises(ValueError):
+        f1[0, 1] = 3.14
+    f2[0, 1] = 3.14
+    assert f1[0, 1] == 1
+    assert f2[0, 1] == 3.14
+    assert f3[0, 1] == 1
 
 
 def test_times_2():
@@ -91,12 +94,13 @@ def test_times_2():
     t1 = item.times
     t2 = np.copy(item.times)
     t3 = item.times
-    t1[3, 0] = 0
 
-    assert t1[3, 0] == 0
-    assert t2[3, 0] == 3
-    assert t3[3, 0] == 0
-    assert np.all(t2 == times)
+    with pytest.raises(ValueError):
+        t1[3, 0] = 0
+    t2[3, 0] = 0
+    assert t1[3, 0] == 3
+    assert t2[3, 0] == 0
+    assert t3[3, 0] == 3
 
 
 def test_properties():
@@ -186,3 +190,24 @@ def test_build_by_copy():
     times_copy = np.copy(times)
     times[:] = 0
     assert np.all(item.times.flatten() == times_copy.flatten())
+
+
+def test_readonly(item):
+    with pytest.raises(AttributeError):
+        item.features = np.ones((10, 4))
+    with pytest.raises(ValueError):
+        item.features[:] = np.ones((5, 4))
+    with pytest.raises(ValueError):
+        item.features[:] = np.ones((10, 4))
+
+    with pytest.raises(AttributeError):
+        item.times = None
+    with pytest.raises(ValueError):
+        item.times[:, 1] = 0
+
+    assert item.properties == {'spam': 'spam a lot'}
+
+    with pytest.raises(AttributeError):
+        item.properties = {'spam again': [0, 1, 2]}
+    with pytest.raises(ValueError):
+        item.properties['spam again'] = [0, 1, 2]

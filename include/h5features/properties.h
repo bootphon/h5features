@@ -44,7 +44,7 @@ public:
    properties() = default;
 
    /// Destructor
-   ~properties() = default;
+   virtual ~properties() = default;
 
    /// Copy constructor
    properties(const properties&) = default;
