@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from h5features import Item
-from _h5features import PropertiesWrapper
 
 
 @pytest.fixture

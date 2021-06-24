@@ -1,6 +1,96 @@
 #include <pybind11/pybind11.h>
 #include "item_wrapper.h"
-#include "properties_wrapper.h"
+
+
+namespace pybind11::detail
+{
+// Helper class to cast h5features::properties::value_type between C++ and Python
+template <>
+struct type_caster<h5features::properties::value_type> //: variant_caster<h5features::properties::value_type>
+{
+   PYBIND11_TYPE_CASTER(h5features::properties::value_type, _("properties_value"));
+
+   // Python -> C++
+   bool load(handle src, bool)
+   {
+      if (isinstance<bool_>(src))
+      {
+         value = src.cast<bool>();
+      }
+      else if (isinstance<int_>(src))
+      {
+         value = src.cast<int>();
+      }
+      else if (isinstance<float_>(src))
+      {
+         value = src.cast<double>();
+      }
+      else if (isinstance<str>(src))
+      {
+         value = src.cast<std::string>();
+      }
+      else if (isinstance<list>(src))
+      {
+         if (isinstance<str>(*src.begin()))
+         {
+            value = src.cast<std::vector<std::string>>();
+         }
+         else if (isinstance<int_>(*src.begin()))
+         {
+            value = src.cast<std::vector<int>>();
+         }
+         else if (isinstance<float_>(*src.begin()))
+         {
+            value = src.cast<std::vector<double>>();
+         }
+      }
+      else if (isinstance<dict>(src))
+      {
+         value = src.cast<h5features::properties>();
+      }
+      else
+      {
+         throw std::runtime_error("invalid property value type");
+      }
+
+      return true;
+   }
+
+   // C++ -> Python
+   static handle cast(const h5features::properties::value_type& src, return_value_policy, handle)
+   {
+      return boost::apply_visitor(variant_caster_visitor{}, src);
+   }
+};
+
+
+// Helper class to cast h5features::properties between C++ and Python. This is
+// required to deal with nested properties.
+template <>
+struct type_caster<h5features::properties>
+{
+   PYBIND11_TYPE_CASTER(h5features::properties, _("properties"));
+
+   // Python -> C++
+   bool load(handle src, bool)
+   {
+      for(auto& item: src)
+         value.set(item.cast<std::string>(), src[item].cast<h5features::properties::value_type>());
+      return true;
+   }
+
+   // C++ -> Python
+   static handle cast(const h5features::properties& src, return_value_policy, handle)
+   {
+      pybind11::dict dict;
+      for(const auto& [key, value] : src)
+      {
+         dict[pybind11::str(key)] = value;
+      }
+      return dict.release();
+   }
+};
+}  // namespace pybind11::detail
 
 
 item_wrapper item_wrapper::create(
@@ -31,7 +121,7 @@ item_wrapper item_wrapper::create(
       name,
       cfeatures,
       ctimes,
-      properties_wrapper(properties),
+      properties.cast<h5features::properties>(),
       check);
 }
 
@@ -73,7 +163,7 @@ pybind11::array_t<double> item_wrapper::times() const
 
 pybind11::dict item_wrapper::properties() const
 {
-   return static_cast<properties_wrapper>(h5features::item::properties()).py_todict();
+   return pybind11::cast(h5features::item::properties());
 }
 
 
