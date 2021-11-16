@@ -90,6 +90,11 @@ class Item:
             raise RuntimeError('properties is not a dict')
 
         for key, value in properties.items():
+            if isinstance(value, np.floating):
+                # convert numpy floats to pure Python floats
+                value = float(value)
+                properties[key] = value
+
             if not isinstance(key, str):
                 raise RuntimeError('property keys must be str')
             if not isinstance(value, (bool, int, float, str, list, dict)):
@@ -98,7 +103,8 @@ class Item:
 
             if isinstance(value, list):
                 ltype = type(value[0])
-                if not isinstance(value[0], (int, float, str)):
+                # TODO the dict here pass but do not work
+                if not isinstance(value[0], (int, float, str, dict)):
                     raise RuntimeError(
                         f'property value type invalid: list of {ltype}')
                 if not all(isinstance(v, ltype) for v in value):
