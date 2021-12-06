@@ -13,6 +13,7 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
    // Python -> C++
    bool load(handle src, bool)
    {
+      std::cout << "passed-python"<<std::endl;
       if (isinstance<bool_>(src))
       {
          value = src.cast<bool>();
@@ -43,6 +44,11 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
          {
             value = src.cast<std::vector<double>>();
          }
+         else //if (isinstance<h5features::properties>(*src.begin()))
+         {
+            std::cout << "passed"<<std::endl;
+            value = src.cast<std::vector<h5features::properties>>();
+         }
       }
       else if (isinstance<dict>(src))
       {
@@ -59,9 +65,11 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
    // C++ -> Python
    static handle cast(const h5features::properties::value_type& src, return_value_policy, handle)
    {
+      std::cout << "passed-python"<<std::endl;
       return boost::apply_visitor(variant_caster_visitor{}, src);
    }
 };
+
 
 
 // Helper class to cast h5features::properties between C++ and Python. This is
@@ -90,6 +98,35 @@ struct type_caster<h5features::properties>
       return dict.release();
    }
 };
+
+
+template <>
+struct type_caster<std::vector<h5features::properties>>
+{
+   
+   PYBIND11_TYPE_CASTER(std::vector<h5features::properties>, _("vproperties"));
+
+   // Python -> C++
+   bool load(handle src, bool)
+   {
+      for(auto& item: src)
+         value.push_back(item.cast<h5features::properties>());
+      return true;
+   }
+
+   // C++ -> Python
+   static handle cast(const std::vector<h5features::properties>& src, return_value_policy, handle)
+   {
+      pybind11::list list;
+      for(size_t i = 0; i < src.size(); ++i)
+      {
+         list.append(pybind11::cast(src[i]));
+      }
+      return list.release();
+   }
+};
+
+
 }  // namespace pybind11::detail
 
 
@@ -115,7 +152,7 @@ item_wrapper item_wrapper::create(
       std::vector<double>{ptr, ptr + info.size},
       h5features::times::get_format(info.shape[1]),
       check};
-
+   std::cout << "passed-python"<<std::endl;
    // instanciate item object
    return item_wrapper(
       name,

@@ -1,3 +1,4 @@
+#include <string>
 #include <h5features/details/properties_writer.h>
 
 
@@ -16,6 +17,17 @@ public:
    }
 
    // write a vector
+   void operator()(const std::vector<h5features::properties>& value) const
+   {
+      
+      auto dataset = m_group.createGroup(m_name);
+      for (size_t i = 0; i < value.size(); ++i)
+      {
+         auto group = dataset.createGroup(m_name + std::string("_") + std::to_string(i));
+         h5features::details::write_properties(value[i], group, m_compress);
+      }
+      
+   }
    template<class T>
    void operator()(const std::vector<T>& value) const
    {
@@ -25,7 +37,6 @@ public:
          props.add(hdf5::Chunking{value.size()});
          props.add(hdf5::Deflate{9});
       }
-
       m_group.createDataSet<T>(m_name, hdf5::DataSpace::From(value), props).write(value);
    }
 

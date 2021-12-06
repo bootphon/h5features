@@ -103,7 +103,18 @@ h5features::properties h5features::details::read_properties(const hdf5::Group& g
          // recusrsive read of nested properties
          case hdf5::ObjectType::Group:
          {
-            properties.set(name, read_properties(group.getGroup(name)));
+            std::vector<std::string> groups_list = group.listObjectNames();
+            if (groups_list.size() == 1)
+               properties.set(name, read_properties(group.getGroup(name)));
+            else
+            {
+               std::vector<h5features::properties> props;
+               for (size_t i = 0; i < groups_list.size(); ++i)
+               {
+                  props.push_back(read_properties(group.getGroup(groups_list[i])));
+               }
+               properties.set(name, props);
+            }
             break;
          }
          default:
