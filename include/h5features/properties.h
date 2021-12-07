@@ -35,26 +35,13 @@ public:
       `h5features::properties`.
 
     */
-   // using pre_value = boost::variant<
-   //     boost::recursive_wrapper<properties>,
-   //     bool, int, double, std::string,
-   //     std::vector<int>, std::vector<double>, std::vector<std::string>>;
- 
-   // using value_type = boost::make_recursive_variant<
-   //    pre_value,
-   //    std::vector<pre_value>
-   //    >::type;
 
-   //  using value_type =  boost::make_recursive_variant<
-   //     boost::recursive_wrapper<properties>,
-   //     bool, int, double, std::string,
-   //     std::vector<int>, std::vector<double>, std::vector<std::string>,
-   //     std::vector<boost::recursive_variant_>>::type;
-using value_type =  boost::make_recursive_variant<
+   using value_type =  boost::variant<
        boost::recursive_wrapper<properties>,
        bool, int, double, std::string,
        std::vector<int>, std::vector<double>, std::vector<std::string>,
-       std::vector<properties>>::type;
+       std::vector<properties>>;
+
    /// Constructor
    properties() = default;
 

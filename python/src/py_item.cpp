@@ -13,7 +13,6 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
    // Python -> C++
    bool load(handle src, bool)
    {
-      std::cout << "passed-python"<<std::endl;
       if (isinstance<bool_>(src))
       {
          value = src.cast<bool>();
@@ -46,7 +45,6 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
          }
          else //if (isinstance<h5features::properties>(*src.begin()))
          {
-            std::cout << "passed"<<std::endl;
             value = src.cast<std::vector<h5features::properties>>();
          }
       }
@@ -65,7 +63,6 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
    // C++ -> Python
    static handle cast(const h5features::properties::value_type& src, return_value_policy, handle)
    {
-      std::cout << "passed-python"<<std::endl;
       return boost::apply_visitor(variant_caster_visitor{}, src);
    }
 };
@@ -152,7 +149,6 @@ item_wrapper item_wrapper::create(
       std::vector<double>{ptr, ptr + info.size},
       h5features::times::get_format(info.shape[1]),
       check};
-   std::cout << "passed-python"<<std::endl;
    // instanciate item object
    return item_wrapper(
       name,
