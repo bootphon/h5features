@@ -23,7 +23,7 @@ public:
       auto dataset = m_group.createGroup(m_name);
       for (size_t i = 0; i < value.size(); ++i)
       {
-         auto group = dataset.createGroup(m_name + std::string("_") + std::to_string(i));
+         auto group = dataset.createGroup(m_name + std::string("__") + std::to_string(i) + std::string("$$"));
          h5features::details::write_properties(value[i], group, m_compress);
       }
       

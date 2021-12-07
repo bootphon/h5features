@@ -10,8 +10,48 @@ def test_read_write(tmpdir):
     array = np.ones((9, 1))
     array[1:3, ] = 0
     times = np.vstack((np.arange(9), np.arange(9) + 1)).T.astype(np.float64)
-
-    item1 = ItemWrapper('item1', array, times, {}, True)
+    props = {
+        "int": 1,
+        "double": 1.,
+        "bool": True,
+        "string": "str",
+        "list of string": ["str1", "str2"],
+        "list of int": [1, 2, 3],
+        "list of double": [1., 2., 3.],
+        "list of properties": [{
+            "int ": 1,
+            "double": 1.,
+            "bool": True,
+            "string": "str",
+            "list of string": ["str1", "str2"],
+            "list of int": [1, 2, 3],
+            "list of double": [1., 2., 3.]},
+            {
+            "int ": 1,
+            "double": 1.,
+            "bool": True,
+            "string": "str",
+            "list of string": ["str1", "str2"],
+            "list of int": [1, 2, 3],
+            "list of double": [1., 2., 3.],
+             "dict": {
+            "int ": 1,
+            "double": 1.,
+            "bool": True,
+            "string": "str",
+            "list of string": ["str1", "str2"],
+            "list of int": [1, 2, 3],
+            "list of double": [1., 2., 3.]}}
+            ],
+        "dict": {
+            "int ": 1,
+            "double": 1.,
+            "bool": True,
+            "string": "str",
+            "list of string": ["str1", "str2"],
+            "list of int": [1, 2, 3],
+            "list of double": [1., 2., 3.]}}
+    item1 = ItemWrapper('item1', array, times, props, True)
     item2 = ItemWrapper('item2', array, times, {}, True)
 
     writer = WriterWrapper(
@@ -28,6 +68,7 @@ def test_read_write(tmpdir):
     it = reader.read(reader.items()[0], False)
     assert np.all(array == np.array(it.features()))
     assert item1 == it
+    assert it.properties() == item1.properties()
 
     it = reader.read_partial(
         reader.items()[0], np.float64(1), np.float64(3), False)
