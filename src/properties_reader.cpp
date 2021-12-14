@@ -110,7 +110,6 @@ h5features::properties h5features::details::read_properties(const hdf5::Group& g
                std::vector<h5features::properties> props;
                for (size_t i = 0; i < groups_list.size(); ++i)
                {
-                  std::cout << groups_list[i] << std::endl;
                   props.push_back(read_properties(new_grp.getGroup(groups_list[i])));
                }
                properties.set(name, props);
