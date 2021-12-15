@@ -2,7 +2,7 @@
 
 #include <h5features/item.h>
 #include <h5features/reader.h>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "test_utils_datadir.h"
 
