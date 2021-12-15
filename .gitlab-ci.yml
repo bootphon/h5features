@@ -8,6 +8,7 @@ before_script:
   - conda activate h5features-ci
   - mkdir -p build
   - cd build
+  - rm -rf ./*
 
 test-linux:
   stage: test
