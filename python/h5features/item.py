@@ -48,7 +48,7 @@ class Item:
     properties : dict, optional
       An optional dictionnary to record item's properties and metadata. Key
       must be ``str``. Values can be one of ``bool``, ``int``, ``float``,
-      ``str``, ``list of int``, ``list of float``, ``list of str`` or nested
+      ``str``, ``list of int``, ``list of float``, ``list of str``, list of ``properties`` or nested
       ``properties``.
 
     Raises
@@ -58,9 +58,9 @@ class Item:
 
     """
     def __init__(self, name, features, times, properties=None):
+        
         if not isinstance(name, str):
             raise RuntimeError('item name must be str')
-
         if not (isinstance(times, np.ndarray) and times.dtype == 'float64'):
             raise RuntimeError('times is not a float64 numpy array')
         if times.ndim not in (1, 2):
@@ -141,15 +141,14 @@ class Item:
         """Number of frames"""
         return self._item.size()
 
-    @property
-    def features(self) -> np.ndarray:
-        """A reference to the item's features"""
-        return self._item.features()
 
-    @property
-    def times(self) -> np.ndarray:
+    def features(self, copy=False) -> np.ndarray:
+        """A reference to the item's features"""
+        return self._item.features() if not copy else self._item.features().copy()
+
+    def times(self, copy=False) -> np.ndarray:
         """A reference to the item's timestamps"""
-        return self._item.times()
+        return self._item.times() if not copy else self._item.times().copy()
 
     @property
     def properties(self) -> dict:

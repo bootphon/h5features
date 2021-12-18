@@ -83,7 +83,6 @@ h5features::properties h5features::details::read_properties(const hdf5::Group& g
 {
    // fill it with the read properties
    h5features::properties properties;
-
    // read all the attributes (correspond to scalar values (bool, int, double) or strings)
    for(const auto& name : group.listAttributeNames())
    {
@@ -105,17 +104,25 @@ h5features::properties h5features::details::read_properties(const hdf5::Group& g
          {
             auto new_grp = group.getGroup(name);
             std::vector<std::string> groups_list = new_grp.listObjectNames();
-            if (groups_list[0].find("__") != std::string::npos && groups_list[0].find("$$") != std::string::npos)
-            {  
-               std::vector<h5features::properties> props;
-               for (size_t i = 0; i < groups_list.size(); ++i)
-               {
-                  props.push_back(read_properties(new_grp.getGroup(groups_list[i])));
+            if (groups_list.size() != 0){
+               std::cout<<groups_list.size()<<std::endl;
+               if (groups_list[0].find("__") != std::string::npos && groups_list[0].find("$$") != std::string::npos)
+               {  
+                  std::vector<h5features::properties> props;
+                  for (size_t i = 0; i < groups_list.size(); ++i)
+                  {
+                     props.push_back(read_properties(new_grp.getGroup(groups_list[i])));
+                  }
+                  properties.set(name, props);
                }
-               properties.set(name, props);
+               else
+               {
+                  properties.set(name, read_properties(group.getGroup(name)));}  
             }
+            
             else
-               properties.set(name, read_properties(group.getGroup(name)));          
+               {
+                  properties.set(name, read_properties(group.getGroup(name)));}          
             break;
          }
          default:

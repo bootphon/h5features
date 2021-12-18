@@ -174,7 +174,7 @@ inline pybind11::array_t<double> wrap_to_array(const T& src, bool readonly=false
 
    if(readonly)
    {
-      // make the array read-only
+      // // make the array read-only
       reinterpret_cast<pybind11::detail::PyArray_Proxy*>(
          array.ptr())->flags &= ~pybind11::detail::npy_api::NPY_ARRAY_WRITEABLE_;
    }
@@ -184,12 +184,14 @@ inline pybind11::array_t<double> wrap_to_array(const T& src, bool readonly=false
 
 pybind11::array_t<double> item_wrapper::features() const
 {
+
    return wrap_to_array(h5features::item::features(), true);
 }
 
 
 pybind11::array_t<double> item_wrapper::times() const
 {
+   
    return wrap_to_array(h5features::item::times(), true);
 }
 
@@ -209,7 +211,7 @@ void init_item(pybind11::module& m)
       .def("name", &item_wrapper::name)
       .def("dim", &item_wrapper::dim)
       .def("size", &item_wrapper::size)
-      .def("features", &item_wrapper::features)
-      .def("times", &item_wrapper::times)
+      .def("features", &item_wrapper::features, pybind11::return_value_policy::move)
+      .def("times", &item_wrapper::times, pybind11::return_value_policy::move)
       .def("properties", &item_wrapper::properties);
 }

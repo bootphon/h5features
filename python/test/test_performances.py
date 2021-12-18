@@ -11,8 +11,8 @@
 # from reader import Reader
 # import tracemalloc
 # # from pyh5features import Item , Writer, Reader
-# import numpy as np
-# # from memory_profiler import profile
+import numpy as np
+from memory_profiler import profile
 # import time
 # def data():
 #     n=10
@@ -114,3 +114,46 @@
 #     remove("testtwo.h5f")
 # if exists("testone.h5"):
 #     remove("testone.h5")
+# from h5features import Item, Writer, Reader
+
+# def data():
+#     n = 1
+#     size = 1000000
+#     dim = 10
+#     items =["item"+str(i) for i in range(n)]
+#     features = np.array(np.random.rand(size, dim) , dtype=np.float64) 
+#     times = np.asarray([i+0.5 for i in range(size) ], dtype=np.float64)
+#     begin = np.asarray([i for i in range(size)], dtype=np.float64)
+#     end = np.asarray([i+1 for i in range(size)], dtype=np.float64)
+#     properties = {}
+#     # print(len(items), len(features), len(times))
+#     return (items, features, times, properties, begin, end, n)
+
+
+# @profile
+# def create_item(name, features, times):
+#     it = Item(name, features, times)
+#     return it
+# @profile
+# def return_features(it):
+#     feat = it.features(copy=False)
+#     return feat
+# @profile
+# def write_item(it):
+#     with Writer("test.hdf5", "test", True, True, "2.0") as writer:
+#         writer.write(it)
+# @profile
+# def read_item():
+#     with Reader("test.hdf5", "test") as reader:
+#         it = reader.read('item0')
+#     return it
+
+# items, features, times, properties, begin, end, n = data()
+# name = items[0]
+# it = create_item(name, features, times)
+# feats = return_features(it)
+# # del feats
+# write_item(it)
+# del it
+# it = read_item()
+# feats = return_features(it)

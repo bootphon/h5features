@@ -90,7 +90,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 setuptools.setup(
     name="h5features",
     version=H5FEATURES_VERSION,
-    python_requires=">=3.8",
+    python_requires=">=3.7",
     setup_requires=['cmake>=3.12'],
     install_requires=[
         'numpy',

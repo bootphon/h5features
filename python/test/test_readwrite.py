@@ -11,7 +11,7 @@ def item():
     array[1:3, ] = 0
     times = np.vstack((np.arange(10), np.arange(10) + 1)).T.astype(np.float64)
     name = "item"
-    properties = {"test": True}
+    properties = {"test": True, "test2":[{"a":1}, {"b" : 2}]}
 
     return Item(name, array, times, properties=properties)
 
