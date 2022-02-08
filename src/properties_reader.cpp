@@ -105,7 +105,6 @@ h5features::properties h5features::details::read_properties(const hdf5::Group& g
             auto new_grp = group.getGroup(name);
             std::vector<std::string> groups_list = new_grp.listObjectNames();
             if (groups_list.size() != 0){
-               std::cout<<groups_list.size()<<std::endl;
                if (groups_list[0].find("__") != std::string::npos && groups_list[0].find("$$") != std::string::npos)
                {  
                   std::vector<h5features::properties> props;
