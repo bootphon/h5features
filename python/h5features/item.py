@@ -141,13 +141,15 @@ class Item:
         """Number of frames"""
         return self._item.size()
 
-
+    
     def features(self, copy=False) -> np.ndarray:
         """A reference to the item's features"""
         return self._item.features() if not copy else self._item.features().copy()
 
     def times(self, copy=False) -> np.ndarray:
         """A reference to the item's timestamps"""
+        if self._item.times().shape[1] == 1:
+            return self._item.times().reshape((-1)) if not copy else self._item.times().reshape((-1)).copy()
         return self._item.times() if not copy else self._item.times().copy()
 
     @property

@@ -54,21 +54,21 @@ def test_v2_0(item, tmpdir):
     for group in Reader.list_groups(filename):
         with Reader(filename, group) as reader:
             it = reader.read('item')
-            assert np.all(item.features == it.features)
-            assert np.all(item.times == it.times)
+            assert np.all(item.features() == it.features())
+            assert np.all(item.times() == it.times())
             assert item.properties == it.properties
             assert item == it
 
             it = reader.read('item', ignore_properties=True)
-            assert np.all(item.features == it.features)
-            assert np.all(item.times == it.times)
+            assert np.all(item.features() == it.features())
+            assert np.all(item.times() == it.times())
             assert it.properties == {}
             assert not item == it
             assert item != it
 
             it = reader.read('item', start=1, stop=4, ignore_properties=True)
-            assert np.all(item.features[1:4] == it.features)
-            assert np.all(item.times[1:4] == it.times)
+            assert np.all(item.features()[1:4] == it.features())
+            assert np.all(item.times()[1:4] == it.times())
             assert not item == it
             assert item != it
             assert filename == reader.filename
@@ -86,8 +86,8 @@ def test_v1_1(capsys, item, tmpdir):
         it = reader.read('item')
         assert 'version 1.1: ignoring properties' in capsys.readouterr().err
         assert it != item
-        assert np.all(it.features == item.features)
-        assert np.all(it.times == item.times)
+        assert np.all(it.features() == item.features())
+        assert np.all(it.times() == item.times())
         assert it.properties == {}
 
 
@@ -109,7 +109,7 @@ def test_read_all(item, tmpdir):
             writer.write(item)
             assert 'item already existing' in str(err)
 
-        item2 = Item('item2', item.features, item.times)
+        item2 = Item('item2', item.features(), item.times())
         writer.write(item2)
 
     all_items = Reader(filename, 'group').read_all()
@@ -141,7 +141,7 @@ def test_times1d(tmpdir):
 
         # partial read
         item3 = reader.read('name', 0, 1.5)
-        assert item3.features.shape == (2, 5)
+        assert item3.features().shape == (2, 5)
 
         item3 = reader.read('name', 0, 0.5)
-        assert item3.features.shape == (1, 5)
+        assert item3.features().shape == (1, 5)

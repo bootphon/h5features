@@ -88,8 +88,8 @@ def test_read(h5file, item1):
     item3 = reader.read('item1', ignore_properties=True)
     assert item3 != item1
     assert item3.properties == {}
-    assert np.all(item3.features == item1.features)
-    assert np.all(item3.times == item1.times)
+    assert np.all(item3.features() == item1.features())
+    assert np.all(item3.times() == item1.times())
 
 
 def test_read_partial(h5file, item1):
@@ -112,6 +112,6 @@ def test_read_partial(h5file, item1):
 
     item2 = reader.read('item1', start=0, stop=2)
     item3 = reader.read('item1', start=0, stop=2.5)
-    assert item2.features.shape == (2, 3)
-    assert np.all(item2.times == np.asarray([[0, 1], [1, 2]]))
+    assert item2.features().shape == (2, 3)
+    assert np.all(item2.times() == np.asarray([[0, 1], [1, 2]]))
     assert item2 == item3
