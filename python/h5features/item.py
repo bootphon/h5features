@@ -94,7 +94,9 @@ class Item:
                 # convert numpy floats to pure Python floats
                 value = float(value)
                 properties[key] = value
-
+            if isinstance(value, np.ndarray):
+                value = np.ndarray.tolist(value.reshape((-1)))
+                properties[key] = value
             if not isinstance(key, str):
                 raise RuntimeError('property keys must be str')
             if not isinstance(value, (bool, int, float, str, list, dict)):

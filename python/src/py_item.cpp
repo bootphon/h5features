@@ -4,6 +4,7 @@
 
 namespace pybind11::detail
 {
+ 
 // Helper class to cast h5features::properties::value_type between C++ and Python
 template <>
 struct type_caster<h5features::properties::value_type> //: variant_caster<h5features::properties::value_type>
@@ -43,10 +44,15 @@ struct type_caster<h5features::properties::value_type> //: variant_caster<h5feat
          {
             value = src.cast<std::vector<double>>();
          }
-         else //if (isinstance<h5features::properties>(*src.begin()))
+         else if (isinstance<list>(*src.begin()))
+         {
+            throw std::runtime_error("invalid property value type :  nested list");
+         }
+         else  //if (isinstance<h5features::properties>(*src.begin()))
          {
             value = src.cast<std::vector<h5features::properties>>();
          }
+         
       }
       else if (isinstance<dict>(src))
       {
@@ -123,7 +129,6 @@ struct type_caster<std::vector<h5features::properties>>
    }
 };
 
-
 }  // namespace pybind11::detail
 
 
@@ -149,12 +154,14 @@ item_wrapper item_wrapper::create(
       std::vector<double>{ptr, ptr + info.size},
       h5features::times::get_format(info.shape[1]),
       check};
+      
+   h5features::properties cprops = properties.cast<h5features::properties>();
    // instanciate item object
    return item_wrapper(
       name,
       cfeatures,
       ctimes,
-      properties.cast<h5features::properties>(),
+      cprops,
       check);
 }
 
