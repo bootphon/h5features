@@ -14,7 +14,7 @@ deploy:
   tags:
     - flores.docs@docker
   only:
-    - mpoli/scikit
+    - main
   script:
     - doxygen doc/Doxyfile
     - UV_CACHE_DIR=".uv-cache" uv run --group doc sphinx-build -b html doc doc/build
