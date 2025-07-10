@@ -1,6 +1,6 @@
 .. _changelog:
 
-ChangeLog
+Changelog
 =========
 
 .. note::
@@ -9,6 +9,22 @@ ChangeLog
 
    * The different releases are all downloadable from `github
      <https://github.com/bootphon/h5features/releases>`_.
+
+
+h5features-2.0.0
+----------------
+
+* **Breaking change**: Complete rewrite of the codebase in C++ using HighFive, with
+  Python bindings using nanobind and built with scikit-build-core.
+
+* The Python API is made of four classes: ``Item``, ``Reader``, ``Writer`` and
+  ``Version``. There is no top-level functions like ``h5features.write`` or
+  ``h5features.read`` anymore.
+
+* The Python package is distributed with wheels on PyPI only, the conda channel will not
+  be updated anymore.
+
+* The documentation is available at: https://docs.cognitive-ml.fr/h5features.
 
 
 h5features-1.3.3

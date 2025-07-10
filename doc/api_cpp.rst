@@ -9,9 +9,6 @@ C++ API
    * The library is then available under the ``h5features`` namespace.
 
 
-.. contents:: Contents
-   :local:
-
 h5features::exception
 ---------------------
 

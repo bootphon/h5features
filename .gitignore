@@ -2,7 +2,8 @@
 *.so
 .eggs
 *.egg-info
-**/__pycache__
+__pycache__
 /.vscode
 /dist
-performances_test.py.lprof
+/doc/build
+/doc/xml

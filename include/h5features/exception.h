@@ -2,21 +2,15 @@
 #define H5FEATURES_EXCEPTION_H
 
 #include <stdexcept>
-#include <string>
+#include <utility>
 
-
-namespace h5features
-{
+namespace h5features {
 /// Defines an exception type to report errors from the h5features library.
-class exception : public std::runtime_error
-{
+class exception : public std::runtime_error {
 public:
-   /// Constructs the exception with `what` as explanatory string
-   template<typename String>
-   explicit exception(String&& what)
-      : std::runtime_error(std::forward<String>(what))
-   {}
+  /// Constructs the exception with `what` as explanatory string
+  template <typename String> explicit exception(String &&what) : std::runtime_error(std::forward<String>(what)) {}
 };
-}
+} // namespace h5features
 
-#endif  // H5FEATURES_EXCEPTION_H
+#endif // H5FEATURES_EXCEPTION_H

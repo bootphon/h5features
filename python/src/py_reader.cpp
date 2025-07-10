@@ -1,63 +1,42 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <h5features/reader.h>
-#include "item_wrapper.h"
+#include "h5features/reader.h"
+#include "nanobind/nanobind.h"
+#include "nanobind/stl/filesystem.h"
+#include "nanobind/stl/string.h"
+#include "nanobind/stl/vector.h"
+#include <filesystem>
+#include <string>
 
+namespace nb = nanobind;
+using namespace nb::literals;
 
-class reader_wrapper : public h5features::reader
-{
-public:
-   using h5features::reader::reader;
-
-   // returns list of item in file and group read
-   pybind11::list items() const
-   {
-      return pybind11::cast(h5features::reader::items());
-   }
-
-   // read an item in file/group
-   item_wrapper read(const std::string& name, bool ignore_properties) const
-   {
-      return h5features::reader::read_item(name, ignore_properties);
-   }
-
-   // read an item in file/group from t1 to tn time
-   item_wrapper read_partial(const std::string& name, double start, double stop, bool ignore_properties) const
-   {
-      return h5features::reader::read_item(name, start, stop, ignore_properties);
-   }
-
-   std::vector<item_wrapper> read_all(bool ignore_properties) const
-   {
-      std::vector<item_wrapper> all_items;
-      for(const auto& item: h5features::reader::items())
-      {
-         all_items.push_back(read(item, ignore_properties));
-      }
-      return all_items;
-   }
-
-   static pybind11::list list_groups(const std::string& filename)
-   {
-      return pybind11::cast(h5features::reader::list_groups(filename));
-   }
-};
-
-
-void init_reader(pybind11::module& m)
-{
-   pybind11::class_<reader_wrapper> reader(m, "ReaderWrapper");
-
-   reader.def(pybind11::init([](
-     const std::string& filename,
-     const std::string& group) {return reader_wrapper(filename, group);}));
-
-   reader.def("read", &reader_wrapper::read);
-   reader.def("read_partial", &reader_wrapper::read_partial);
-   reader.def("read_all", &reader_wrapper::read_all);
-   reader.def("items", &reader_wrapper::items);
-   reader.def("filename", &reader_wrapper::filename);
-   reader.def("groupname", &reader_wrapper::groupname);
-   reader.def("version", &reader_wrapper::version);
-   reader.def("list_groups", &reader_wrapper::list_groups);
+void init_reader(nb::module_ &m) {
+  nb::class_<h5features::reader>(m, "Reader")
+      .def(nb::init<const std::filesystem::path &, const std::string &>(), "filename"_a, nb::kw_only(),
+           "group"_a = "features", "Read :py:class:`.Item` instances from an HDF5 file.")
+      .def(
+          "read",
+          [](const h5features::reader &self, const std::string &name, bool ignore_properties) {
+            return self.read_item(name, ignore_properties);
+          },
+          "name"_a, nb::kw_only(), "ignore_properties"_a = false, "Read an :py:class:`.Item` from the HDF5 file.")
+      .def(
+          "read_partial",
+          [](const h5features::reader &self, const std::string &name, double start, double stop,
+             bool ignore_properties) { return self.read_item(name, start, stop, ignore_properties); },
+          "name"_a, "start"_a, "stop"_a, nb::kw_only(), "ignore_properties"_a = false,
+          "Partial read of an :py:class:`.Item` within the time interval ``[start, stop]``.")
+      .def("read_all", &h5features::reader::read_all, nb::kw_only(), "ignore_properties"_a = false,
+           "Read all the items stored in the file.")
+      .def("items", &h5features::reader::items, "The name of stored items.")
+      .def_prop_ro("filename", &h5features::reader::filename, "The name of the file being read.")
+      .def_prop_ro("groupname", &h5features::reader::groupname, "The name of the group being read in the file.")
+      .def_prop_ro("version", &h5features::reader::version,
+                   "The :py:class:`.Version` of the h5features data in the group.")
+      .def_static(
+          "list_groups",
+          [](const std::filesystem::path &filename) { return h5features::reader::list_groups(filename); }, "filename"_a,
+          "Return the list of groups in the specified HDF5 file.")
+      .def("__repr__", [](const h5features::reader &self) {
+        return nb::str("Reader(filename={}, groupname={})").format(self.filename(), self.groupname());
+      });
 }

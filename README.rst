@@ -10,4 +10,6 @@ h5features
 
 * It is implemented in **C++** and exposes **Python bindings**.
 
+* The Python package is available on PyPI: ``pip install h5features``.
+
 * See the complete documentation at https://docs.cognitive-ml.fr/h5features.

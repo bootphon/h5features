@@ -1,0 +1,16 @@
+PROJECT_NAME           = h5features
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+CASE_SENSE_NAMES       = NO
+SHOW_GROUPED_MEMB_INC  = YES
+SORT_MEMBER_DOCS       = NO
+INPUT                  = include
+FILE_PATTERNS          = *.h
+RECURSIVE              = YES
+ALPHABETICAL_INDEX     = NO
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = doc/xml
+HAVE_DOT               = FALSE
+QUIET                  = YES

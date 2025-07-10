@@ -8,8 +8,9 @@ h5features documentation
 * It has been primarly designed to store **speech features** extracted from huge
   corpora.
 
-* It uses the `HDF5 <https://portal.hdfgroup.org/display/HDF5/HDF5>`_ binary
-  file format, it is implemented in **C++** and exposes **Python bindings**.
+* It uses the `HDF5 <https://support.hdfgroup.org/documentation>`_ binary
+  file format, it is implemented in **C++** and exposes **Python bindings**
+  with `nanobind <https://nanobind.readthedocs.io>`_.
 
 * The source code is available at
   `<http://www.github.com/bootphon/h5features>`_.
@@ -27,16 +28,14 @@ h5features documentation
    changelog
 
 
-Licence and copyright
----------------------
+License
+-------
 
 .. figure:: static/inria.jpg
    :align: left
    :figwidth: 190px
    :alt: Inria
    :target: https://inria.fr/en
-
-Copyright |copyright|
 
 This work is founded by the grant *ADT-193* from `Inria <https://inria.fr/en>`_
 and developed within the `Cognitive Machine Learning <https://cognitive-ml.fr>`_

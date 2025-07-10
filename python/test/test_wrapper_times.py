@@ -1,21 +1,19 @@
 import numpy as np
-import pytest
-from _h5features import ItemWrapper
+
+from h5features import Item
 
 
-def test_times():
+def test_times() -> None:
     """test access to times by reference"""
     features = np.ones((5, 2))
     times = np.vstack((np.arange(5), np.arange(5) + 1)).T.astype(np.float64)
     name = "Test"
     properties = {}
-    times = ItemWrapper(name, features, times, properties, True)
+    times = Item(name, features, times, properties)
 
     copy_true = np.array(times.times(), dtype=np.int8, copy=True)
     copy_false = np.array(times.times(), copy=False)
 
-    with pytest.raises(ValueError):
-        np.array(times.times(), copy=False)[0][0] = -1
     assert np.array(times.times(), dtype=np.int8, copy=True).shape == (5, 2)
     assert copy_true[0][0] == 0
     assert copy_false[0][0] == 0

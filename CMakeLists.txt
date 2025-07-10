@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 #######################################################################
@@ -19,8 +19,6 @@ project(h5features
   VERSION ${H5FEATURES_VERSION}
   DESCRIPTION "easy and efficient storage of large features data on HDF5 file format"
   LANGUAGES C CXX)
-set(PROJECT_AUTHOR "CoML <https://cognitive-ml.fr>")
-set(PROJECT_COPYRIGHT "2020-2021 Inria")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,9 +29,10 @@ if (MSVC)
   add_compile_options(/W4 /WX)
 else()
   # lots of warnings and all warnings as errors
-  add_compile_options(-Wall -Wextra -pedantic -Werror)
+  add_compile_options(-Wall -Wextra -Werror)
 endif()
 
+include(GNUInstallDirs)
 
 #######################################################################
 # cmake build configuration
@@ -50,11 +49,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-
 option(BUILD_SHARED_LIBS "Builds shared libraries" ON)
-option(H5FEATURES_BUILD_PYTHON "Builds the Python wrapper" ON)
 option(H5FEATURES_BUILD_TEST "Builds the test suite" OFF)
-option(H5FEATURES_BUILD_DOC "Builds the documentation" OFF)
 
 
 #######################################################################
@@ -65,19 +61,13 @@ option(H5FEATURES_BUILD_DOC "Builds the documentation" OFF)
 # HDF5, request 1.10 minimum
 if(NOT DEFINED HDF5_C_LIBRARIES)
   set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE TRUE)
-  set(HDF5_PREFER_PARALLEL ${HIGHFIVE_PARALLEL_HDF5})
+  set(HDF5_PREFER_PARALLEL TRUE)
   find_package(HDF5 1.10 REQUIRED)
 endif()
 
 
-# HighFive (include Boost)
+# HighFive
 if(NOT DEFINED HIGHFIVE_SOURCE_DIR)
-  set(HIGHFIVE_USE_BOOST ON)
-  set(HIGHFIVE_EXAMPLES OFF)
-  set(HIGHFIVE_UNIT_TESTS OFF)
-  set(HIGHFIVE_USE_INSTALL_DEPS YES)
-  set(HIGHFIVE_BUILD_DOCS OFF)
-
   set(HIGHFIVE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/HighFive)
   add_subdirectory(
     ${HIGHFIVE_SOURCE_DIR}
@@ -126,7 +116,6 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/
   DESTINATION "include")
 
-
 # execute the tests with "make" and run them with "make test"
 if(H5FEATURES_BUILD_TEST)
   enable_testing()
@@ -136,15 +125,7 @@ if(H5FEATURES_BUILD_TEST)
   target_link_libraries(benchmark h5features)
 endif()
 
-
 # h5features Python library
-if(H5FEATURES_BUILD_PYTHON)
+if(SKBUILD STREQUAL "2")
   add_subdirectory(python)
-endif()
-
-
-# build the documentation with "make doc"
-if(H5FEATURES_BUILD_DOC)
-  target_include_directories(h5features PUBLIC h5features)
-  add_subdirectory(doc)
 endif()

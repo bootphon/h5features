@@ -54,7 +54,7 @@ library, and the difference between the implemented versions.
 .. warning::
 
    Do not be confused between **library version** and **file format version**.
-   The details of library changes and versions are available in the *ChangeLog*
+   The details of library changes and versions are available in the *Changelog*
    section.
 
 

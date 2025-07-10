@@ -7,29 +7,48 @@ Python API
 
    .. code-block:: python
 
-      import h5features as h5f
+      import h5features
 
-
-.. contents:: Contents
-   :local:
-
-
-h5features.Item
----------------
+Item
+----
 
 .. autoclass:: h5features.Item
-   :members:
+
+   .. automethod:: features
+   .. automethod:: times
+   .. autoproperty:: name() -> str
+   .. autoproperty:: dim() -> int
+   .. autoproperty:: size() -> int
+   .. autoproperty:: properties() -> dict
 
 
-h5features.Writer
------------------
+Writer
+------
 
 .. autoclass:: h5features.Writer
-   :members:
+
+   .. automethod:: write
+   .. autoproperty:: filename() -> str
+   .. autoproperty:: groupname() -> str
+   .. autoproperty:: version() -> h5features.Version
 
 
-h5features.Reader
------------------
+Reader
+------
 
 .. autoclass:: h5features.Reader
-   :members:
+
+   .. automethod:: read
+   .. automethod:: read_all
+   .. automethod:: read_partial
+   .. automethod:: items
+   .. automethod:: list_groups
+   .. autoproperty:: filename() -> str
+   .. autoproperty:: groupname() -> str
+   .. autoproperty:: version() -> h5features.Version
+
+
+Version
+-------
+
+.. autoenum:: h5features.Version

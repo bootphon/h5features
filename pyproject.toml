@@ -1,0 +1,60 @@
+[build-system]
+requires = ["scikit-build-core>=0.11.5", "nanobind>=2.7.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "h5features"
+description = "Easy and efficient storage of large features data in HDF5 file format"
+requires-python = ">=3.12"
+authors = [{ name = "CoML" }]
+license = "GPL-3.0-or-later"
+dynamic = ["version"]
+dependencies = ["numpy>=1.26.4"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "pytest>=8.4.1",
+    "ruff>=0.12.1",
+    "typos>=1.34.0",
+]
+doc = [
+    "breathe>=4.36.0",
+    "enum-tools[sphinx]>=0.13.0",
+    "furo>=2024.8.6",
+    "sphinx>=8.2.3",
+]
+
+[project.urls]
+homepage = "https://docs.cognitive-ml.fr/h5features"
+documentation = "https://docs.cognitive-ml.fr/h5features"
+repository = "https://github.com/bootphon/h5features"
+changelog = "https://github.com/bootphon/h5features/releases"
+
+[tool.scikit-build]
+wheel.py-api = "cp312"
+wheel.exclude = ["include", "lib/cmake"]
+
+[tool.scikit-build.cmake.define]
+CMAKE_INSTALL_LIBDIR = "h5features"
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "VERSION"
+regex = "(?P<value>.*)"
+
+[tool.ruff]
+line-length = 119
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["COM812", "D", "INP001", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["h5features"]
+
+[tool.ruff.lint.pylint]
+allow-magic-value-types = ["int", "str", "bytes"]
+
+[tool.pytest.ini_options]
+testpaths = "python/test"

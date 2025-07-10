@@ -1,37 +1,35 @@
-#include <pybind11/pybind11.h>
-#include <h5features/writer.h>
-#include <h5features/version.h>
-#include "item_wrapper.h"
+#include "h5features/item.h"
+#include "h5features/version.h"
+#include "h5features/writer.h"
+#include "nanobind/nanobind.h"
+#include "nanobind/stl/filesystem.h"
+#include "nanobind/stl/string.h"
+#include "nanobind/stl/vector.h"
+#include <filesystem>
+#include <string>
+#include <vector>
 
+namespace nb = nanobind;
+using namespace nb::literals;
 
-class writer_wrapper : public h5features::writer
-{
-public:
-   using h5features::writer::writer;
-
-   void write(const item_wrapper& item)
-   {
-      h5features::writer::write(item);
-   }
-};
-
-
-void init_writer(pybind11::module& m)
-{
-   pybind11::class_<writer_wrapper> writer(m, "WriterWrapper");
-
-   writer.def(pybind11::init([](
-         const std::string& filename,
-         const std::string& group = "features",
-         bool overwrite= false,
-         bool compress = true,
-         h5features::version version=h5features::current_version)
-         {
-            return writer_wrapper(filename, group, overwrite, compress, version);
-         }));
-
-   writer.def("write", &writer_wrapper::write);
-   writer.def("version", &writer_wrapper::version);
-   writer.def("filename", &writer_wrapper::filename);
-   writer.def("groupname", &writer_wrapper::groupname);
+void init_writer(nb::module_ &m) {
+  nb::class_<h5features::writer>(m, "Writer")
+      .def(nb::init<const std::filesystem::path &, const std::string &, bool, bool, h5features::version>(),
+           "filename"_a, nb::kw_only(), "group"_a = "features", "overwrite"_a = false, "compress"_a = false,
+           "version"_a = h5features::current_version, "Write :py:class:`.Item` instances to an HDF5 file.")
+      .def(
+          "write", [](h5features::writer &self, const h5features::item &item) { return self.write(item); }, "item"_a,
+          "Write an :py:class:`.Item` to disk.")
+      .def(
+          "write",
+          [](h5features::writer &self, const std::vector<h5features::item> &items) {
+            return self.write(items.begin(), items.end());
+          },
+          "items"_a, "Write a sequence of :py:class:`.Item` to disk in parallel.")
+      .def_prop_ro("version", &h5features::writer::version, "The h5features format :py:class:`.Version` being written.")
+      .def_prop_ro("filename", &h5features::writer::filename, "The HDF5 file name.")
+      .def_prop_ro("groupname", &h5features::writer::groupname, "The HDF5 group name.")
+      .def("__repr__", [](const h5features::writer &self) {
+        return nb::str("Writer(filename={}, groupname={})").format(self.filename(), self.groupname());
+      });
 }

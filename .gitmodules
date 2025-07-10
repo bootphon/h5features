@@ -1,7 +1,4 @@
 [submodule "external/HighFive"]
 	path = external/HighFive
-	url = https://github.com/BlueBrain/HighFive.git
-	branch = master
-[submodule "external/pybind11"]
-	path = external/pybind11
-	url = https://github.com/pybind/pybind11.git
+	url = https://github.com/highfive-devs/highfive.git
+	branch = main
