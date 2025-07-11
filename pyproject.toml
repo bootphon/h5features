@@ -6,10 +6,22 @@ build-backend = "scikit_build_core.build"
 name = "h5features"
 description = "Easy and efficient storage of large features data in HDF5 file format"
 requires-python = ">=3.12"
-authors = [{ name = "CoML" }]
+authors = [{ name = "CoML", email = "dev@cognitive-ml.fr" }]
 license = "GPL-3.0-or-later"
 dynamic = ["version"]
 dependencies = ["numpy>=1.26.4"]
+keywords = ["HDF5", "speech", "machine learning"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 
 [dependency-groups]
 dev = [
