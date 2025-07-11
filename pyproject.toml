@@ -5,6 +5,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "h5features"
 description = "Easy and efficient storage of large features data in HDF5 file format"
+readme = "README.rst"
 requires-python = ">=3.12"
 authors = [{ name = "CoML", email = "dev@cognitive-ml.fr" }]
 license = "GPL-3.0-or-later"
@@ -23,6 +24,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
+[project.urls]
+homepage = "https://docs.cognitive-ml.fr/h5features"
+documentation = "https://docs.cognitive-ml.fr/h5features"
+repository = "https://github.com/bootphon/h5features"
+changelog = "https://github.com/bootphon/h5features/releases"
+
 [dependency-groups]
 dev = [
     "ipykernel>=6.29.5",
@@ -36,12 +43,6 @@ doc = [
     "furo>=2024.8.6",
     "sphinx>=8.2.3",
 ]
-
-[project.urls]
-homepage = "https://docs.cognitive-ml.fr/h5features"
-documentation = "https://docs.cognitive-ml.fr/h5features"
-repository = "https://github.com/bootphon/h5features"
-changelog = "https://github.com/bootphon/h5features/releases"
 
 [tool.scikit-build]
 wheel.py-api = "cp312"
