@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from importlib.metadata import metadata
 
 project = "h5features"
-author = metadata(project)["Author"]
+author = metadata(project)["Author-email"].split(" ")[0]
 copyright = f"2020-{datetime.now(tz=UTC).year} {author}"  # noqa: A001
 version = metadata(project)["Version"]
 release = version
