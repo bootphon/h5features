@@ -70,7 +70,7 @@ h5features::v1::reader::reader(hdf5::Group &&group, h5features::version version)
   try {
     m_items = read_string_dataset(m_group.getDataSet(items_dataset_name));
     m_group.getDataSet(index_dataset_name).read(m_index);
-  } catch (const hdf5::Exception &e) {
+  } catch (const hdf5::Exception &) {
     // failed to load the datasets, assumes the group is empty (this is
     // required to have a behavior consistent with version 2.0)
     m_items.clear();

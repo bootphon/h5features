@@ -25,8 +25,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 if (MSVC)
-  # warning level 4 and all warnings as errors
-  add_compile_options(/W4 /WX)
+  # warning level 3 and all warnings as errors. Disable C4244.
+  add_compile_options(/W3 /WX /permissive- /wd4244)
 else()
   # lots of warnings and all warnings as errors
   add_compile_options(-Wall -Wextra -Werror)
@@ -49,7 +49,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-option(BUILD_SHARED_LIBS "Builds shared libraries" ON)
+if(SKBUILD STREQUAL "2" AND MSVC) # On Windows with the python extension: static libraries
+  option(BUILD_SHARED_LIBS "Builds shared libraries" OFF)
+else()
+  option(BUILD_SHARED_LIBS "Builds shared libraries" ON)
+endif()
+
 option(H5FEATURES_BUILD_TEST "Builds the test suite" OFF)
 
 

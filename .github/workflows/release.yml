@@ -1,0 +1,178 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build wheel
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [macos-14, ubuntu-22.04, windows-latest]
+    env:
+      GLIBC_VERSION: "2_34"
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install HDF5 on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y libhdf5-dev
+
+      - name: Install HDF5 on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install hdf5
+
+      - name: Install HDF5 on Windows
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg install hdf5
+          echo "CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Build wheel
+        shell: bash
+        run: uv build --wheel
+
+      - name: Repair the Linux wheel
+        if: runner.os == 'Linux'
+        run: |
+          uvx --with patchelf auditwheel repair ./dist/*abi3-linux*.whl -w ./dist --plat manylinux_${GLIBC_VERSION}_x86_64
+          rm ./dist/*abi3-linux*.whl
+
+      - name: Repair the macOS wheel
+        if: runner.os == 'macOS'
+        run: uvx --from delocate delocate-wheel --require-archs arm64 -w ./dist -v ./dist/h5features-*.whl
+
+      - name: Repair the Windows wheel
+        if: runner.os == 'Windows'
+        shell: bash
+        run: uvx delvewheel repair ./dist/h5features-*.whl --add-path $VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin/ -w dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: ./dist/*
+
+  cpptest:
+    name: C++ tests on Linux
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libhdf5-dev build-essential cmake libboost-test-dev libboost-filesystem-dev
+
+      - name: Build C++ tests
+        run: |
+          mkdir build && cd build
+          cmake -DH5FEATURES_BUILD_TEST=ON ..
+          cmake --build . -j
+
+      - name: Run C++ tests
+        run: cd build && make test
+
+  pythontest:
+    name: Python tests
+    needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [macos-14, ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Fetch pre-built wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: artifacts
+
+      - name: Install h5features and pytest
+        shell: bash
+        run: |
+          uv venv -p 3.12
+          uv pip install $(find ./artifacts -name "*.whl")
+          uv pip install pytest
+
+      - name: Run Python tests on Linux or macOS
+        if : runner.os == 'Linux' || runner.os == 'macOS'
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          pytest
+
+      - name: Run Python tests on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          .venv\Scripts\activate
+          pytest
+
+  release:
+    name: Create release
+    needs: [build, cpptest, pythontest]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Move the artifacts
+        run: |
+          mkdir ./dist
+          mv ./artifacts/**/*.whl ./dist
+
+      - name: Build sdist
+        run: uv build --sdist
+
+      - name: List artifacts
+        run: find ./dist
+
+      # - name: Create Release
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     TAG: ${{ steps.get_tag.outputs.TAG_NAME }}
+      #   run: gh release create "${GITHUB_REF#refs/tags/}" ./dist/*
+
+      # - name: Upload to PyPI
+      #   run: uv publish -t ${{ secrets.UV_PUBLISH_TOKEN }}

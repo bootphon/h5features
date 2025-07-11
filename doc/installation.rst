@@ -9,7 +9,7 @@ h5features can be installed from PyPI with::
     pip install h5features
 
 h5features requires Python >= 3.12 and depends on ``numpy``. Pre-built wheels are
-available for Linux, macOS and Windows.
+available for Linux x86-64 (with glibc 2.34 or later), macOS arm64, and Windows x86-64.
 
 Build from source
 -----------------
@@ -23,12 +23,12 @@ Build requirements
 Optional:
 
 * The `cmake>=3.12 <https://cmake.org>`_ build system to build only the C++ library.
-* The `boost>=1.55 <https://www.boost.org>`_ library for the test suite of the C++ library.
+* The `boost>=1.55 <https://www.boost.org>`_ library (Boost.Test and Boost.Filesystem) for the test suite of the C++ library.
 * The `doxygen <https://www.doxygen.org>`_ tool to build the documentation.
 
 On Ubuntu install those dependencies with::
 
-    apt install git libhdf5-dev build-essential cmake libboost-all-dev doxygen
+    apt install git libhdf5-dev build-essential cmake libboost-test-dev libboost-filesystem-dev doxygen
 
 Python API
 ~~~~~~~~~~

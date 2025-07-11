@@ -28,6 +28,7 @@ nanobind_add_stub(
   MODULE _core
   OUTPUT _core.pyi
   MARKER_FILE py.typed
+  PYTHON_PATH $<TARGET_FILE_DIR:_core>
   DEPENDS _core
 )
 
@@ -39,19 +40,4 @@ if(APPLE)
   set_target_properties(_core PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
 else()
   set_target_properties(_core PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
-endif()
-
-# include the Python tests with "make test"
-if(H5FEATURES_BUILD_TEST)
-  find_package(Python3 REQUIRED COMPONENTS Interpreter)
-
-  add_test(
-    NAME test_python
-    COMMAND ${Python3_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test)
-
-  # need to tweak PYTHONPATH so as to find the _core library (either in
-  # BINARY_DIR if using "python setup.py install" / cmake, or in SOURCE_DIR if
-  # using "python setup.py develop")
-  set_tests_properties(test_python
-    PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}:${CMAKE_CURRENT_BINARY_DIR}:$PYTHONPATH")
 endif()

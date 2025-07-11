@@ -16,7 +16,7 @@ void write_features(const h5features::features &features, hdf5::Group &group, bo
   // 128*8 = 1kB per dimension. Note that a frame is never split into several
   // chunks.
   hdf5::DataSetCreateProps props;
-  props.add(hdf5::Chunking{features.dim() * std::min<std::size_t>(features.size(), std::pow(2, 7))});
+  props.add(hdf5::Chunking{features.dim() * std::min<std::size_t>(features.size(), 128UL)});
   if (compress) {
     props.add(hdf5::Deflate{9});
   }
@@ -43,7 +43,7 @@ void write_times(const h5features::times &times, hdf5::Group &group, bool compre
   // bytes) (by default the HDF5 chunk cache is 1MB per dataset).
   hdf5::DataSetCreateProps props;
   if (compress) {
-    props.add(hdf5::Chunking{std::min<std::size_t>(times.size() * times.dim(), std::pow(2, 15))});
+    props.add(hdf5::Chunking{std::min<std::size_t>(times.size() * times.dim(), 32768UL)});
     props.add(hdf5::Deflate{9});
   }
 

@@ -1,0 +1,26 @@
+name: Push to Gitlab Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push:
+    name: Push to Gitlab
+    runs-on: ubuntu-latest
+    env:
+      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+      GITLAB_REPO: gitlab.cognitive-ml.fr/abx/h5features2.git
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}
+          git push gitlab HEAD:main --force

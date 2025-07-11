@@ -19,7 +19,7 @@ h5features::version h5features::read_version(const hdf5::Group &group) {
     std::string version;
     try {
       group.getAttribute("version").read(version);
-    } catch (const hdf5::AttributeException &e) {
+    } catch (const hdf5::AttributeException &) {
       // due to a bug in HighFive, a string attribute wrote from h5py cannot
       // be read in HighFive correctly. If we get here, the version is either
       // 1.0 or 1.1.
@@ -32,7 +32,7 @@ h5features::version h5features::read_version(const hdf5::Group &group) {
 
     try {
       return map.at(version);
-    } catch (const std::out_of_range &e) {
+    } catch (const std::out_of_range &) {
       std::stringstream msg;
       msg << "invalid h5features version '" << version.front() << "'";
       throw h5features::exception(msg.str());

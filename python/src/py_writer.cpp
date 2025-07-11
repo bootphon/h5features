@@ -14,9 +14,14 @@ using namespace nb::literals;
 
 void init_writer(nb::module_ &m) {
   nb::class_<h5features::writer>(m, "Writer")
-      .def(nb::init<const std::filesystem::path &, const std::string &, bool, bool, h5features::version>(),
-           "filename"_a, nb::kw_only(), "group"_a = "features", "overwrite"_a = false, "compress"_a = false,
-           "version"_a = h5features::current_version, "Write :py:class:`.Item` instances to an HDF5 file.")
+      .def(
+          "__init__",
+          [](h5features::writer *t, std::filesystem::path &filename, const std::string &group, bool overwrite,
+             bool compress, h5features::version version) {
+            return new (t) h5features::writer(filename.string(), group, overwrite, compress, version);
+          },
+          "filename"_a, nb::kw_only(), "group"_a = "features", "overwrite"_a = false, "compress"_a = false,
+          "version"_a = h5features::current_version, "Write :py:class:`.Item` instances to an HDF5 file.")
       .def(
           "write", [](h5features::writer &self, const h5features::item &item) { return self.write(item); }, "item"_a,
           "Write an :py:class:`.Item` to disk.")
