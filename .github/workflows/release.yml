@@ -174,5 +174,5 @@ jobs:
           TAG: ${{ steps.get_tag.outputs.TAG_NAME }}
         run: gh release create "${GITHUB_REF#refs/tags/}" ./dist/* -t "h5features-${GITHUB_REF#refs/tags/}"
 
-      # - name: Upload to PyPI
-      #   run: uv publish -t ${{ secrets.UV_PUBLISH_TOKEN }}
+      - name: Upload to PyPI
+        run: uv publish -t ${{ secrets.UV_PUBLISH_TOKEN }}
